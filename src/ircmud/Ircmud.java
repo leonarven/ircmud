@@ -8,9 +8,11 @@ import ircmud.Connection;
 public class Ircmud {
 	
 	public static String globalServerName = new String("IrcMud");
-	public static int    globalServerPort = 6667;
+	public static int    globalServerPort = 6668;
 
 	public static void main(String[] args) {
+
+		System.out.println("Starting..");
 
 		switch(args.length) {
 			case 0: break;
@@ -25,16 +27,18 @@ public class Ircmud {
 		}
 
 		try {
+
+			System.out.println("Initializing ServerSocket");
 			ServerSocket serverSocket = new ServerSocket(globalServerPort);
 
-			while (true) {
-				Socket         socket = serverSocket.accept();
-				Connection connection = new Connection(socket);
-				Thread         thread = new Thread(connection);
-				thread.start();
-			}
+			Server server = new Server(serverSocket);
 
-		} catch(IOException e) {
+			server.serverLoop();
+
+		} catch(Exception e) {
+			
+			System.err.println("ERROR: Exception " + e.getMessage());
+			e.printStackTrace();
 			
 		}
 		
