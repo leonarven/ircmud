@@ -1,4 +1,4 @@
-package ircmud;
+package com.cb2.ircmud;
 
 import java.net.Socket;
 

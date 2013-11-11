@@ -1,0 +1,20 @@
+// Spring Roo 1.2.2.RELEASE [rev 7d75659] log opened at 2013-11-11 22:20:11
+hint
+project --topLevelPackage com.cb2.ircmud
+hint
+jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY 
+hint
+entity jpa --class ~.domain.Room
+hint
+field string --fieldName name
+hint
+hint eclipse
+exit
+// Spring Roo 1.2.2.RELEASE [rev 7d75659] log closed at 2013-11-11 22:45:05
+// Spring Roo 1.2.2.RELEASE [rev 7d75659] log opened at 2013-11-11 22:45:41
+hint
+exit
+// Spring Roo 1.2.2.RELEASE [rev 7d75659] log closed at 2013-11-11 22:51:28
+// Spring Roo 1.2.2.RELEASE [rev 7d75659] log opened at 2013-11-11 22:51:38
+hint eclipse
+perform eclipse

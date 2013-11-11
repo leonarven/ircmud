@@ -1,9 +1,8 @@
-package ircmud;
+package com.cb2.ircmud;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-
-import ircmud.Connection;
 
 public class Ircmud {
 	
