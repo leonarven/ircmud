@@ -1,13 +1,8 @@
-# Compiled Object files
-*.slo
-*.lo
-*.o
+#.gitignore for java
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
+*.class
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
+# Package Files #
+*.jar
+*.war
+*.ear
