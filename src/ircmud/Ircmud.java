@@ -2,13 +2,14 @@ package ircmud;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.io.IOException;
 
 import ircmud.Connection;
 
 public class Ircmud {
 	
 	public static String globalServerName = new String("IrcMud");
-	public static int    globalServerPort = 6668;
+	public static int    globalServerPort = 6667;
 
 	public static void main(String[] args) {
 
@@ -26,19 +27,27 @@ public class Ircmud {
 				System.out.println("Usage: Ircmud [servername [port]]");
 		}
 
+		ServerSocket serverSocket;
+		Server       server;
+
 		try {
 
 			System.out.println("Initializing ServerSocket");
-			ServerSocket serverSocket = new ServerSocket(globalServerPort);
+			serverSocket = new ServerSocket(globalServerPort);
 
-			Server server = new Server(serverSocket);
+			server = new Server(serverSocket);
 
-			server.serverLoop();
+			server.run();
 
-		} catch(Exception e) {
+			serverSocket.close();
+
+		} catch(IOException e) {
 			
 			System.err.println("ERROR: Exception " + e.getMessage());
 			e.printStackTrace();
+			
+		} finally {
+			
 			
 		}
 		

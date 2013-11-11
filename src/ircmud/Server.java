@@ -3,6 +3,7 @@ package ircmud;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
+import java.io.IOException;
 
 public class Server {
 	
@@ -14,15 +15,21 @@ public class Server {
 		this.serverSocket = serverSocket;		
 	}
 	
-	public int serverLoop() {
+	public boolean run() {
 		System.out.println("Starting server loop");
 
-		while (true) {
-			Socket         socket = serverSocket.accept();
-			Connection connection = new Connection(socket);
-			Thread         thread = new Thread(connection);
-			thread.start();
+		try {
+			while (true) {
+				Socket         socket = serverSocket.accept();
+				Connection connection = new Connection(socket);
+				Thread         thread = new Thread(connection);
+				thread.start();
+			}
+		} catch(IOException e) {
+
 		}
+		
+		return false;
 	}
 
 }
