@@ -80,7 +80,7 @@ public class Connection  implements Runnable {
 	}
 
 	
-	private void processLine(String line) {
+	private void processLine(String line) throws Exception {
 
 		System.out.println("Processing line from " + nick + ": " + line);
 		String prefix = "";
@@ -213,7 +213,11 @@ public class Connection  implements Runnable {
 			String line;
 			
 			while ((line = reader.readLine()) != null) {
-				processLine(line);
+				try {
+					processLine(line);
+				} catch (Exception e) {
+					System.err.println("ERROR: NullPointerException as Connection.run: "+e.getMessage());
+				}
 			}
 		} catch (IOException e) {
 			try {

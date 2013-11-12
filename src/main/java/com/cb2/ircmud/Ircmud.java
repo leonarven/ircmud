@@ -1,9 +1,6 @@
 package com.cb2.ircmud;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -22,8 +19,8 @@ public class Ircmud {
 	public static int    globalServerPort = Config.ServerPort;
 
 	public void main(String[] args) {
-/*		Room room = new Room();		//using plain roo generated entity
-		room.setName("olohuone");
+		Room room = new Room();
+/*		room.setName("olohuone");
 		room.persist();	
 		room = new Room();
 		room.setName("niitty");
