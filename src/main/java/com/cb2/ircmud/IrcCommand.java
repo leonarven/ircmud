@@ -1,4 +1,4 @@
-package ircmud;
+package com.cb2.ircmud;
 
 import java.util.Map;
 import java.util.HashMap;

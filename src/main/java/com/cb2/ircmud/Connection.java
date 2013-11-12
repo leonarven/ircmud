@@ -1,4 +1,4 @@
-package ircmud;
+package com.cb2.ircmud;
 
 import java.io.BufferedReader;
 import java.io.OutputStream;
@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import ircmud.IrcCommand;
+import com.cb2.ircmud.IrcCommand;
 
 public class Connection  implements Runnable {
 

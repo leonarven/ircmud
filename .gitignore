@@ -2,7 +2,20 @@
 
 *.class
 
+roo.log
+*_Roo_*
+/target
+/bin
+.settings
+.classpath
+.springBeans
+.project
+target
+.DS_Store
+
 # Package Files #
 *.jar
 *.war
 *.ear
+*.classpath
+/*.project
