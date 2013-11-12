@@ -44,19 +44,22 @@ public class Ircmud {
 				System.out.println("Usage: Ircmud [servername [port]]");
 		}
 
+		Server server;
+
 		try {
-			System.out.println("muodostetaan yhteys");
-			ServerSocket serverSocket = new ServerSocket(globalServerPort);
+			server = new Server(globalServerName, globalServerPort);
 
-			while (true) {
-				Socket         socket = serverSocket.accept();
-				Connection connection = new Connection(socket);
-				Thread         thread = new Thread(connection);
-				thread.start();
-			}
+			server.run();
 
+			server.close();
+			
 		} catch(IOException e) {
-			System.out.println(e);
+			
+			System.err.println("ERROR: IOException " + e.getMessage());
+			e.printStackTrace();
+			
+		} finally {
+			
 		}
 		
 		

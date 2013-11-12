@@ -17,3 +17,5 @@ target
 *.jar
 *.war
 *.ear
+*.classpath
+/*.project
