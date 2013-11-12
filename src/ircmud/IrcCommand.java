@@ -9,13 +9,11 @@ public enum IrcCommand {
 		@Override
 		public void init(Connection con, String prefix, String[] arguments) throws Exception {
 			this.arguments = arguments;
-			HashMap<String, String> map = new HashMap<String, String>();
 
-			map.put("command",  "NICK");
-			map.put("nick", arguments[0]);
+			this.argumentMap.put("command",  "NICK");
+			this.argumentMap.put("nick", arguments[0]);
 			
-			var_dump(con, prefix, map);
-			this.argumentMap = map;
+			var_dump(con, prefix);
 		}
 	},
 	USER(1, 4) {
@@ -23,15 +21,13 @@ public enum IrcCommand {
 		public void init(Connection con, String prefix, String[] arguments) throws Exception {
 			this.arguments  = arguments;
 
-			HashMap<String, String> map = new HashMap<String, String>();
-			map.put("command",  "USER");
-			map.put("nick",     arguments[0]);
-			map.put("mode",     arguments[1]);
-			map.put("unused",   arguments[2]);
-			map.put("realname", arguments[3]);
-			var_dump(con, prefix, map);
+			this.argumentMap.put("command",  "USER");
+			this.argumentMap.put("nick",     arguments[0]);
+			this.argumentMap.put("mode",     arguments[1]);
+			this.argumentMap.put("unused",   arguments[2]);
+			this.argumentMap.put("realname", arguments[3]);
 
-			this.argumentMap = map;
+			var_dump(con, prefix);
 		}
 	},
 	QUIT(1, 1) {
@@ -39,43 +35,60 @@ public enum IrcCommand {
 		public void init(Connection con, String prefix, String[] arguments) throws Exception {
 			this.arguments  = arguments;
 
-			HashMap<String, String> map = new HashMap<String, String>();
-			map.put("command",  "QUIT");
-			map.put("quitMessage", arguments[0]);
-			var_dump(con, prefix, map);
+			this.argumentMap.put("command",  "QUIT");
+			this.argumentMap.put("quitMessage", arguments[0]);
 
-			this.argumentMap = map;
+			var_dump(con, prefix);
 		}
 	},
-    MODE(0, 2) {
+	MODE(0, 2) {
 		@Override
 		public void init(Connection con, String prefix, String[] arguments) throws Exception {
 			this.arguments  = arguments;
 
-			HashMap<String, String> map = new HashMap<String, String>();
-			map.put("command",  "QUIT");
-			map.put("nick", arguments[0]);
-			map.put("mode", arguments[1]);
-			var_dump(con, prefix, map);
+			this.argumentMap.put("command",  "MODE");
+			this.argumentMap.put("nick", arguments[0]);
+			this.argumentMap.put("mode", arguments[1]);
 
-			this.argumentMap = map;
+			var_dump(con, prefix);
 		}
-    };
+	},
+	JOIN(1, 2){
+		@Override
+		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+			this.arguments  = arguments;
 
-	
+			this.argumentMap.put("command",  "JOIN");
+			this.argumentMap.put("channels", arguments[0]);
+			this.argumentMap.put("passwords", arguments[1]);
 
-    public void var_dump(Connection con, String prefix, HashMap<String, String> argumentMap) {
-    	System.out.println("DEBUG: Command " + argument("command") + " from  " +con.hostname);
-    	System.out.println("DEBUG: prefix:" + prefix);
+			var_dump(con, prefix);
+		}
+	},
+	PART(1, 2){
+		@Override
+		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+			this.arguments  = arguments;
 
-    	
-		Iterator it = argumentMap.entrySet().iterator();
+			this.argumentMap.put("command",  "JOIN");
+			this.argumentMap.put("channels", arguments[0]);
+			this.argumentMap.put("leaveMessage", arguments[1]);
+
+			var_dump(con, prefix);
+		}
+	};
+
+	public void var_dump(Connection con, String prefix) {
+		System.out.println("DEBUG: Command " + argument("command") + " from  " +con.hostname);
+		System.out.println("DEBUG: prefix:" + prefix);
+		
+		Iterator it = this.argumentMap.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry pairs = (Map.Entry)it.next();
 			System.out.println("DEBUG: "+pairs.getKey() + " = " + pairs.getValue());
 			it.remove();
 		}
-    }
+	}
 	
 	public String[] arguments;
 	public HashMap<String, String> argumentMap;
@@ -93,11 +106,17 @@ public enum IrcCommand {
 	}
 	
 	public String argument(String key) {
-		if (this.argumentMap.containsKey(key))
+		if (key != null && this.argumentMap.containsKey(key))
 			return this.argumentMap.get(key);
 		else
 			return null;
 	}
+	public String argument(int i) {
+		if (0 < i && i < this.arguments.length)
+			return this.arguments[i];
+		else
+			return null;
+	}
 	
-    public abstract void init(Connection con, String prefix, String[] arguments) throws Exception;
+	public abstract void init(Connection con, String prefix, String[] arguments) throws Exception;
 }

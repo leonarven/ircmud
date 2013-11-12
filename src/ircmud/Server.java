@@ -7,30 +7,32 @@ import java.io.IOException;
 
 public class Server {
 	
-	private ServerSocket serverSocket;
-	private String globalServerName;
-	private int globalServerPort;
-    public static Map<String, Connection> connectionMap = new HashMap<String, Connection>();
-    public static Map<String, Channel>       channelMap = new HashMap<String, Channel>();
+	private static ServerSocket serverSocket;
+	public static String globalServerName;
+	public static int globalServerPort;
+	public static Map<String, Connection> connectionMap = new HashMap<String, Connection>();
+	public static Map<String, Channel>       channelMap = new HashMap<String, Channel>();
 	
-	public Server(String globalServerName, int globalServerPort) throws IOException {
+	public static void init(String globalServerName, int globalServerPort) throws IOException {
 		System.out.println("Initializing Server("+globalServerName+":"+globalServerPort+")");
 
-		this.globalServerPort = globalServerPort;
-		this.globalServerName = globalServerName;
+		globalServerPort = globalServerPort;
+		globalServerName = globalServerName;
 
 		System.out.println("Initializing ServerSocket");
-		this.serverSocket = new ServerSocket(this.globalServerPort);		
+		serverSocket = new ServerSocket(globalServerPort);
+		
+		Channel worldChannel = new Channel(Config.WorldChannel);
+		channelMap.put(worldChannel.name, worldChannel);
 	}
 	
-	public boolean run() {
+	public static boolean run() {
 		System.out.println("Starting server loop");
-
 		try {
 			while (true) {
-				Socket         socket = serverSocket.accept();
-				Connection connection = new Connection(socket, this.globalServerName);
-				Thread         thread = new Thread(connection);
+				Socket	   socket = serverSocket.accept();
+				Connection connection = new Connection(socket);
+				Thread	   thread = new Thread(connection);
 				thread.start();
 			}
 		} catch(IOException e) {
@@ -40,12 +42,10 @@ public class Server {
 		return false;
 	}
 	
-	public boolean close() throws IOException {
+	public static boolean close() throws IOException {
 
-		this.serverSocket.close();
+		serverSocket.close();
 	
 		return false;
 	}
-	
-
 }
