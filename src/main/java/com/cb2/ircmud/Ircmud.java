@@ -35,7 +35,8 @@ public class Ircmud {
 			case 1: 
 				globalServerName = args[0];
 				break;
-			case 2: 
+			case 2:
+				globalServerName = args[0];
 				globalServerPort = Integer.parseInt(args[1]);
 				break;
 			default:
