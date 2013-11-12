@@ -5,6 +5,7 @@
 roo.log
 *_Roo_*
 /target
+/bin
 .settings
 .classpath
 .springBeans
