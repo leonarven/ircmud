@@ -9,8 +9,11 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+
 
 import com.cb2.ircmud.IrcCommand;
 
@@ -24,7 +27,8 @@ public class Connection  implements Runnable {
 
 	private InetSocketAddress address;
 	private Socket socket = null;
-
+	private Map<String, Channel> joinedChannels;
+	
 	public Connection(Socket socket){
 		this.socket = socket;
 	}
@@ -83,6 +87,31 @@ public class Connection  implements Runnable {
 		sendServerCommand("NOTICE", string);
 	}
 
+	public boolean joinChannel(String channelName) {
+		if (!Server.channelMap.containsKey(channelName)) return false;
+		Channel chan = Server.channelMap.get(channelName);
+		chan.addConnection(this);
+		joinedChannels.put(channelName, chan);
+		
+		return true;
+	}
+	public boolean leaveChannel(String channelName, String msg) {
+		if (!joinedChannels.containsKey(channelName)) return false;
+		joinedChannels.remove(channelName);
+		if (!Server.channelMap.containsKey(channelName)) return false;
+		Channel chan = Server.channelMap.get(channelName);
+		chan.removeConnection(this);
+		chan.sendRawStringAll(":" + this.getRepresentation() + " PART " + channelName + " :" + msg);
+		return true;
+	}
+	
+	public boolean quit(String msg) {
+		for (Map.Entry<String, Channel> entry : this.joinedChannels.entrySet()) {
+			entry.getValue().removeConnection(this);
+			entry.getValue().sendRawStringAll(":" + this.getRepresentation() + " QUIT :" + msg);
+		}
+		return true;
+	}
 	
 	private void processLine(String line) throws Exception {
 		
@@ -142,7 +171,7 @@ public class Connection  implements Runnable {
 		act(commandObject);
 	}
 	
-	public void act(IrcCommand command) {
+	public void act(IrcCommand command) throws Exception {
 		switch(command) {
 			case NICK:
 				this.nick = command.arguments[0];
@@ -174,7 +203,8 @@ public class Connection  implements Runnable {
 				this.mode = "+i";
 				sendServerCommand("MODE", this.mode);
 
-				Server.channelMap.get("#World").addConnection(this);
+				Server.channelMap.get("#world").addConnection(this);
+				this.joinedChannels.put("#world", Server.channelMap.get("#world"));
 
 				break;
 			case JOIN:
@@ -195,17 +225,22 @@ public class Connection  implements Runnable {
 					break;
 				}
 				break;
+			case PART:
+				leaveChannel(command.arguments[0], command.arguments[1]);
+				break;
 			case QUIT:
-				
+				quit(command.arguments[0]);
+				socket.close();
 				break;
 			case PRIVMSG:
-				if (Server.channelMap.containsKey(command.arguments[0])) {
-					Server.channelMap.get(command.arguments[0]).sendPrivateMessage(this, command.arguments[1]);
+				if (joinedChannels.containsKey(command.arguments[0])) {
+					joinedChannels.get(command.arguments[0]).sendPrivateMessage(this, command.arguments[1]);
 				} else {
 					this.sendCommand("404", "No such channel");
 				}
 				break;
 			default:
+				System.err.println("Unhandled IrcCommand");
 		}
 	}
 	
@@ -234,11 +269,14 @@ public class Connection  implements Runnable {
 			}
 		} catch (IOException e) {
 			try {
-				socket.close();
+				quit("Quit...");
+				if (socket.isConnected())
+					socket.close();
 			} catch (IOException e2) {
 			}
 			e.printStackTrace();
 		} finally {
+			//Outthread should be shutdown?
 		}		
 	}
 		

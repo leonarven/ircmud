@@ -9,7 +9,7 @@ public class Config {
 	/* 
 	 * Maailman oletustila/-kanava, johon pelaajat liitetään. Manjäristykset ja meteoripommitukset
 	 */
-	protected static String WorldChannel = WorldChannelPrefix + "World";
+	protected static String WorldChannel = WorldChannelPrefix + "world";
 	
 	/* 
 	 * IRC-Serverin määrite: portti, jota kuunnellaan

@@ -13,7 +13,7 @@ public class Channel {
 		this.name = name;
 	}
 	
-	public void sendAllExcept(Connection except, String msg) {
+	public void sendRawStringAllExcept(Connection except, String msg) {
 		for (Connection con : channelMembers) {
 			if (con != except) con.sendRawString(msg);
 		}
@@ -21,21 +21,17 @@ public class Channel {
 	
 	public void sendPrivateMessage(Connection sender, String msg) {
 		for (Connection con : channelMembers) {
-			if (con != sender) con.sendPrivateMessage(con.getRepresentation(), this.name, msg);
+			if (con != sender) con.sendPrivateMessage(sender.getRepresentation(), this.name, msg);
 		}
 	}
 	
-	public void sendAll(String toSend) {
-		sendAllExcept(null, toSend);
-	}
-	
-	public void send(String toSend) {
-		sendAll(toSend);
+	public void sendRawStringAll(String toSend) {
+		sendRawStringAllExcept(null, toSend);
 	}
 	
 	public void addConnection(Connection con) {
 		channelMembers.add(con);
-		send(":" + con.getRepresentation() + " JOIN "+ this.name);
+		sendRawStringAll(":" + con.getRepresentation() + " JOIN "+ this.name);
 		con.sendRawString(":"+Server.globalServerName+" 332 "+con.nick+" "+this.name+" :"+this.topic);
 
 		String userlist = "";
@@ -45,8 +41,8 @@ public class Channel {
 		con.sendRawString(":"+Server.globalServerName+" 366 "+con.nick+" "+this.name+" :End of /NAMES list.");
 	}
 	
-	public void memberQuit(String nick) {
-		
+	public void removeConnection(Connection con) {
+		channelMembers.remove(con);
 	}
 	
 }
