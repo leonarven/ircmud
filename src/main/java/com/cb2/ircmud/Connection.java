@@ -40,7 +40,7 @@ public class Connection  implements Runnable {
 					String s = outQueue.take();
 					s = s.replace("\n", "").replace("\r", "");
 					s = s + "\r\n";
-					out.write(s.getBytes());
+					out.write(s.getBytes("UTF-8"));
 					out.flush();
 				}
 			} catch (Exception e) {
@@ -60,20 +60,24 @@ public class Connection  implements Runnable {
 	public String getRepresentation() {
 		return this.nick + "!" + this.username + "@" + this.hostname;
 	}
+	
 
-	public void send(String s) {
-		Queue<String> testQueue = outQueue;
-		if (testQueue != null) {
+	public void sendRawString(String s) {
+		if (outQueue != null) {
 			System.out.println("Sending line to " + nick + ": " + s);
-			testQueue.add(s);
+			outQueue.add(s);
 		}
+	}
+	
+	public void sendPrivateMessage(String sender, String target, String msg) {
+		sendRawString(":" + sender + " PRIVMSG " + target + " :" + msg);
 	}
 
 	public void sendServerCommand(String command, String string) {
-		send(":" + Server.globalServerName + " " + command + " " + nick + " :" + string);
+		sendRawString(":" + Server.globalServerName + " " + command + " " + nick + " :" + string);
 	}
 	public void sendCommand(String command, String string) {
-		send(":" + getRepresentation() + " " + command + " :" + string);
+		sendRawString(":" + getRepresentation() + " " + command + " :" + string);
 	}
 	public void sendSelfNotice(String string) {
 		sendServerCommand("NOTICE", string);
@@ -196,7 +200,7 @@ public class Connection  implements Runnable {
 				break;
 			case PRIVMSG:
 				if (Server.channelMap.containsKey(command.arguments[0])) {
-					Server.channelMap.get(command.arguments[0]).send(command.arguments[1]);
+					Server.channelMap.get(command.arguments[0]).sendPrivateMessage(this, command.arguments[1]);
 				} else {
 					this.sendCommand("404", "No such channel");
 				}
