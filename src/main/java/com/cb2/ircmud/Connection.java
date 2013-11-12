@@ -81,6 +81,8 @@ public class Connection  implements Runnable {
 
 	
 	private void processLine(String line) throws Exception {
+		
+		if (line == null) return;
 
 		System.out.println("Processing line from " + nick + ": " + line);
 		String prefix = "";

@@ -36,7 +36,7 @@ public class Server {
 				thread.start();
 			}
 		} catch(IOException e) {
-
+			System.err.println("ERROR: IOException at Server.run: " + e.getMessage());
 		}
 		
 		return false;

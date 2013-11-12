@@ -51,7 +51,7 @@ public class Ircmud {
 			
 		} catch(IOException e) {
 			
-			System.err.println("ERROR: IOException " + e.getMessage());
+			System.err.println("ERROR: IOException at IrcMud.main:" + e.getMessage());
 			e.printStackTrace();
 			
 		} finally {
