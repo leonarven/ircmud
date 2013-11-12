@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import ircmud.IrcCommand;
+import com.cb2.ircmud.IrcCommand;
 
 public class Connection  implements Runnable {
 
