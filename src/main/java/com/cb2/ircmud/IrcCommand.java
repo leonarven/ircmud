@@ -76,6 +76,16 @@ public enum IrcCommand {
 
 			var_dump(con, prefix);
 		}
+	},
+	PRIVMSG(2, 2) {
+		@Override
+		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+			this.arguments = arguments;
+			
+			this.argumentMap.put("command", "PRIVMSG");
+			this.argumentMap.put("channel", arguments[0]);
+			this.argumentMap.put("msg", arguments[1]);
+		}
 	};
 
 	public void var_dump(Connection con, String prefix) {

@@ -12,14 +12,14 @@ public class Channel {
 		this.name = name;
 	}
 	
-	public void sendNot(Connection not, String toSend) {
+	public void sendAllExcept(Connection except, String msg) {
 		for (Connection con : channelMembers) {
-			if (con != not) con.send(toSend);
+			if (con != except) con.send(msg);
 		}
 	}
 	
 	public void sendAll(String toSend) {
-		sendNot(null, toSend);
+		sendAllExcept(null, toSend);
 	}
 	
 	public void send(String toSend) {

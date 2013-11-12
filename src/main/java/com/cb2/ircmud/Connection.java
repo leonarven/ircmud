@@ -194,6 +194,13 @@ public class Connection  implements Runnable {
 			case QUIT:
 				
 				break;
+			case PRIVMSG:
+				if (Server.channelMap.containsKey(command.arguments[0])) {
+					Server.channelMap.get(command.arguments[0]).send(command.arguments[1]);
+				} else {
+					this.sendCommand("404", "No such channel");
+				}
+				break;
 			default:
 		}
 	}
