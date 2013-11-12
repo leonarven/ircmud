@@ -17,37 +17,31 @@ public class Ircmud {
 
 		switch(args.length) {
 			case 0: break;
-			case 1: 
-				globalServerName = args[0];
-				break;
 			case 2: 
 				globalServerPort = Integer.parseInt(args[1]);
+			case 1: 
+				globalServerName = args[0];
 				break;
 			default:
 				System.out.println("Usage: Ircmud [servername [port]]");
 		}
 
-		ServerSocket serverSocket;
-		Server       server;
+		Server server;
 
 		try {
 
-			System.out.println("Initializing ServerSocket");
-			serverSocket = new ServerSocket(globalServerPort);
-
-			server = new Server(serverSocket);
+			server = new Server(globalServerName, globalServerPort);
 
 			server.run();
 
-			serverSocket.close();
-
+			server.close();
+			
 		} catch(IOException e) {
 			
-			System.err.println("ERROR: Exception " + e.getMessage());
+			System.err.println("ERROR: IOException " + e.getMessage());
 			e.printStackTrace();
 			
 		} finally {
-			
 			
 		}
 		

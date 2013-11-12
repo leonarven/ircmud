@@ -7,20 +7,33 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import ircmud.IrcCommand;
 
 public class Connection  implements Runnable {
 
     private Socket socket = null;
-    private String hostname;
+    public String nick;
+    public String realname;
+    public String username;
+    public String hostname;
+    public String globalServerName;
     private InetSocketAddress address;
 
-	public Connection(Socket socket){
+	public Connection(Socket socket, String globalServerName){
     	this.socket = socket;
+    	this.globalServerName = globalServerName;
     }
 
     private LinkedBlockingQueue<String> outQueue = new LinkedBlockingQueue<String>(1000);
-
+    public ArrayList<IrcCommand> commandQuery = new ArrayList<IrcCommand>();
+    
 	private Thread outThread = new Thread() {
 		public void run() {
 			try {
@@ -33,7 +46,7 @@ public class Connection  implements Runnable {
 					out.flush();
 				}
 			} catch (Exception e) {
-				System.out.println("Outqueue died");
+				System.err.println("Outqueue died");
 				outQueue.clear();
 				outQueue = null;
 				e.printStackTrace();
@@ -45,27 +58,138 @@ public class Connection  implements Runnable {
 			}
 		}
 	};
+
+    public void send(String s) {
+        Queue<String> testQueue = outQueue;
+        if (testQueue != null) {
+            System.out.println("Sending line to " + nick + ": " + s);
+            testQueue.add(s);
+        }
+    }
+
+    private void sendServerCommand(String command, String string) {
+		send(":" + globalServerName + " " + command + " " + nick + " :" + string);
+    }
+    private void sendSelfNotice(String string) {
+		sendServerCommand("NOTICE", string);
+	}
+
 	
+	private void processLine(String line) {
+
+        System.out.println("Processing line from " + nick + ": " + line);
+        String prefix = "";
+        if (line.startsWith(":")) {
+            String[] tokens = line.split(" ", 2);
+            prefix = tokens[0];
+            line = (tokens.length > 1 ? tokens[1] : "");
+        }
+        String[] tokens1 = line.split(" ", 2);
+        String command = tokens1[0];
+        line = tokens1.length > 1 ? tokens1[1] : "";
+        String[] tokens2 = line.split("(^| )\\:", 2);
+        String trailing = null;
+        line = tokens2[0];
+        if (tokens2.length > 1)
+            trailing = tokens2[1];
+        ArrayList<String> argumentList = new ArrayList<String>();
+        if (!line.equals(""))
+            argumentList.addAll(Arrays.asList(line.split(" ")));
+        if (trailing != null)
+            argumentList.add(trailing);
+        String[] arguments = argumentList.toArray(new String[0]);
+        
+
+        if (command.matches("[0-9][0-9][0-9]"))
+            command = "n" + command;
+        IrcCommand commandObject = null;
+        try {
+        	IrcCommand.valueOf(command.toLowerCase());
+        } catch (Exception e) {
+        }
+        if (commandObject == null) {
+            try {
+                commandObject = IrcCommand.valueOf(command.toUpperCase());
+            } catch (Exception e) {
+            }
+        }
+        if (commandObject == null) {
+        	sendSelfNotice("That command (" + command + ") isnt a supported command at this server.");
+            return;
+        }
+        if (arguments.length < commandObject.getMin() || arguments.length > commandObject.getMax()) {
+        	sendSelfNotice("Invalid number of arguments for this" + " command, expected not more than " + commandObject.getMax() + " and not less than " + commandObject.getMin() + " but got " + arguments.length + " arguments");
+            return;
+        } try {
+        	commandObject.init(this, prefix, arguments);
+        } catch(Exception e) {
+        	System.err.println("ERROR at processLine: "+e.getMessage());
+        }
+
+        act(commandObject);
+	}
+	
+	public void act(IrcCommand command) {
+        switch(command) {
+	    	case NICK:
+	    		this.nick = command.arguments[0];//command.argument("nick");
+	    		
+	    		sendSelfNotice("Nick changed to "+this.nick);
+	    		break;
+	    	case USER:
+	    		if (this.nick != null) {
+	    			
+	    			this.username = command.arguments[0];//command.argument("username");
+	    			this.realname = command.arguments[3];//command.argument("realname");
+
+	    			sendSelfNotice("Connection accepted, "+getRepresentation()+"("+realname+")");
+	    			
+	    			sendServerCommand("375", this.globalServerName+" - Message Of The Day:");
+	    			sendServerCommand("372", "Tissit on kivoja.");
+	    			sendServerCommand("372", "Niin on kuppikakutkin.");
+	    			sendServerCommand("372", "");
+	    			sendServerCommand("372", "On mahdotonta olla masentunut, jos sinulla on ilmapallo. -Nalle Puh");
+	    			sendServerCommand("376", "End of /MOTD command.");
+	    			
+	    		} else sendSelfNotice("You must send NICK command first");
+	    		break;
+	    	case QUIT: 
+	    		break;
+    		default:
+        }
+	}
 	
     @Override
     public void run() {
+    	sendServerCommand("020", "Please wait while we process your connection");
 
     	try {
-			address = (InetSocketAddress) socket.getRemoteSocketAddress();
-			hostname = address.getAddress().getHostAddress();
+			
+			this.address = (InetSocketAddress) socket.getRemoteSocketAddress();
+			this.hostname = address.getAddress().getHostAddress();
 			System.out.println("Connection from host " + hostname);
+
 			outThread.start();
+
 			InputStream socketIn = socket.getInputStream();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(socketIn));
 			String line;
+			
 			while ((line = reader.readLine()) != null) {
-				System.out.println("DEBUG: con: "+line);
-			}    	
-    	} catch(IOException e) {
-    		
-    	}
-    	
+				processLine(line);
+			}
+		} catch (IOException e) {
+            try {
+                socket.close();
+            } catch (IOException e2) {
+            }
+            e.printStackTrace();
+        } finally {
+        }    	
 	}
 
+    public String getRepresentation() {
+        return this.nick + "!" + this.username + "@" + this.hostname;
+    }
     	
 }
