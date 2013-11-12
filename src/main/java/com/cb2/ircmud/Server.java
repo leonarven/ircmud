@@ -13,11 +13,11 @@ public class Server {
 	public static Map<String, Connection> connectionMap = new HashMap<String, Connection>();
 	public static Map<String, Channel>       channelMap = new HashMap<String, Channel>();
 	
-	public static void init(String globalServerName, int globalServerPort) throws IOException {
-		System.out.println("Initializing Server("+globalServerName+":"+globalServerPort+")");
+	public static void init(String _globalServerName, int _globalServerPort) throws IOException {
+		System.out.println("Initializing Server("+_globalServerName+":"+_globalServerPort+")");
 
-		globalServerPort = globalServerPort;
-		globalServerName = globalServerName;
+		globalServerPort = _globalServerPort;
+		globalServerName = _globalServerName;
 
 		System.out.println("Initializing ServerSocket");
 		serverSocket = new ServerSocket(globalServerPort);
