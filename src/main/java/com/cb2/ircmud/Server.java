@@ -10,8 +10,11 @@ public class Server {
 	private static ServerSocket serverSocket;
 	public static String globalServerName;
 	public static int globalServerPort;
-	public static Map<String, Connection> connectionNicknameMap = new HashMap<String, Connection>();
-	public static Map<String, Channel>       channelMap = new HashMap<String, Channel>();
+	
+	private static Map<String, Connection> connectionNicknameMap = new HashMap<String, Connection>();
+	private static Map<String, Channel>       channelMap = new HashMap<String, Channel>();
+	
+	
 	
 	public static void init(String _globalServerName, int _globalServerPort) throws IOException {
 		System.out.println("Initializing Server("+_globalServerName+":"+_globalServerPort+")");
@@ -32,6 +35,17 @@ public class Server {
 			connectionNicknameMap.put(nick, con);
 		}
 		return true;
+	}
+	
+	public static Channel findChannel(String channelName) {
+		synchronized (channelMap) {
+			if (!channelMap.containsKey(channelName)) return null;
+			return channelMap.get(channelName);
+		}
+	}
+	
+	public static void addChannel(Channel  chan) {
+		channelMap.put(chan.name, chan);
 	}
 	
 	public static boolean run() {

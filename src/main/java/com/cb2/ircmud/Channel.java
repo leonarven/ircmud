@@ -35,15 +35,19 @@ public class Channel {
 	
 	public void addConnection(Connection con) {
 		synchronized (channelMembers) {
-			channelMembers.add(con);
+			con.sendRawString(":" + con.getRepresentation() + " JOIN "+ this.name);
 			sendRawStringAll(":" + con.getRepresentation() + " JOIN "+ this.name);
-			con.sendRawString(":"+Server.globalServerName+" 332 "+con.nick+" "+this.name+" :"+this.topic);
+			
+			if (this.topic != null)
+				con.sendRawString(":"+Server.globalServerName+" 332 "+con.nick+" "+this.name+" :"+this.topic);
 	
-			String userlist = "";
-			for(Connection _con : channelMembers) userlist = userlist + " " + _con.nick; 
-			con.sendRawString(":"+Server.globalServerName+" 353 "+con.nick+" @ "+this.name+" :"+userlist);
-	
-			con.sendRawString(":"+Server.globalServerName+" 366 "+con.nick+" "+this.name+" :End of /NAMES list.");
+			String userlist = con.nick;
+			for(Connection _con : channelMembers) userlist = userlist + " " +  _con.nick;
+			con.sendRawString(":"+Server.globalServerName+" 353 "+con.nick+" @ "+ this.name + " :" + userlist.trim());
+			
+			con.sendRawString(":"+Server.globalServerName+" 366 "+con.nick+" " + this.name + " :End of /NAMES list.");
+			
+			channelMembers.add(con);
 		}
 	}
 	

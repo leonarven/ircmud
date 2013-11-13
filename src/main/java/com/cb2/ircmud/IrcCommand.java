@@ -47,7 +47,7 @@ public enum IrcCommand {
 			this.arguments  = arguments;
 
 			this.argumentMap.put("command",  "MODE");
-			this.argumentMap.put("nick", arguments[0]);
+			this.argumentMap.put("target", arguments[0]);
 			if (arguments.length == 2)
 				this.argumentMap.put("mode", arguments[1]);
 
@@ -74,7 +74,8 @@ public enum IrcCommand {
 
 			this.argumentMap.put("command",  "JOIN");
 			this.argumentMap.put("channels", arguments[0]);
-			this.argumentMap.put("leaveMessage", arguments[1]);
+			if (arguments.length == 2)
+				this.argumentMap.put("leaveMessage", arguments[1]);
 
 			var_dump(con, prefix);
 		}

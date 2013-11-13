@@ -54,7 +54,7 @@ public class Connection  implements Runnable {
 				outQueue = null;
 				e.printStackTrace();
 				try {
-					socket.close();
+					closeConnection();
 				} catch (Exception e2) {
 					e2.printStackTrace();
 				}
@@ -87,20 +87,21 @@ public class Connection  implements Runnable {
 	}
 
 	public boolean joinChannel(String channelName) {
-		if (!Server.channelMap.containsKey(channelName)) return false;
-		Channel chan = Server.channelMap.get(channelName);
+		Channel chan = Server.findChannel(channelName);
+		if (chan == null) return false;
 		chan.addConnection(this);
 		joinedChannels.put(channelName, chan);
 		
 		return true;
 	}
 	public boolean leaveChannel(String channelName, String msg) {
+		
 		if (!joinedChannels.containsKey(channelName)) return false;
 		joinedChannels.remove(channelName);
-		if (!Server.channelMap.containsKey(channelName)) return false;
-		Channel chan = Server.channelMap.get(channelName);
-		chan.removeConnection(this);
+		Channel chan = Server.findChannel(channelName);
+		if (chan == null) return false;
 		chan.sendRawStringAll(":" + this.getRepresentation() + " PART " + channelName + " :" + msg);
+		chan.removeConnection(this);
 		return true;
 	}
 	
@@ -133,8 +134,8 @@ public class Connection  implements Runnable {
 		this.mode = "+i";
 		sendServerCommand("MODE", this.mode);
 
-		Server.channelMap.get("#world").addConnection(this);
-		this.joinedChannels.put("#world", Server.channelMap.get("#world"));
+		Server.findChannel("#world").addConnection(this);
+		this.joinedChannels.put("#world", Server.findChannel("#world"));
 	}
 	
 	private void processLine(String line) throws Exception {
@@ -178,10 +179,12 @@ public class Connection  implements Runnable {
 			}
 		}
 		if (commandObject == null) {
-			sendSelfNotice("That command (" + command + ") isnt a supported command at this server.");
+			sendRawString(":" + Server.globalServerName + " 421 " + nick + " " + command + " :Unknown command ");
 			return;
 		}
 		if (arguments.length < commandObject.getMin() || arguments.length > commandObject.getMax()) {
+			
+			//TODO: Use command
 			sendSelfNotice("Invalid number of arguments for this" + " command, expected not more than " + commandObject.getMax() + " and not less than " + commandObject.getMin() + " but got " + arguments.length + " arguments");
 			return;
 		}
@@ -251,11 +254,18 @@ public class Connection  implements Runnable {
 				case JOIN:
 					String[] channels = command.arguments[0].split(",");
 	                for (String channelName : channels) {
-						if (Server.channelMap.containsKey(channelName)) {
-							Server.channelMap.get(channelName).addConnection(this);
-						} else {
-							Server.channelMap.put(channelName, new Channel(channelName));
-							Server.channelMap.get(channelName).addConnection(this);
+	                	if (joinedChannels.containsKey(channelName)) {
+	                		//Already joined to channel
+	                		break;
+	                	}
+	                	Channel chan = Server.findChannel(channelName);
+	                	if (chan == null) {
+							chan = new Channel(channelName);
+							Server.addChannel(chan);
+	                	}
+						chan.addConnection(this);
+						synchronized (joinedChannels) {
+							joinedChannels.put(channelName, chan);
 						}
 	                }
 					break;
@@ -263,11 +273,20 @@ public class Connection  implements Runnable {
 					//TODO: Implement modes
 					if (command.arguments.length >= 2)
 						sendSelfNotice("This server does not allow to change usermode");
-					else
-						sendRawString(":" + Server.globalServerName + " 221 " + this.nick + " +i");
+					else {
+						if (command.arguments[0].startsWith("#")) { //Channel
+							sendRawString(":" + Server.globalServerName + " 324 " + this.nick + " " + command.arguments[0] + " +stn");
+						}
+						else if (command.arguments[0].equals(this.nick)){
+							sendRawString(":" + Server.globalServerName + " 221 " + this.nick + " +i");
+						}
+					}
 					break;
 				case PART:
-					leaveChannel(command.arguments[0], command.arguments[1]);
+					if (command.arguments.length == 2)
+						leaveChannel(command.arguments[0], command.arguments[1]);
+					else
+						leaveChannel(command.arguments[0], "");
 					break;
 				case QUIT:
 					quit(command.arguments[0]);
@@ -289,7 +308,7 @@ public class Connection  implements Runnable {
 	
 	@Override
 	public void run() {
-		sendServerCommand("020", "Please wait while we process your connection");
+		sendRawString(":" + Server.globalServerName + " 020 :Please wait while we process your connection");
 
 		try {
 			
@@ -312,13 +331,12 @@ public class Connection  implements Runnable {
 			}
 		} catch (IOException e) {
 			try {
-				quit("Quit...");
 				closeConnection();
 			} catch (IOException e2) {
 			}
 			System.err.println("IOException in Connection::run : " + e.getMessage());
 		} finally {
-			//Outthread should be shutdown?
+			
 		}		
 	}
 		
