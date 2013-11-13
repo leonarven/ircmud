@@ -257,7 +257,7 @@ public class Connection  implements Runnable {
 			outThread.start();
 
 			InputStream socketIn = socket.getInputStream();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(socketIn));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(socketIn, "UTF-8"));
 			String line;
 			
 			while ((line = reader.readLine()) != null) {
