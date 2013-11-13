@@ -101,7 +101,7 @@ public enum IrcCommand {
 	}
 	
 	public String[] arguments;
-	public HashMap<String, String> argumentMap;
+	public HashMap<String, String> argumentMap = new HashMap<String, String>();
 	
 	private int minCmds;
 	private int maxCmds;
