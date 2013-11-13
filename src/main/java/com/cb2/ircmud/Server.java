@@ -10,7 +10,7 @@ public class Server {
 	private static ServerSocket serverSocket;
 	public static String globalServerName;
 	public static int globalServerPort;
-	public static Map<String, Connection> connectionMap = new HashMap<String, Connection>();
+	public static Map<String, Connection> connectionNicknameMap = new HashMap<String, Connection>();
 	public static Map<String, Channel>       channelMap = new HashMap<String, Channel>();
 	
 	public static void init(String _globalServerName, int _globalServerPort) throws IOException {
@@ -24,6 +24,14 @@ public class Server {
 		
 		Channel worldChannel = new Channel(Config.WorldChannel);
 		channelMap.put(worldChannel.name, worldChannel);
+	}
+	
+	public static boolean trySetNickname(Connection con, String nick) {
+		synchronized (connectionNicknameMap) {
+			if (connectionNicknameMap.containsKey(nick)) return false;
+			connectionNicknameMap.put(nick, con);
+		}
+		return true;
 	}
 	
 	public static boolean run() {
