@@ -1,10 +1,14 @@
 package com.cb2.ircmud;
 
+import java.util.Properties;
+import java.io.FileInputStream;
+import java.io.IOException;
+
 public class Config {
 	/* Kanaviin liittyvä rajoite
 	 * Maailman tiloihin viittaavien kanavien etuliite
 	 */
-	protected static String WorldChannelPrefix = "#";
+	public static String WorldChannelPrefix = "#";
 
 	/* 
 	 * Maailman oletustila/-kanava, johon pelaajat liitetään. Manjäristykset ja meteoripommitukset
@@ -20,4 +24,17 @@ public class Config {
 	 * IRC-Serverin määrite: nimi, jolla serveriä ylläpidetään
 	 */
 	protected static String ServerName = "IrcMud";
+
+
+	/*
+	 * Config.load tulee lataamaan tiedostosta asetukset
+	 */
+	public static boolean load( String file ) throws IOException {
+
+		Properties config = new Properties();
+		
+		config.load(new FileInputStream( file ));
+
+		return false;
+	}	
 }
