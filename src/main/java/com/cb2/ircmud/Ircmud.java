@@ -45,11 +45,12 @@ public class Ircmud {
 		}
 
 		try {
-			Server.init(globalServerName, globalServerPort);
+			System.out.println("Creating Server");
+			IrcServer.init(globalServerName, globalServerPort);
 
-			Server.run();
+			IrcServer.run();
 
-			Server.close();
+			IrcServer.close();
 			
 		} catch(IOException e) {
 			

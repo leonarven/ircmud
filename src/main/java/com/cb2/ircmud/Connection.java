@@ -77,7 +77,7 @@ public class Connection  implements Runnable {
 	}
 
 	public void sendServerCommand(String command, String string) {
-		sendRawString(":" + Server.globalServerName + " " + command + " " + nick + " :" + string);
+		sendRawString(":" + IrcServer.globalServerName + " " + command + " " + nick + " :" + string);
 	}
 	public void sendCommand(String command, String string) {
 		sendRawString(":" + getRepresentation() + " " + command + " :" + string);
@@ -87,7 +87,7 @@ public class Connection  implements Runnable {
 	}
 
 	public boolean joinChannel(String channelName) {
-		Channel chan = Server.findChannel(channelName);
+		Channel chan = IrcServer.findChannel(channelName);
 		if (chan == null) return false;
 		chan.addConnection(this);
 		joinedChannels.put(channelName, chan);
@@ -98,7 +98,7 @@ public class Connection  implements Runnable {
 		
 		if (!joinedChannels.containsKey(channelName)) return false;
 		joinedChannels.remove(channelName);
-		Channel chan = Server.findChannel(channelName);
+		Channel chan = IrcServer.findChannel(channelName);
 		if (chan == null) return false;
 		chan.sendRawStringAll(":" + this.getRepresentation() + " PART " + channelName + " :" + msg);
 		chan.removeConnection(this);
@@ -124,7 +124,7 @@ public class Connection  implements Runnable {
 	public void acceptConnection() {
 		sendSelfNotice("Connection accepted, "+getRepresentation()+"("+realname+")");
 		
-		sendServerCommand("375", Server.globalServerName+" - Message Of The Day:");
+		sendServerCommand("375", IrcServer.globalServerName+" - Message Of The Day:");
 		sendServerCommand("372", "Tissit on kivoja.");
 		sendServerCommand("372", "Niin on kuppikakutkin.");
 		sendServerCommand("372", "");
@@ -134,8 +134,8 @@ public class Connection  implements Runnable {
 		this.mode = "+i";
 		sendServerCommand("MODE", this.mode);
 
-		Server.findChannel("#world").addConnection(this);
-		this.joinedChannels.put("#world", Server.findChannel("#world"));
+		IrcServer.findChannel("#world").addConnection(this);
+		this.joinedChannels.put("#world", IrcServer.findChannel("#world"));
 	}
 	
 	private void processLine(String line) throws Exception {
@@ -176,7 +176,7 @@ public class Connection  implements Runnable {
 			commandObject = IrcCommand.valueOf(command.toUpperCase());
 		}
 		if (commandObject == null) {
-			sendRawString(":" + Server.globalServerName + " 421 " + nick + " " + command + " :Unknown command ");
+			sendRawString(":" + IrcServer.globalServerName + " 421 " + nick + " " + command + " :Unknown command ");
 			return;
 		}
 		if (arguments.length < commandObject.getMin() || arguments.length > commandObject.getMax()) {
@@ -195,14 +195,14 @@ public class Connection  implements Runnable {
 			switch(command) {
 				case NICK:
 					String n = command.arguments[0];
-					if (Server.trySetNickname(this, n)) {
+					if (IrcServer.trySetNickname(this, n)) {
 						this.nick = n;
 						sendSelfNotice("Nick changed to "+this.nick);
 						if (this.username != null) {
 							acceptConnection();
 						}
 					} else {
-						sendRawString(":" + Server.globalServerName + " 433 " + n + ":Nickname in use");
+						sendRawString(":" + IrcServer.globalServerName + " 433 " + n + ":Nickname in use");
 					}
 					break;
 				case USER:
@@ -230,14 +230,14 @@ public class Connection  implements Runnable {
 					
 					//TODO: Fix me
 					String n = command.arguments[0];
-					if (Server.trySetNickname(this, n)) {
+					if (IrcServer.trySetNickname(this, n)) {
 						this.nick = n;
 						sendSelfNotice("Nick changed to "+this.nick);
 						if (this.username != null) {
 							acceptConnection();
 						}
 					} else {
-						sendRawString(":" + Server.globalServerName + " 433 " + n + ":Nickname in use");
+						sendRawString(":" + IrcServer.globalServerName + " 433 " + n + ":Nickname in use");
 					}
 					break;
 				case USER:
@@ -250,10 +250,10 @@ public class Connection  implements Runnable {
 	                		//Already joined to channel
 	                		break;
 	                	}
-	                	Channel chan = Server.findChannel(channelName);
+	                	Channel chan = IrcServer.findChannel(channelName);
 	                	if (chan == null) {
 							chan = new Channel(channelName);
-							Server.addChannel(chan);
+							IrcServer.addChannel(chan);
 	                	}
 						chan.addConnection(this);
 						synchronized (joinedChannels) {
@@ -267,10 +267,10 @@ public class Connection  implements Runnable {
 						sendSelfNotice("This server does not allow to change usermode");
 					else {
 						if (command.arguments[0].startsWith("#")) { //Channel
-							sendRawString(":" + Server.globalServerName + " 324 " + this.nick + " " + command.arguments[0] + " +stn");
+							sendRawString(":" + IrcServer.globalServerName + " 324 " + this.nick + " " + command.arguments[0] + " +stn");
 						}
 						else if (command.arguments[0].equals(this.nick)){
-							sendRawString(":" + Server.globalServerName + " 221 " + this.nick + " +i");
+							sendRawString(":" + IrcServer.globalServerName + " 221 " + this.nick + " +i");
 						}
 					}
 					break;
@@ -300,7 +300,7 @@ public class Connection  implements Runnable {
 	
 	@Override
 	public void run() {
-		sendRawString(":" + Server.globalServerName + " 020 :Please wait while we process your connection");
+		sendRawString(":" + IrcServer.globalServerName + " 020 :Please wait while we process your connection");
 
 		try {
 			

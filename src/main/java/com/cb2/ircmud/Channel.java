@@ -39,13 +39,13 @@ public class Channel {
 			sendRawStringAll(":" + con.getRepresentation() + " JOIN "+ this.name);
 			
 			if (this.topic != null)
-				con.sendRawString(":"+Server.globalServerName+" 332 "+con.nick+" "+this.name+" :"+this.topic);
+				con.sendRawString(":"+IrcServer.globalServerName+" 332 "+con.nick+" "+this.name+" :"+this.topic);
 	
 			String userlist = con.nick;
 			for(Connection _con : channelMembers) userlist = userlist + " " +  _con.nick;
-			con.sendRawString(":"+Server.globalServerName+" 353 "+con.nick+" @ "+ this.name + " :" + userlist.trim());
+			con.sendRawString(":"+IrcServer.globalServerName+" 353 "+con.nick+" @ "+ this.name + " :" + userlist.trim());
 			
-			con.sendRawString(":"+Server.globalServerName+" 366 "+con.nick+" " + this.name + " :End of /NAMES list.");
+			con.sendRawString(":"+IrcServer.globalServerName+" 366 "+con.nick+" " + this.name + " :End of /NAMES list.");
 			
 			channelMembers.add(con);
 		}

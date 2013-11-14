@@ -5,7 +5,7 @@ import java.net.Socket;
 import java.util.*;
 import java.io.IOException;
 
-public class Server {
+public class IrcServer {
 	
 	private static ServerSocket serverSocket;
 	public static String globalServerName;
@@ -17,14 +17,16 @@ public class Server {
 	
 	
 	public static void init(String _globalServerName, int _globalServerPort) throws IOException {
-		System.out.println("Initializing Server("+_globalServerName+":"+_globalServerPort+")");
+		System.out.println("Initializing IrcServer("+_globalServerName+":"+_globalServerPort+")");
 
 		globalServerPort = _globalServerPort;
 		globalServerName = _globalServerName;
 
-		System.out.println("Initializing ServerSocket");
+		System.out.println("IrcServer: Initializing ServerSocket");
 		serverSocket = new ServerSocket(globalServerPort);
-		
+
+		System.out.println("IrcServer: Initializing "+Config.WorldChannel);
+
 		Channel worldChannel = new Channel(Config.WorldChannel);
 		channelMap.put(worldChannel.name, worldChannel);
 	}
