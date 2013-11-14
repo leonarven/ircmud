@@ -16,6 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 
 
+
 import com.cb2.ircmud.IrcCommand;
 
 public class Connection  implements Runnable {
@@ -86,6 +87,19 @@ public class Connection  implements Runnable {
 		sendServerCommand("NOTICE", string);
 	}
 
+	public void sendWhoisToCon(Connection con) {
+		// RPL_WHOISUSER 311
+		// RPL_WHOISSERVER 312
+		// RPL_ENDOFWHOIS 318
+		
+		con.sendRawString(":"+IrcServer.globalServerName+" 311 "+con.nick+" "+this.nick+" "+this.username+" "+this.hostname+" * :"+this.realname);
+		con.sendRawString(":"+IrcServer.globalServerName+" 312 "+con.nick+" "+this.nick+" "+IrcServer.globalServerName+" :"+IrcServer.globalServerInfo);
+		// TODO if is IRCoperator RPL_WHOISOPERATOR 313
+		// TODO if is away RPL_WHOISIDLE 317
+		con.sendRawString(":"+IrcServer.globalServerName+" 318 "+con.nick+" "+this.nick+" :End of /WHOIS list.");
+	}
+
+	
 	public boolean joinChannel(String channelName) {
 		Channel chan = IrcServer.findChannel(channelName);
 		if (chan == null) return false;
@@ -191,6 +205,8 @@ public class Connection  implements Runnable {
 	}
 	
 	public void act(IrcCommand command) throws Exception {
+		String mask;
+		
 		if (this.nick == null || this.username == null) {
 			switch(command) {
 				case NICK:
@@ -292,33 +308,38 @@ public class Connection  implements Runnable {
 					}
 					break;
 				case WHO:
-					String mask = command.arguments[0];
+					mask = command.arguments[0];
 					String op = "";
 					if (command.arguments.length == 2)
 						op = command.arguments[1];
-
 					if (Channel.isValidPrefix(mask.charAt(0))) {
-						
 						if (joinedChannels.containsKey(mask)) {
-							
 							Channel channel = IrcServer.findChannel(mask);
 							if (channel != null) {
-								
 								channel.sendWhoToCon(this);
-								
 							} else {
 								sendSelfNotice("Channel does not exits"); //ERR_NOSUCHCHANNEL = 403
 							}
-							
 						} else {
 							sendSelfNotice("Server does not allow to asking about channels you are not in to");
 						}
-						
 					} else {
 						// TODO
 						sendSelfNotice("Server does not allow to asking about users");
 					}
+					break;
+				case WHOIS:
+					mask = command.arguments[0];
 					
+					Connection con = IrcServer.findConnection(mask);
+					if (con != null) {
+						
+						con.sendWhoisToCon(this);
+						
+					} else {
+						// TODO ERR_NOSUCHNICK = 401 
+						sendSelfNotice("No such nick");
+					}
 					break;
 				default:
 					System.err.println("Unhandled IrcCommand");

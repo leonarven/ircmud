@@ -100,6 +100,15 @@ public enum IrcCommand {
 			if (arguments.length == 2)
 				this.argumentMap.put("operator", arguments[1]);
 		}
+	},
+	WHOIS(1,1) {
+		@Override
+		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+			this.arguments = arguments;
+			
+			this.argumentMap.put("command", "WHOIS");
+			this.argumentMap.put("mask", arguments[0]);
+		}
 	};
 
 	public void var_dump(Connection con, String prefix) {

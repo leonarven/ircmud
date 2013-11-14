@@ -5,11 +5,14 @@ import java.net.Socket;
 import java.util.*;
 import java.io.IOException;
 
+import org.aspectj.weaver.patterns.ThisOrTargetAnnotationPointcut;
+
 public class IrcServer {
 	
 	private static ServerSocket serverSocket;
 	public static String globalServerName;
-	public static int globalServerPort;
+	public static int    globalServerPort;
+	public static String globalServerInfo = "";
 	
 	private static Map<String, Connection> connectionNicknameMap = new HashMap<String, Connection>();
 	private static Map<String, Channel>       channelMap = new HashMap<String, Channel>();
@@ -41,6 +44,12 @@ public class IrcServer {
 		synchronized (channelMap) {
 			if (!channelMap.containsKey(channelName)) return null;
 			return channelMap.get(channelName);
+		}
+	}
+	public static Connection findConnection(String nickName) {
+		synchronized (connectionNicknameMap) {
+			if (!connectionNicknameMap.containsKey(nickName)) return null;
+			return connectionNicknameMap.get(nickName);
 		}
 	}
 	
