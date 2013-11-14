@@ -8,19 +8,15 @@ public class IrcReply {
 	private String postfix = null;
 	private String sender = null;
 	private String command = null;
-	
-	public IrcReply(IrcUser sender, String command, String string) {
-		this(sender, string);
-		this.command = command;
-	}
 
 	public IrcReply(String sender, String string) {
 		this.sender = sender;
 		this.init(string);
 	}
+
 	public IrcReply(String sender, String command, String string) {
-		this.sender = sender;
 		this.command = command;
+		this.sender = sender;
 		this.init(string);
 	}
 
@@ -31,6 +27,19 @@ public class IrcReply {
 	
 	public IrcReply(IrcUser sender) {
 		this.sender = sender.getRepresentation();
+	}
+
+	public IrcReply(Connection sender, String command, String string) {
+		this(sender.getRepresentation(), command, string);
+	}
+
+
+	public IrcReply(Connection sender, String string) {
+		this(sender.getRepresentation(), string);
+	}
+	
+	public IrcReply(Connection sender) {
+		this(sender.getRepresentation(), "");
 	}
 
 
