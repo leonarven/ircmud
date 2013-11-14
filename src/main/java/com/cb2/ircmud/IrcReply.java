@@ -41,6 +41,8 @@ public class IrcReply {
 		String postfix = "";
 		
 		switch(tokens.length) {
+			case 0:
+				break;
 			case 1:
 				prefix = tokens[0];
 				break;
