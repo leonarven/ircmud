@@ -48,11 +48,10 @@ public class IrcReply {
 				prefix = tokens[0];
 				postfix = tokens[1];
 				break;
-			case 3:
-				prefix = tokens[1];
-				postfix = tokens[2];
-				break;
 			default:
+				prefix = tokens[1];
+				for(int i = 2; i < tokens.length; i++)
+					postfix = postfix + ":" + tokens[i];
 		}
 		
 		this.postfix = postfix;
