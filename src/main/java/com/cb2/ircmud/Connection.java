@@ -49,7 +49,7 @@ public class Connection  implements Runnable {
 					out.flush();
 				}
 			} catch (Exception e) {
-				System.err.println("Outqueue died");
+				System.err.println("Connection:outThread: Outqueue died");
 				outQueue.clear();
 				outQueue = null;
 				e.printStackTrace();

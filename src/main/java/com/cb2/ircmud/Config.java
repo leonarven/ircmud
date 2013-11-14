@@ -34,6 +34,10 @@ public class Config {
 	 * Config.load tulee lataamaan tiedostosta asetukset
 	 */
 	public static boolean load( String file ) throws IOException {
+		
+		//TODO: Make me
+		
+		System.out.println("Config: Loading configurations from file " +file);
 
 		Properties config = new Properties();
 		

@@ -92,15 +92,19 @@ public enum IrcCommand {
 	};
 
 	public void var_dump(Connection con, String prefix) {
-		System.out.println("DEBUG: Command " + argument("command") + " from  " +con.hostname);
-		System.out.println("DEBUG: prefix:" + prefix);
+		System.out.println("DEBUG: Command " + argument("command") + " from " +con.getRepresentation());
+		System.out.print("DEBUG: prefix:" + prefix);
 		
 		Iterator it = this.argumentMap.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry pairs = (Map.Entry)it.next();
-			System.out.println("DEBUG: "+pairs.getKey() + " = " + pairs.getValue());
+
+			if (pairs.getKey().equals("command")) continue;
+
+			System.out.print( ", " + pairs.getKey() + " = " + pairs.getValue() );
 			it.remove();
 		}
+		System.out.println("");
 	}
 	
 	public String[] arguments;

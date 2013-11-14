@@ -13,9 +13,7 @@ public class IrcServer {
 	
 	private static Map<String, Connection> connectionNicknameMap = new HashMap<String, Connection>();
 	private static Map<String, Channel>       channelMap = new HashMap<String, Channel>();
-	
-	
-	
+		
 	public static void init(String _globalServerName, int _globalServerPort) throws IOException {
 		System.out.println("Initializing IrcServer("+_globalServerName+":"+_globalServerPort+")");
 
@@ -51,7 +49,7 @@ public class IrcServer {
 	}
 	
 	public static boolean run() {
-		System.out.println("Starting server loop");
+		System.out.println("IrcServer: Starting server loop");
 		try {
 			while (true) {
 				Socket	   socket = serverSocket.accept();
@@ -60,7 +58,7 @@ public class IrcServer {
 				thread.start();
 			}
 		} catch(IOException e) {
-			System.err.println("ERROR: IOException at Server.run: " + e.getMessage());
+			System.err.println("IrcServer: IOException at Server.run: " + e.getMessage());
 		}
 		
 		return false;

@@ -40,6 +40,9 @@ public class Channel {
 			
 			if (this.topic != null)
 				con.sendRawString(":"+IrcServer.globalServerName+" 332 "+con.nick+" "+this.name+" :"+this.topic);
+			else con.sendRawString(":"+IrcServer.globalServerName+" 332 "+con.nick+" "+this.name+" :");
+			
+			con.sendRawString(":"+IrcServer.globalServerName+" 333 "+con.nick+" "+this.name+" admin!admin@IrcMud 0");
 	
 			String userlist = con.nick;
 			for(Connection _con : channelMembers) userlist = userlist + " " +  _con.nick;
