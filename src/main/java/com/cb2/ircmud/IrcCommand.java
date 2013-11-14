@@ -89,6 +89,17 @@ public enum IrcCommand {
 			this.argumentMap.put("channel", arguments[0]);
 			this.argumentMap.put("msg", arguments[1]);
 		}
+	},
+	WHO(1,2) {
+		@Override
+		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+			this.arguments = arguments;
+			
+			this.argumentMap.put("command", "WHO");
+			this.argumentMap.put("mask", arguments[0]);
+			if (arguments.length == 2)
+				this.argumentMap.put("operator", arguments[1]);
+		}
 	};
 
 	public void var_dump(Connection con, String prefix) {

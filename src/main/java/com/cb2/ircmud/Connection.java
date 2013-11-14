@@ -291,6 +291,35 @@ public class Connection  implements Runnable {
 						this.sendCommand("404", "No such channel");
 					}
 					break;
+				case WHO:
+					String mask = command.arguments[0];
+					String op = "";
+					if (command.arguments.length == 2)
+						op = command.arguments[1];
+
+					if (Channel.isValidPrefix(mask.charAt(0))) {
+						
+						if (joinedChannels.containsKey(mask)) {
+							
+							Channel channel = IrcServer.findChannel(mask);
+							if (channel != null) {
+								
+								channel.sendWhoToCon(this);
+								
+							} else {
+								sendSelfNotice("Channel does not exits"); //ERR_NOSUCHCHANNEL = 403
+							}
+							
+						} else {
+							sendSelfNotice("Server does not allow to asking about channels you are not in to");
+						}
+						
+					} else {
+						// TODO
+						sendSelfNotice("Server does not allow to asking about users");
+					}
+					
+					break;
 				default:
 					System.err.println("Unhandled IrcCommand");
 			}

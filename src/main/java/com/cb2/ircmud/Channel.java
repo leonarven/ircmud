@@ -45,7 +45,7 @@ public class Channel {
 			
 			con.sendRawString(":"+IrcServer.globalServerName+" 333 "+con.nick+" "+this.name+" admin!admin@IrcMud 0");
 	
-			String userlist = con.nick;
+			String userlist = "Foobarasd " + con.nick;
 			for(Connection _con : channelMembers) userlist = userlist + " " +  _con.nick;
 			con.sendRawString(":"+IrcServer.globalServerName+" 353 "+con.nick+" @ "+ this.name + " :" + userlist.trim());
 			
@@ -55,10 +55,33 @@ public class Channel {
 		}
 	}
 	
+	public void sendWhoToCon(Connection con) {
+		// RPL_WHOREPLY 352
+		
+		for(Connection _con : channelMembers)
+			// TODO H/G => here/gone
+			// TODO: H/G:n perään tulee henkilön statuksen indikoiva merkki (+/@)
+			con.sendRawString(":"+IrcServer.globalServerName+" 352 "+con.nick+" "+this.name+" "+_con.username+" "+_con.hostname+" "+IrcServer.globalServerName+" "+_con.nick+" H :0 " + _con.realname);
+
+		con.sendRawString(":"+IrcServer.globalServerName+" 315 "+con.nick+" " + this.name + " :End of /WHO list.");
+	}
+	
 	public void removeConnection(Connection con) {
 		synchronized (channelMembers) {
 			channelMembers.remove(con);
 		}
 	}
 	
+	
+	public static boolean isValidPrefix(char prefix) {
+		// TODO make to better
+		switch(prefix) {
+			case '#':
+			case '&':
+			case '!':
+				return true;
+			default:
+				return false;
+		}
+	}
 }
