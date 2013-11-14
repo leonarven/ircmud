@@ -2,7 +2,7 @@
 
 *.class
 
-roo.log
+*.log
 *_Roo_*
 /target
 /bin
