@@ -9,7 +9,7 @@ public class IrcReply {
 	private String sender = null;
 	private String command = null;
 	
-	public IrcReply(Connection sender, String command, String string) {
+	public IrcReply(IrcUser sender, String command, String string) {
 		this(sender, string);
 		this.command = command;
 	}
@@ -24,12 +24,12 @@ public class IrcReply {
 		this.init(string);
 	}
 
-	public IrcReply(Connection sender, String string) {
+	public IrcReply(IrcUser sender, String string) {
 		this(sender);
 		this.init(string);
 	}
 	
-	public IrcReply(Connection sender) {
+	public IrcReply(IrcUser sender) {
 		this.sender = sender.getRepresentation();
 	}
 
@@ -104,8 +104,9 @@ public class IrcReply {
 		String string = ":" + this.sender + " "  + this.command + " ";
 		for( String str : this.arguments )
 			string = string + str + " ";
-
-		return string + ":" + this.postfix;
+		if (!this.postfix.isEmpty())
+			string += ":" + this.postfix;
+		return string;
 	}
 	public void var_dump() {
 		System.out.println("DEBUG: IrcReply::var_dump()");

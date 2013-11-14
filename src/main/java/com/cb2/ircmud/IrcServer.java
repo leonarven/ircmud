@@ -14,7 +14,7 @@ public class IrcServer {
 	public static int    globalServerPort;
 	public static String globalServerInfo = "";
 	
-	private static Map<String, Connection> connectionNicknameMap = new HashMap<String, Connection>();
+	private static Map<String, IrcUser> userNicknameMap = new HashMap<String, IrcUser>();
 	private static Map<String, Channel>       channelMap = new HashMap<String, Channel>();
 		
 	public static void init(String _globalServerName, int _globalServerPort) throws IOException {
@@ -32,10 +32,10 @@ public class IrcServer {
 		channelMap.put(worldChannel.name, worldChannel);
 	}
 	
-	public static boolean trySetNickname(Connection con, String nick) {
-		synchronized (connectionNicknameMap) {
-			if (connectionNicknameMap.containsKey(nick)) return false;
-			connectionNicknameMap.put(nick, con);
+	public static boolean trySetNickname(IrcUser user, String nick) {
+		synchronized (userNicknameMap) {
+			if (userNicknameMap.containsKey(nick)) return false;
+			userNicknameMap.put(nick, user);
 		}
 		return true;
 	}
@@ -46,10 +46,10 @@ public class IrcServer {
 			return channelMap.get(channelName);
 		}
 	}
-	public static Connection findConnection(String nickName) {
-		synchronized (connectionNicknameMap) {
-			if (!connectionNicknameMap.containsKey(nickName)) return null;
-			return connectionNicknameMap.get(nickName);
+	public static IrcUser findUserByNickname(String nickName) {
+		synchronized (userNicknameMap) {
+			if (!userNicknameMap.containsKey(nickName)) return null;
+			return userNicknameMap.get(nickName);
 		}
 	}
 	

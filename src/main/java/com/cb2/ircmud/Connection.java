@@ -19,14 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.cb2.ircmud.IrcCommand;
 
-public class Connection  implements Runnable {
-
-	public String nick;
-	public String mode;
-	public String realname;
-	public String username;
-	public String hostname;
-
+public class Connection extends IrcUser implements Runnable {
 	private InetSocketAddress address;
 	private Socket socket = null;
 	private Map<String, Channel> joinedChannels = new HashMap<String, Channel>();
@@ -36,7 +29,6 @@ public class Connection  implements Runnable {
 	}
 
 	private LinkedBlockingQueue<String> outQueue = new LinkedBlockingQueue<String>(1000);
-	public ArrayList<IrcCommand> commandQuery = new ArrayList<IrcCommand>();
 	
 	private Thread outThread = new Thread() {
 		public void run() {
@@ -62,14 +54,10 @@ public class Connection  implements Runnable {
 			}
 		}
 	};
-
-	public String getRepresentation() {
-		return this.nick + "!" + this.username + "@" + this.hostname;
-	}
 	
 
 	public void sendRawString(String s) {
-		System.out.println("Sending line to " + nick + ": " + s);
+		System.out.println("Sending line to " + nickname + ": " + s);
 		outQueue.add(s);
 	}
 	
@@ -78,53 +66,13 @@ public class Connection  implements Runnable {
 	}
 
 	public void sendServerCommand(String command, String string) {
-		sendRawString(":" + IrcServer.globalServerName + " " + command + " " + nick + " :" + string);
+		sendRawString(":" + IrcServer.globalServerName + " " + command + " " + nickname + " :" + string);
 	}
 	public void sendCommand(String command, String string) {
 		sendRawString(":" + getRepresentation() + " " + command + " :" + string);
 	}
 	public void sendSelfNotice(String string) {
 		sendServerCommand("NOTICE", string);
-	}
-
-	public void sendWhoisToCon(Connection con) {
-		// RPL_WHOISUSER 311
-		// RPL_WHOISSERVER 312
-		// RPL_ENDOFWHOIS 318
-		
-		con.sendRawString(":"+IrcServer.globalServerName+" 311 "+con.nick+" "+this.nick+" "+this.username+" "+this.hostname+" * :"+this.realname);
-		con.sendRawString(":"+IrcServer.globalServerName+" 312 "+con.nick+" "+this.nick+" "+IrcServer.globalServerName+" :"+IrcServer.globalServerInfo);
-		// TODO if is IRCoperator RPL_WHOISOPERATOR 313
-		// TODO if is away RPL_WHOISIDLE 317
-		con.sendRawString(":"+IrcServer.globalServerName+" 318 "+con.nick+" "+this.nick+" :End of /WHOIS list.");
-	}
-
-	
-	public boolean joinChannel(String channelName) {
-		Channel chan = IrcServer.findChannel(channelName);
-		if (chan == null) return false;
-		chan.addConnection(this);
-		joinedChannels.put(channelName, chan);
-		
-		return true;
-	}
-	public boolean leaveChannel(String channelName, String msg) {
-		
-		if (!joinedChannels.containsKey(channelName)) return false;
-		joinedChannels.remove(channelName);
-		Channel chan = IrcServer.findChannel(channelName);
-		if (chan == null) return false;
-		chan.sendRawStringAll(":" + this.getRepresentation() + " PART " + channelName + " :" + msg);
-		chan.removeConnection(this);
-		return true;
-	}
-	
-	public boolean quit(String msg) {
-		for (Map.Entry<String, Channel> entry : this.joinedChannels.entrySet()) {
-			entry.getValue().removeConnection(this);
-			entry.getValue().sendRawStringAll(":" + this.getRepresentation() + " QUIT :" + msg);
-		}
-		return true;
 	}
 	
 	public void closeConnection() throws IOException {
@@ -148,15 +96,14 @@ public class Connection  implements Runnable {
 		this.mode = "+i";
 		sendServerCommand("MODE", this.mode);
 
-		IrcServer.findChannel("#world").addConnection(this);
-		this.joinedChannels.put("#world", IrcServer.findChannel("#world"));
+		this.joinChannel(IrcServer.findChannel("#world"));
 	}
 	
 	private void processLine(String line) throws Exception {
 		
 		if (line == null) return;
 
-		System.out.println("Processing line from " + nick + ": " + line);
+		System.out.println("Processing line from " + nickname + ": " + line);
 		String prefix = "";
 		if (line.startsWith(":")) {
 			String[] tokens = line.split(" ", 2);
@@ -190,7 +137,7 @@ public class Connection  implements Runnable {
 			commandObject = IrcCommand.valueOf(command.toUpperCase());
 		}
 		if (commandObject == null) {
-			sendRawString(":" + IrcServer.globalServerName + " 421 " + nick + " " + command + " :Unknown command ");
+			sendRawString(":" + IrcServer.globalServerName + " 421 " + nickname + " " + command + " :Unknown command ");
 			return;
 		}
 		if (arguments.length < commandObject.getMin() || arguments.length > commandObject.getMax()) {
@@ -207,13 +154,13 @@ public class Connection  implements Runnable {
 	public void act(IrcCommand command) throws Exception {
 		String mask;
 		
-		if (this.nick == null || this.username == null) {
+		if (this.nickname == null || this.username == null) {
 			switch(command) {
 				case NICK:
 					String n = command.arguments[0];
 					if (IrcServer.trySetNickname(this, n)) {
-						this.nick = n;
-						sendSelfNotice("Nick changed to "+this.nick);
+						this.nickname = n;
+						sendSelfNotice("Nick changed to "+this.nickname);
 						if (this.username != null) {
 							acceptConnection();
 						}
@@ -230,7 +177,7 @@ public class Connection  implements Runnable {
 					this.username = command.arguments[0];
 					this.realname = command.arguments[3];
 	
-					if (this.nick != null) {
+					if (this.nickname != null) {
 						acceptConnection();
 					}
 	
@@ -247,8 +194,8 @@ public class Connection  implements Runnable {
 					//TODO: Fix me
 					String n = command.arguments[0];
 					if (IrcServer.trySetNickname(this, n)) {
-						this.nick = n;
-						sendSelfNotice("Nick changed to "+this.nick);
+						this.nickname = n;
+						sendSelfNotice("Nick changed to "+this.nickname);
 						if (this.username != null) {
 							acceptConnection();
 						}
@@ -271,22 +218,27 @@ public class Connection  implements Runnable {
 							chan = new Channel(channelName);
 							IrcServer.addChannel(chan);
 	                	}
-						chan.addConnection(this);
-						synchronized (joinedChannels) {
-							joinedChannels.put(channelName, chan);
-						}
+	                	this.joinChannel(chan);
 	                }
 					break;
 				case MODE:
 					//TODO: Implement modes
-					if (command.arguments.length >= 2)
-						sendSelfNotice("This server does not allow to change usermode");
-					else {
-						if (command.arguments[0].startsWith("#")) { //Channel
-							sendRawString(":" + IrcServer.globalServerName + " 324 " + this.nick + " " + command.arguments[0] + " +stn");
+					if (command.arguments.length >= 2) {
+						if (command.arguments[1].equals("b") && Channel.isValidPrefix(command.arguments[0].charAt(0))) { //Ban list
+							IrcReply reply = new IrcReply(IrcServer.globalServerName, "368", command.arguments[0] + " :End of channel ban list");
+							this.sendReply(reply);
+							break;
 						}
-						else if (command.arguments[0].equals(this.nick)){
-							sendRawString(":" + IrcServer.globalServerName + " 221 " + this.nick + " +i");
+						sendSelfNotice("This server does not allow to change usermode");
+					}
+					else {
+						if (Channel.isValidPrefix(command.arguments[0].charAt(0))) { //Channel
+							IrcReply reply = new IrcReply(IrcServer.globalServerName, "324",  this.nickname + " " + command.arguments[0] + " +stn");
+							this.sendReply(reply);
+						}
+						else if (command.arguments[0].equals(this.nickname)){
+							IrcReply reply = new IrcReply(IrcServer.globalServerName, "221", this.nickname + " +i");
+							this.sendReply(reply);
 						}
 					}
 					break;
@@ -302,7 +254,7 @@ public class Connection  implements Runnable {
 					break;
 				case PRIVMSG:
 					if (joinedChannels.containsKey(command.arguments[0])) {
-						joinedChannels.get(command.arguments[0]).sendMessage(this, command.arguments[1]);
+						joinedChannels.get(command.arguments[0]).sendReplyToAllExceptSender(new IrcReply(this, "PRIVMSG", command.arguments[0] + " :" + command.arguments[1]));
 					} else {
 						this.sendCommand("404", "No such channel");
 					}
@@ -316,7 +268,7 @@ public class Connection  implements Runnable {
 						if (joinedChannels.containsKey(mask)) {
 							Channel channel = IrcServer.findChannel(mask);
 							if (channel != null) {
-								channel.sendWhoToCon(this);
+								this.sendWhoReply(channel);
 							} else {
 								sendSelfNotice("Channel does not exits"); //ERR_NOSUCHCHANNEL = 403
 							}
@@ -331,10 +283,10 @@ public class Connection  implements Runnable {
 				case WHOIS:
 					mask = command.arguments[0];
 					
-					Connection con = IrcServer.findConnection(mask);
+					IrcUser con = IrcServer.findUserByNickname(mask);
 					if (con != null) {
 						
-						con.sendWhoisToCon(this);
+						this.sendWhoIsReply(con);
 						
 					} else {
 						// TODO ERR_NOSUCHNICK = 401 
@@ -381,6 +333,16 @@ public class Connection  implements Runnable {
 		} finally {
 			
 		}		
+	}
+
+	@Override
+	void sendReply(IrcReply reply) {
+		this.sendRawString(reply.toString());
+	}
+
+	@Override
+	boolean isConnection() {
+		return true;
 	}
 		
 }
