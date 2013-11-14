@@ -148,10 +148,7 @@ public class Connection  implements Runnable {
 		} catch (Exception e) {
 		}
 		if (commandObject == null) {
-			try {
-				commandObject = IrcCommand.valueOf(command.toUpperCase());
-			} catch (Exception e) {
-			}
+			commandObject = IrcCommand.valueOf(command.toUpperCase());
 		}
 		if (commandObject == null) {
 			sendSelfNotice("That command (" + command + ") isnt a supported command at this server.");
@@ -161,12 +158,7 @@ public class Connection  implements Runnable {
 			sendSelfNotice("Invalid number of arguments for this" + " command, expected not more than " + commandObject.getMax() + " and not less than " + commandObject.getMin() + " but got " + arguments.length + " arguments");
 			return;
 		}
-		try {
-			commandObject.init(this, prefix, arguments);
-		} catch(Exception e) {
-			System.err.println("ERROR at processLine: "+e.getMessage());
-			e.printStackTrace();
-		}
+		commandObject.init(this, prefix, arguments);
 
 		act(commandObject);
 	}
@@ -208,7 +200,8 @@ public class Connection  implements Runnable {
 
 				break;
 			case JOIN:
-				String[] channels = command.arguments[0].split(",");
+				String[] channels  = command.arguments[0].split(",");
+				/* Ei tueta toistaiseksi kanavien salasanoja */
                 for (String channelName : channels) {
 					if (Server.channelMap.containsKey(channelName)) {
 						Server.channelMap.get(channelName).addConnection(this);
@@ -264,7 +257,8 @@ public class Connection  implements Runnable {
 				try {
 					processLine(line);
 				} catch (Exception e) {
-					System.err.println("ERROR: NullPointerException as Connection.run: "+e.getMessage());
+					System.err.println("ERROR: Exception at Connection.run, in processLine: "+e.getMessage());z
+					e.printStackTrace();
 				}
 			}
 		} catch (IOException e) {
