@@ -221,6 +221,7 @@ public class Connection  implements Runnable {
 					break;
 				default:
 					sendRawString("ERROR :Closing connection " + getRepresentation() + " (Invalid command)");
+
 			}
 		}
 		else { //Connection established
