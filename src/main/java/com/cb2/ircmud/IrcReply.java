@@ -20,27 +20,15 @@ public class IrcReply {
 		this.init(string);
 	}
 
-	public IrcReply(IrcUser sender, String string) {
-		this(sender);
-		this.init(string);
-	}
+	public IrcReply(IrcUser sender, String command, String string)
+		{ this(sender.getRepresentation(), command, string); }
+
+
+	public IrcReply(IrcUser sender, String string)
+		{ this(sender.getRepresentation(), string); }
 	
-	public IrcReply(IrcUser sender) {
-		this.sender = sender.getRepresentation();
-	}
-
-	public IrcReply(Connection sender, String command, String string) {
-		this(sender.getRepresentation(), command, string);
-	}
-
-
-	public IrcReply(Connection sender, String string) {
-		this(sender.getRepresentation(), string);
-	}
-	
-	public IrcReply(Connection sender) {
-		this(sender.getRepresentation(), "");
-	}
+	public IrcReply(IrcUser sender)
+		{ this(sender.getRepresentation(), ""); }
 
 
 
