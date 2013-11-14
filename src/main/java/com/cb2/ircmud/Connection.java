@@ -22,7 +22,6 @@ import com.cb2.ircmud.IrcCommand;
 public class Connection extends IrcUser implements Runnable {
 	private InetSocketAddress address;
 	private Socket socket = null;
-	private Map<String, Channel> joinedChannels = new HashMap<String, Channel>();
 	
 	public Connection(Socket socket){
 		this.socket = socket;
