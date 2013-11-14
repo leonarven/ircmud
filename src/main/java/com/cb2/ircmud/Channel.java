@@ -2,15 +2,25 @@ package com.cb2.ircmud;
 
 import java.util.ArrayList;
 import com.cb2.ircmud.Connection;
+import com.cb2.ircmud.DefaultChannelMessageProxy;
 
 public class Channel {
 
 	private ArrayList<Connection> channelMembers = new ArrayList<Connection>();
 	private String topic;
+	private IChannelMessageProxy messageProxy = new DefaultChannelMessageProxy();
 	protected String name;
 	
 	public Channel(String name) {
 		this.name = name;
+	}
+	
+	public String getName() { return name; }
+	
+	public ArrayList<Connection> getChannelMembers() { return channelMembers; }
+	
+	public void sendMessage(Connection sender, String msg) {
+		messageProxy.privateMessageToChannel(sender, this, msg);
 	}
 	
 	public void sendRawStringAllExcept(Connection except, String msg) {
@@ -20,15 +30,6 @@ public class Channel {
 			}
 		}
 	}
-	
-	public void sendPrivateMessage(Connection sender, String msg) {
-		synchronized (channelMembers) {
-			for (Connection con : channelMembers) {
-				if (con != sender) con.sendPrivateMessage(sender.getRepresentation(), this.name, msg);
-			}
-		}
-	}
-	
 	public void sendRawStringAll(String toSend) {
 		sendRawStringAllExcept(null, toSend);
 	}

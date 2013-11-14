@@ -286,7 +286,7 @@ public class Connection  implements Runnable {
 					break;
 				case PRIVMSG:
 					if (joinedChannels.containsKey(command.arguments[0])) {
-						joinedChannels.get(command.arguments[0]).sendPrivateMessage(this, command.arguments[1]);
+						joinedChannels.get(command.arguments[0]).sendMessage(this, command.arguments[1]);
 					} else {
 						this.sendCommand("404", "No such channel");
 					}
