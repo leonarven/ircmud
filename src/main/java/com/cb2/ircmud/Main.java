@@ -5,8 +5,10 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 public class Main {
 	public static void main(String[] args) {
-        ApplicationContext ctx = new FileSystemXmlApplicationContext("src/main/resources/META-INF/spring/applicationContext.xml");
- 
+        System.out.println("DEBUG: Main::main()");
+
+        ApplicationContext ctx = new FileSystemXmlApplicationContext(Config.applicationContextFile);
+        
         Ircmud ircmud = ctx.getBean(Ircmud.class);
         ircmud.main(args);
     }

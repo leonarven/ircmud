@@ -41,14 +41,15 @@ public enum IrcCommand {
 			var_dump(con, prefix);
 		}
 	},
-	MODE(0, 2) {
+	MODE(0, 2) { // TODO: If user queries channel mode no 2. parameter. Now causes java.lang.ArrayIndexOutOfBoundsException
 		@Override
 		public void init(Connection con, String prefix, String[] arguments) throws Exception {
 			this.arguments  = arguments;
 
 			this.argumentMap.put("command",  "MODE");
-			this.argumentMap.put("nick", arguments[0]);
-			this.argumentMap.put("mode", arguments[1]);
+			this.argumentMap.put("target", arguments[0]);
+			if (arguments.length == 2)
+				this.argumentMap.put("mode", arguments[1]);
 
 			var_dump(con, prefix);
 		}
@@ -60,7 +61,8 @@ public enum IrcCommand {
 
 			this.argumentMap.put("command",  "JOIN");
 			this.argumentMap.put("channels", arguments[0]);
-			this.argumentMap.put("passwords", arguments[1]);
+			if (arguments.length == 2)
+				this.argumentMap.put("passwords", arguments[1]);
 
 			var_dump(con, prefix);
 		}
@@ -72,7 +74,8 @@ public enum IrcCommand {
 
 			this.argumentMap.put("command",  "JOIN");
 			this.argumentMap.put("channels", arguments[0]);
-			this.argumentMap.put("leaveMessage", arguments[1]);
+			if (arguments.length == 2)
+				this.argumentMap.put("leaveMessage", arguments[1]);
 
 			var_dump(con, prefix);
 		}

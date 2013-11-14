@@ -25,6 +25,10 @@ public class Config {
 	 */
 	protected static String ServerName = "IrcMud";
 
+	/* 
+	 * 
+	 */
+	protected static String applicationContextFile = "src/main/resources/META-INF/spring/applicationContext.xml";
 
 	/*
 	 * Config.load tulee lataamaan tiedostosta asetukset

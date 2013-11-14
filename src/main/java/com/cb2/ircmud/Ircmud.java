@@ -1,6 +1,7 @@
 package com.cb2.ircmud;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -8,7 +9,6 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
-
 
 import com.cb2.ircmud.domain.Room;
 
@@ -19,8 +19,9 @@ public class Ircmud {
 	public static int    globalServerPort = Config.ServerPort;
 
 	public void main(String[] args) {
+        System.out.println("DEBUG: Ircmud::main()");
 		Room room = new Room();
-/*		room.setName("olohuone");
+		room.setName("olohuone");
 		room.persist();	
 		room = new Room();
 		room.setName("niitty");
@@ -28,7 +29,7 @@ public class Ircmud {
 		
 		List<Room> rooms = Room.findAllRooms(); //fetch from database
 		
-		System.out.println(rooms);*/
+		System.out.println(rooms);
 		
 		switch(args.length) {
 			case 0: break;

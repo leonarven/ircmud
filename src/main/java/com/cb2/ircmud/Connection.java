@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -27,7 +28,7 @@ public class Connection  implements Runnable {
 
 	private InetSocketAddress address;
 	private Socket socket = null;
-	private Map<String, Channel> joinedChannels;
+	private Map<String, Channel> joinedChannels = new HashMap<String, Channel>();
 	
 	public Connection(Socket socket){
 		this.socket = socket;
@@ -53,7 +54,7 @@ public class Connection  implements Runnable {
 				outQueue = null;
 				e.printStackTrace();
 				try {
-					socket.close();
+					closeConnection();
 				} catch (Exception e2) {
 					e2.printStackTrace();
 				}
@@ -67,10 +68,8 @@ public class Connection  implements Runnable {
 	
 
 	public void sendRawString(String s) {
-		if (outQueue != null) {
-			System.out.println("Sending line to " + nick + ": " + s);
-			outQueue.add(s);
-		}
+		System.out.println("Sending line to " + nick + ": " + s);
+		outQueue.add(s);
 	}
 	
 	public void sendPrivateMessage(String sender, String target, String msg) {
@@ -88,20 +87,21 @@ public class Connection  implements Runnable {
 	}
 
 	public boolean joinChannel(String channelName) {
-		if (!Server.channelMap.containsKey(channelName)) return false;
-		Channel chan = Server.channelMap.get(channelName);
+		Channel chan = Server.findChannel(channelName);
+		if (chan == null) return false;
 		chan.addConnection(this);
 		joinedChannels.put(channelName, chan);
 		
 		return true;
 	}
 	public boolean leaveChannel(String channelName, String msg) {
+		
 		if (!joinedChannels.containsKey(channelName)) return false;
 		joinedChannels.remove(channelName);
-		if (!Server.channelMap.containsKey(channelName)) return false;
-		Channel chan = Server.channelMap.get(channelName);
-		chan.removeConnection(this);
+		Channel chan = Server.findChannel(channelName);
+		if (chan == null) return false;
 		chan.sendRawStringAll(":" + this.getRepresentation() + " PART " + channelName + " :" + msg);
+		chan.removeConnection(this);
 		return true;
 	}
 	
@@ -111,6 +111,31 @@ public class Connection  implements Runnable {
 			entry.getValue().sendRawStringAll(":" + this.getRepresentation() + " QUIT :" + msg);
 		}
 		return true;
+	}
+	
+	public void closeConnection() throws IOException {
+		//TODO: Cleaner closing
+		synchronized (socket) {
+			if (socket.isConnected())
+				socket.close();
+		}
+	}
+	
+	public void acceptConnection() {
+		sendSelfNotice("Connection accepted, "+getRepresentation()+"("+realname+")");
+		
+		sendServerCommand("375", Server.globalServerName+" - Message Of The Day:");
+		sendServerCommand("372", "Tissit on kivoja.");
+		sendServerCommand("372", "Niin on kuppikakutkin.");
+		sendServerCommand("372", "");
+		sendServerCommand("372", "On mahdotonta olla masentunut, jos sinulla on ilmapallo. -Nalle Puh");
+		sendServerCommand("376", "End of /MOTD command.");
+
+		this.mode = "+i";
+		sendServerCommand("MODE", this.mode);
+
+		Server.findChannel("#world").addConnection(this);
+		this.joinedChannels.put("#world", Server.findChannel("#world"));
 	}
 	
 	private void processLine(String line) throws Exception {
@@ -151,10 +176,12 @@ public class Connection  implements Runnable {
 			commandObject = IrcCommand.valueOf(command.toUpperCase());
 		}
 		if (commandObject == null) {
-			sendSelfNotice("That command (" + command + ") isnt a supported command at this server.");
+			sendRawString(":" + Server.globalServerName + " 421 " + nick + " " + command + " :Unknown command ");
 			return;
 		}
 		if (arguments.length < commandObject.getMin() || arguments.length > commandObject.getMax()) {
+			
+			//TODO: Use command
 			sendSelfNotice("Invalid number of arguments for this" + " command, expected not more than " + commandObject.getMax() + " and not less than " + commandObject.getMin() + " but got " + arguments.length + " arguments");
 			return;
 		}
@@ -164,82 +191,115 @@ public class Connection  implements Runnable {
 	}
 	
 	public void act(IrcCommand command) throws Exception {
-		switch(command) {
-			case NICK:
-				this.nick = command.arguments[0];
-				
-				sendSelfNotice("Nick changed to "+this.nick);
-				break;
-			case USER:
-				if (this.nick == null) {
-					sendSelfNotice("You must send NICK command first");
+		if (this.nick == null || this.username == null) {
+			switch(command) {
+				case NICK:
+					String n = command.arguments[0];
+					if (Server.trySetNickname(this, n)) {
+						this.nick = n;
+						sendSelfNotice("Nick changed to "+this.nick);
+						if (this.username != null) {
+							acceptConnection();
+						}
+					} else {
+						sendRawString(":" + Server.globalServerName + " 433 " + n + ":Nickname in use");
+					}
 					break;
-				}
-				if (this.username != null) {
+				case USER:
+					if (this.username != null) {
+						sendSelfNotice("You cannot change userinfo");
+						break;
+					}
+						
+					this.username = command.arguments[0];
+					this.realname = command.arguments[3];
+	
+					if (this.nick != null) {
+						acceptConnection();
+					}
+	
+					break;
+				default:
+					sendRawString("ERROR :Closing connection " + getRepresentation() + " (Invalid command)");
+			}
+		}
+		else { //Connection established
+			switch(command) {
+				case NICK:
+					
+					//TODO: Fix me
+					String n = command.arguments[0];
+					if (Server.trySetNickname(this, n)) {
+						this.nick = n;
+						sendSelfNotice("Nick changed to "+this.nick);
+						if (this.username != null) {
+							acceptConnection();
+						}
+					} else {
+						sendRawString(":" + Server.globalServerName + " 433 " + n + ":Nickname in use");
+					}
+					break;
+				case USER:
 					sendSelfNotice("You cannot change userinfo");
 					break;
-				}
-					
-				this.username = command.arguments[0];
-				this.realname = command.arguments[3];
-
-				sendSelfNotice("Connection accepted, "+getRepresentation()+"("+realname+")");
-				
-				sendServerCommand("375", Server.globalServerName+" - Message Of The Day:");
-				sendServerCommand("372", "Tissit on kivoja.");
-				sendServerCommand("372", "Niin on kuppikakutkin.");
-				sendServerCommand("372", "");
-				sendServerCommand("372", "On mahdotonta olla masentunut, jos sinulla on ilmapallo. -Nalle Puh");
-				sendServerCommand("376", "End of /MOTD command.");
-
-				this.mode = "+i";
-				sendServerCommand("MODE", this.mode);
-
-				Server.channelMap.get("#world").addConnection(this);
-				this.joinedChannels.put("#world", Server.channelMap.get("#world"));
-
-				break;
-			case JOIN:
-				String[] channels  = command.arguments[0].split(",");
-				/* Ei tueta toistaiseksi kanavien salasanoja */
-                for (String channelName : channels) {
-					if (Server.channelMap.containsKey(channelName)) {
-						Server.channelMap.get(channelName).addConnection(this);
-					} else {
-						Server.channelMap.put(channelName, new Channel(channelName));
-						Server.channelMap.get(channelName).addConnection(this);
-					}
-                }
-				break;
-			case MODE:
-				sendSelfNotice("This server does not allow to change usermode");
-				if (this.username == null) {
-					sendSelfNotice("You must send USER command first");
+				case JOIN:
+					String[] channels = command.arguments[0].split(",");
+	                for (String channelName : channels) {
+	                	if (joinedChannels.containsKey(channelName)) {
+	                		//Already joined to channel
+	                		break;
+	                	}
+	                	Channel chan = Server.findChannel(channelName);
+	                	if (chan == null) {
+							chan = new Channel(channelName);
+							Server.addChannel(chan);
+	                	}
+						chan.addConnection(this);
+						synchronized (joinedChannels) {
+							joinedChannels.put(channelName, chan);
+						}
+	                }
 					break;
-				}
-				break;
-			case PART:
-				leaveChannel(command.arguments[0], command.arguments[1]);
-				break;
-			case QUIT:
-				quit(command.arguments[0]);
-				socket.close();
-				break;
-			case PRIVMSG:
-				if (joinedChannels.containsKey(command.arguments[0])) {
-					joinedChannels.get(command.arguments[0]).sendPrivateMessage(this, command.arguments[1]);
-				} else {
-					this.sendCommand("404", "No such channel");
-				}
-				break;
-			default:
-				System.err.println("Unhandled IrcCommand");
+				case MODE:
+					//TODO: Implement modes
+					if (command.arguments.length >= 2)
+						sendSelfNotice("This server does not allow to change usermode");
+					else {
+						if (command.arguments[0].startsWith("#")) { //Channel
+							sendRawString(":" + Server.globalServerName + " 324 " + this.nick + " " + command.arguments[0] + " +stn");
+						}
+						else if (command.arguments[0].equals(this.nick)){
+							sendRawString(":" + Server.globalServerName + " 221 " + this.nick + " +i");
+						}
+					}
+					break;
+				case PART:
+					if (command.arguments.length == 2)
+						leaveChannel(command.arguments[0], command.arguments[1]);
+					else
+						leaveChannel(command.arguments[0], "");
+					break;
+				case QUIT:
+					quit(command.arguments[0]);
+					socket.close();
+					break;
+				case PRIVMSG:
+					if (joinedChannels.containsKey(command.arguments[0])) {
+						joinedChannels.get(command.arguments[0]).sendPrivateMessage(this, command.arguments[1]);
+					} else {
+						this.sendCommand("404", "No such channel");
+					}
+					break;
+				default:
+					System.err.println("Unhandled IrcCommand");
+			}
+			
 		}
 	}
 	
 	@Override
 	public void run() {
-		sendServerCommand("020", "Please wait while we process your connection");
+		sendRawString(":" + Server.globalServerName + " 020 :Please wait while we process your connection");
 
 		try {
 			
@@ -250,27 +310,25 @@ public class Connection  implements Runnable {
 			outThread.start();
 
 			InputStream socketIn = socket.getInputStream();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(socketIn));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(socketIn, "UTF-8"));
 			String line;
 			
 			while ((line = reader.readLine()) != null) {
 				try {
 					processLine(line);
 				} catch (Exception e) {
-					System.err.println("ERROR: Exception at Connection.run, in processLine: "+e.getMessage());z
+					System.err.println("ERROR: Exception in Connection.run: " + e.getMessage() + "\n Stacktrace: ");
 					e.printStackTrace();
 				}
 			}
 		} catch (IOException e) {
 			try {
-				quit("Quit...");
-				if (socket.isConnected())
-					socket.close();
+				closeConnection();
 			} catch (IOException e2) {
 			}
-			e.printStackTrace();
+			System.err.println("IOException in Connection::run : " + e.getMessage());
 		} finally {
-			//Outthread should be shutdown?
+			
 		}		
 	}
 		
