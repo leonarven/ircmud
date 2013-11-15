@@ -20,8 +20,14 @@ public class IrcReply {
 		this.init(string);
 	}
 
+	public IrcReply(String sender, Const command, String string)
+		{ this(sender, command.toString(), string); }
+
 	public IrcReply(IrcUser sender, String command, String string)
 		{ this(sender.getRepresentation(), command, string); }
+
+	public IrcReply(IrcUser sender, Const command, String string)
+		{ this(sender, command.toString(), string); }
 
 
 	public IrcReply(IrcUser sender, String string)

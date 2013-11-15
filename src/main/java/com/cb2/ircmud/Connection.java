@@ -67,12 +67,24 @@ public class Connection extends IrcUser implements Runnable {
 	public void sendServerCommand(String command, String string) {
 		sendRawString(":" + IrcServer.globalServerName + " " + command + " " + nickname + " :" + string);
 	}
+	public void sendServerCommand(Const command, String string) {
+		sendRawString(":" + IrcServer.globalServerName + " " + command + " " + nickname + " :" + string);
+	}
+
 	public void sendServerReply(String command, String string) {
 		sendRawString(":" + IrcServer.globalServerName + " " + command + " " + nickname + " " + string);
 	}
+	public void sendServerReply(Const command, String string) {
+		sendRawString(":" + IrcServer.globalServerName + " " + command + " " + nickname + " " + string);
+	}
+
 	public void sendCommand(String command, String string) {
 		sendRawString(":" + getRepresentation() + " " + command + " :" + string);
 	}
+	public void sendCommand(Const command, String string) {
+		sendRawString(":" + getRepresentation() + " " + command + " :" + string);
+	}
+
 	public void sendSelfNotice(String string) {
 		sendServerCommand("NOTICE", string);
 	}
@@ -87,18 +99,18 @@ public class Connection extends IrcUser implements Runnable {
 	}
 	
 	public void acceptConnection() {
-		sendServerCommand("001", "Welcome to "+IrcServer.globalServerName+", "+getRepresentation()+"("+realname+")");
-		sendServerCommand("002", "Your host is "+IrcServer.globalServerName+", running version "+IrcServer.VERSION);
+		sendServerCommand(Const.RPL_WELCOME, "Welcome to "+IrcServer.globalServerName+", "+getRepresentation()+"("+realname+")");
+		sendServerCommand(Const.RPL_YOURHOST, "Your host is "+IrcServer.globalServerName+", running version "+IrcServer.VERSION);
 
-		sendServerReply("005", "RFC2812 PREFIX=(ov)@+ CHANTYPES=#&!+ MODES=3 CHANLIMIT=#&!+:21 NICKLEN=15 TOPICLEN=255 KICKLEN=255 MAXLIST=beIR:64 CHANNELLEN=50 IDCHAN=!:5 :are supported by this server");
-		sendServerReply("005", "PENALTY FNC EXCEPTS=e INVEX=I CASEMAPPING=ascii NETWORK=IrcMud :are supported by this server");
+		sendServerReply(Const.RPL_BOUNCE, "RFC2812 PREFIX=(ov)@+ CHANTYPES=#&!+ MODES=3 CHANLIMIT=#&!+:21 NICKLEN=15 TOPICLEN=255 KICKLEN=255 MAXLIST=beIR:64 CHANNELLEN=50 IDCHAN=!:5 :are supported by this server");
+		sendServerReply(Const.RPL_BOUNCE, "PENALTY FNC EXCEPTS=e INVEX=I CASEMAPPING=ascii NETWORK=IrcMud :are supported by this server");
 
-		sendServerCommand("375", IrcServer.globalServerName+" - Message Of The Day:");
-		sendServerCommand("372", "Tissit on kivoja.");
-		sendServerCommand("372", "Niin on kuppikakutkin.");
-		sendServerCommand("372", "");
-		sendServerCommand("372", "On mahdotonta olla masentunut, jos sinulla on ilmapallo. -Nalle Puh");
-		sendServerCommand("376", "End of /MOTD command.");
+		sendServerCommand(Const.RPL_MOTDSTART, IrcServer.globalServerName+" - Message Of The Day:");
+		sendServerCommand(Const.RPL_MOTD, "Tissit on kivoja.");
+		sendServerCommand(Const.RPL_MOTD, "Niin on kuppikakutkin.");
+		sendServerCommand(Const.RPL_MOTD, "");
+		sendServerCommand(Const.RPL_MOTD, "On mahdotonta olla masentunut, jos sinulla on ilmapallo. -Nalle Puh");
+		sendServerCommand(Const.RPL_ENDOFMOTD, "End of /MOTD command.");
 
 		this.mode = "+i";
 
@@ -143,7 +155,7 @@ public class Connection extends IrcUser implements Runnable {
 			commandObject = IrcCommand.valueOf(command.toUpperCase());
 		}
 		if (commandObject == null) {
-			sendRawString(":" + IrcServer.globalServerName + " 421 " + nickname + " " + command + " :Unknown command ");
+			sendRawString(":" + IrcServer.globalServerName + " "+Const.ERR_UNKNOWNCOMMAND+" " + nickname + " " + command + " :Unknown command ");
 			return;
 		}
 		if (arguments.length < commandObject.getMin() || arguments.length > commandObject.getMax()) {
@@ -171,7 +183,7 @@ public class Connection extends IrcUser implements Runnable {
 							acceptConnection();
 						}
 					} else {
-						sendRawString(":" + IrcServer.globalServerName + " 433 " + n + ":Nickname in use");
+						sendRawString(":" + IrcServer.globalServerName + " " + Const.ERR_NICKNAMEINUSE + " " + n + ":Nickname in use");
 					}
 					break;
 				case USER:
@@ -206,7 +218,7 @@ public class Connection extends IrcUser implements Runnable {
 							acceptConnection();
 						}
 					} else {
-						sendRawString(":" + IrcServer.globalServerName + " 433 " + n + ":Nickname in use");
+						sendRawString(":" + IrcServer.globalServerName + " " + Const.ERR_NICKNAMEINUSE + " " + n + ":Nickname in use");
 					}
 					break;
 				case USER:
@@ -231,7 +243,7 @@ public class Connection extends IrcUser implements Runnable {
 					//TODO: Implement modes
 					if (command.arguments.length >= 2) {
 						if (command.arguments[1].equals("b") && Channel.isValidPrefix(command.arguments[0].charAt(0))) { //Ban list
-							IrcReply reply = new IrcReply(IrcServer.globalServerName, "368", command.arguments[0] + " :End of channel ban list");
+							IrcReply reply = new IrcReply(IrcServer.globalServerName, Const.RPL_ENDOFBANLIST, command.arguments[0] + " :End of channel ban list");
 							this.sendReply(reply);
 							break;
 						}
@@ -241,14 +253,14 @@ public class Connection extends IrcUser implements Runnable {
 						if (Channel.isValidPrefix(command.arguments[0].charAt(0))) { //Channel
 							Channel channel = IrcServer.findChannel(command.arguments[0]);
 							if (channel != null) { 
-								IrcReply reply = new IrcReply(IrcServer.globalServerName, "324",  this.nickname + " " + command.arguments[0] + " " + channel.mode);
+								IrcReply reply = new IrcReply(IrcServer.globalServerName, Const.RPL_CHANNELMODEIS,  this.nickname + " " + command.arguments[0] + " " + channel.mode);
 								this.sendReply(reply);
 							} else {
-								this.sendCommand("404", "No such channel");
+								this.sendCommand(Const.ERR_CANNOTSENDTOCHAN, "No such channel");
 							}
 						}
 						else if (command.arguments[0].equals(this.nickname)){
-							IrcReply reply = new IrcReply(IrcServer.globalServerName, "221", this.nickname + " " + this.mode);
+							IrcReply reply = new IrcReply(IrcServer.globalServerName, Const.RPL_UMODEIS, this.nickname + " " + this.mode);
 							this.sendReply(reply);
 						}
 					}
@@ -267,7 +279,7 @@ public class Connection extends IrcUser implements Runnable {
 					if (joinedChannels.containsKey(command.arguments[0])) {
 						joinedChannels.get(command.arguments[0]).sendReplyToAllExceptSender(new IrcReply(this, "PRIVMSG", command.arguments[0] + " :" + command.arguments[1]));
 					} else {
-						this.sendCommand("404", "No such channel");
+						this.sendCommand(Const.ERR_CANNOTSENDTOCHAN, "No such channel");
 					}
 					break;
 				case WHO:
