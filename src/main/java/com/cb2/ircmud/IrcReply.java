@@ -9,75 +9,24 @@ public class IrcReply {
 	private String sender = null;
 	private String command = null;
 
-	public IrcReply(String sender, String string) {
+	public IrcReply(String sender, Object command, String... args) {
 		this.sender = sender;
-		this.init(string);
+		this.command = command.toString();
+		if (args.length > 0) {
+			this.postfix = args[args.length-1];
+			args[args.length-1] = "";
+		}
+
+		for( String argv: args ) if (!argv.isEmpty()) this.arguments.add(argv);
+
+		for(String str : this.arguments) System.out.println("args[]:"+str);
+	}
+	public IrcReply(IrcUser sender, Object command, String... args) {
+		this(sender.getRepresentation(), command, args);
 	}
 
-	public IrcReply(String sender, String command, String string) {
-		this.command = command;
-		this.sender = sender;
-		this.init(string);
-	}
-
-	public IrcReply(String sender, Const command, String string)
-		{ this(sender, command.toString(), string); }
-
-	public IrcReply(IrcUser sender, String command, String string)
-		{ this(sender.getRepresentation(), command, string); }
-
-	public IrcReply(IrcUser sender, Const command, String string)
-		{ this(sender, command.toString(), string); }
-
-
-	public IrcReply(IrcUser sender, String string)
-		{ this(sender.getRepresentation(), string); }
-	
-	public IrcReply(IrcUser sender)
-		{ this(sender.getRepresentation(), ""); }
-
-
-
-	public void init(String string) {
-		this.arguments.clear();
-		this.postfix = new String();
-		
-		String[] tokens = string.split(":");
-		String prefix = "";
-		String postfix = "";
-		
-		switch(tokens.length) {
-			case 0:
-				break;
-			case 1:
-				prefix = tokens[0];
-				break;
-			case 2:
-				prefix = tokens[0];
-				postfix = tokens[1];
-				break;
-			default:
-				prefix = tokens[1];
-				for(int i = 2; i < tokens.length; i++)
-					postfix = postfix + ":" + tokens[i];
-		}
-		
-		this.postfix = postfix;
-
-		tokens = prefix.split(" ");
-		int i = 0;
-		if ( this.sender == null ) {
-			this.sender = tokens[i];
-			i++;
-		}
-		if ( this.command == null ) {
-			this.command = tokens[i];
-			i++;
-		}
-		
-		for( ; i < tokens.length; i++  ) {
-			this.arguments.add(tokens[i]);
-		}
+	public static IrcReply serverReply(Object command, String... args) {
+		return new IrcReply(IrcServer.globalServerName, command, args);
 	}
 	
 	public String argument( int n ) {
@@ -100,15 +49,11 @@ public class IrcReply {
 		return this.command;
 	}
 	
-	public void pushArgument(String string) {
-		this.arguments.add(string);
-	}
-
 	public String toString() {
 		String string = ":" + this.sender + " "  + this.command + " ";
 		for( String str : this.arguments )
 			string = string + str + " ";
-		if (!this.postfix.isEmpty())
+		if (this.postfix != null)
 			string += ":" + this.postfix;
 		return string;
 	}
