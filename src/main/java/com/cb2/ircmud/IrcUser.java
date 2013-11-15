@@ -79,6 +79,10 @@ public abstract class IrcUser {
 		return true;
 	}
 	
+	public void sendMessage(IrcUser sender, String msg) {
+		sendReply(new IrcReply(sender, "PRIVMSG", this.nickname, msg));
+	}
+	
 	public void sendWhoReply(Channel chan) {
 		chan.sendWhoReply(this);
 	}

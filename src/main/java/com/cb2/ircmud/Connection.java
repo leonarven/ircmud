@@ -270,10 +270,27 @@ public class Connection extends IrcUser implements Runnable {
 					socket.close();
 					break;
 				case PRIVMSG:
-					if (joinedChannels.containsKey(command.arguments[0])) {
-						joinedChannels.get(command.arguments[0]).sendReplyToAllExceptSender(new IrcReply(this, "PRIVMSG", command.arguments[0], command.arguments[1]));
-					} else {
-						this.sendCommand(Const.ERR_CANNOTSENDTOCHAN, "No such channel");
+					String target  = command.arguments[0];
+					if (Channel.isValidPrefix(target.charAt(0))) { //Channel
+						if (IrcServer.findChannel(target) != null) {
+							if (joinedChannels.containsKey(target)) {
+								joinedChannels.get(command.arguments[0]).sendReplyToAllExceptSender(new IrcReply(this, "PRIVMSG", target, command.arguments[1]));
+							} else {
+								this.sendCommand(Const.ERR_CANNOTSENDTOCHAN, "Cannot send to channels you have not joined");
+							}
+						}
+						else {
+							this.sendCommand(Const.ERR_NOSUCHCHANNEL, "No such channel");
+						}
+					}
+					else {
+						IrcUser user = IrcServer.findUserByNickname(target);
+						if (user != null) {
+							user.sendMessage(this, command.arguments[1]);
+						}
+						else {
+							this.sendCommand(Const.ERR_NOSUCHNICK, "No such nick");
+						}
 					}
 					break;
 				case WHO:
@@ -311,8 +328,6 @@ public class Connection extends IrcUser implements Runnable {
 					}
 					break;
 				case PING:
-					String target = command.arguments[0];
-					
 					this.sendServerReply("PONG", IrcServer.globalServerName+" :"+IrcServer.globalServerName);
 					break;
 				default:
