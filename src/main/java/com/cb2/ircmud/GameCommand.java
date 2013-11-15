@@ -6,6 +6,17 @@ public class GameCommand {
 		WALK, // Kun pelaaja haluaa liikkua
 		RUN,  // Kun pelaaja haluaa juosta (kuluttaa energiaa enemmän)
 		HIDE; // Kun pelaaja haluaa piiloutua
+		
+		@Override
+		public String toString() {
+			switch(this) {
+				case WALK: return "Walk";
+				case RUN: return "Run";
+				case HIDE: return "Hide";
+				case UNDEFINED: return "Undefined";
+			}
+			return "Undefined";
+		}
 	};
 
 	public static enum Target {
@@ -26,6 +37,21 @@ public class GameCommand {
 		public String target() {
 			return this.target;
 		}
+		
+		@Override
+		public String toString() {
+			String str = "Undefined";
+			switch(this) {
+				case SELF: str = "Self"; break;
+				case PLAYER: str = "Player"; break;
+				case LOCATION: str = "Location"; break;
+				case COMPASSPOINT: str = "Compasspoint"; break;
+				case UNDEFINED: str = "Undefined"; break;
+				case UNSPECIFIED: str = "Unspecified"; break;
+			}
+			if (this.target != null) str = str + "("+this.target+")";
+			return str;
+		}
 	}
 	
 	Action action;
@@ -44,5 +70,9 @@ public class GameCommand {
 	}
 	public Target target() {
 		return this.target;
+	}
+	@Override
+	public String toString() {
+		return "COMMAND{action:("+this.action.toString()+"),target:("+this.target.toString()+")}";
 	}
 }

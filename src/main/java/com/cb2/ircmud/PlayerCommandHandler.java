@@ -49,6 +49,7 @@ public class PlayerCommandHandler {
 				action_str = token[0];
 				target_str = token[1];
 				target_additional_str = "";
+				break;
 			case 3:
 				action_str = token[0];
 				target_str = token[1];
