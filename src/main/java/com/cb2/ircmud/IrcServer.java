@@ -53,6 +53,14 @@ public class IrcServer {
 			return userNicknameMap.get(nickName);
 		}
 	}
+	public static void dropUser(String nickName) {
+		synchronized (userNicknameMap) {
+			if (!userNicknameMap.containsKey(nickName)) return;
+
+			userNicknameMap.get(nickName).quit("Quitting");
+			userNicknameMap.remove(nickName);
+		}
+	}
 	
 	public static void addChannel(Channel  chan) {
 		channelMap.put(chan.name, chan);

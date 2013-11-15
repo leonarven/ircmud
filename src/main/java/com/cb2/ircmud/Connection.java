@@ -82,6 +82,7 @@ public class Connection extends IrcUser implements Runnable {
 		synchronized (socket) {
 			if (socket.isConnected())
 				socket.close();
+			IrcServer.dropUser(this.nickname);
 		}
 	}
 	
