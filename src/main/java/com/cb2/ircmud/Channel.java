@@ -9,11 +9,13 @@ public class Channel {
 
 	private ArrayList<IrcUser> channelMembers = new ArrayList<IrcUser>();
 	private String topic;
-	private ChannelReplyProxy messageProxy = new DefaultChannelReplyProxy();
 	protected String name;
+	public String mode;
+	private ChannelReplyProxy messageProxy = new DefaultChannelReplyProxy();
 	
 	public Channel(String name) {
 		this.name = name;
+		this.mode = "+stn";
 	}
 	
 	public String getName() { return name; }
@@ -43,7 +45,7 @@ public class Channel {
 			for(IrcUser _user : channelMembers) {
 				// TODO H/G => here/gone
 				// TODO: H/G:n perään tulee henkilön statuksen indikoiva merkki (+/@)
-				IrcReply whoReply = new IrcReply(IrcServer.globalServerName, "352", user.getNickname()+" "+this.name+" "+_user.getNickname()+" "+_user.getHostname()+" "+IrcServer.globalServerName+" "+_user.getNickname()+" H :0 " + _user.getRealname());
+				IrcReply whoReply = new IrcReply(IrcServer.globalServerName, "352", user.getNickname()+" "+this.name+" "+_user.getNickname()+" "+_user.getHostname()+" "+IrcServer.globalServerName+" "+_user.getNickname()+" H :0 0 " + _user.getRealname());
 				user.sendReply(whoReply);
 			}
 			IrcReply whoEndReply = new IrcReply(IrcServer.globalServerName, "315", user.getNickname()+" " + this.name + " :End of /WHO list.");
@@ -56,17 +58,13 @@ public class Channel {
 			user.sendReply(joinReply);
 			sendReplyToAll(joinReply);
 			
-			String topicT;
-			if (this.topic != null)
-				topicT = this.topic;
-			else 
-				topicT = "";
-			IrcReply topicReply = new IrcReply(IrcServer.globalServerName, "332", user.nickname+" "+this.name+" :"+topicT);
-			user.sendReply(topicReply);
-			
-			IrcReply topicDateReply = new IrcReply(IrcServer.globalServerName, "333", user.nickname+" "+this.name+" admin!admin@IrcMud 0");
-			user.sendReply(topicDateReply);
-			
+			if (this.topic != null) {
+				IrcReply topicReply = new IrcReply(IrcServer.globalServerName, "332", user.nickname+" "+this.name+" :"+this.topic);
+				user.sendReply(topicReply);
+				
+				IrcReply topicDateReply = new IrcReply(IrcServer.globalServerName, "333", user.nickname+" "+this.name+" admin!admin@IrcMud 0");
+				user.sendReply(topicDateReply);
+			}
 			String userlist = user.nickname;
 			for(IrcUser _user : channelMembers) userlist = userlist + " " +  _user.nickname;
 			IrcReply namesReply = new IrcReply(IrcServer.globalServerName, "353", user.nickname+" @ "+ this.name + " :" + userlist.trim());

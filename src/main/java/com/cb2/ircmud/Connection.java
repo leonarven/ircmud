@@ -56,7 +56,7 @@ public class Connection extends IrcUser implements Runnable {
 	
 
 	public void sendRawString(String s) {
-		System.out.println("Sending line to " + nickname + ": " + s);
+		System.out.println(nickname + " <<< " + s);
 		outQueue.add(s);
 	}
 	
@@ -66,6 +66,9 @@ public class Connection extends IrcUser implements Runnable {
 
 	public void sendServerCommand(String command, String string) {
 		sendRawString(":" + IrcServer.globalServerName + " " + command + " " + nickname + " :" + string);
+	}
+	public void sendServerReply(String command, String string) {
+		sendRawString(":" + IrcServer.globalServerName + " " + command + " " + nickname + " " + string);
 	}
 	public void sendCommand(String command, String string) {
 		sendRawString(":" + getRepresentation() + " " + command + " :" + string);
@@ -83,8 +86,12 @@ public class Connection extends IrcUser implements Runnable {
 	}
 	
 	public void acceptConnection() {
-		sendSelfNotice("Connection accepted, "+getRepresentation()+"("+realname+")");
-		
+		sendServerCommand("001", "Welcome to "+IrcServer.globalServerName+", "+getRepresentation()+"("+realname+")");
+		sendServerCommand("002", "Your host is "+IrcServer.globalServerName+", running version "+IrcServer.VERSION);
+
+		sendServerReply("005", "RFC2812 PREFIX=(ov)@+ CHANTYPES=#&!+ MODES=3 CHANLIMIT=#&!+:21 NICKLEN=15 TOPICLEN=255 KICKLEN=255 MAXLIST=beIR:64 CHANNELLEN=50 IDCHAN=!:5 :are supported by this server");
+		sendServerReply("005", "PENALTY FNC EXCEPTS=e INVEX=I CASEMAPPING=ascii NETWORK=IrcMud :are supported by this server");
+
 		sendServerCommand("375", IrcServer.globalServerName+" - Message Of The Day:");
 		sendServerCommand("372", "Tissit on kivoja.");
 		sendServerCommand("372", "Niin on kuppikakutkin.");
@@ -93,7 +100,6 @@ public class Connection extends IrcUser implements Runnable {
 		sendServerCommand("376", "End of /MOTD command.");
 
 		this.mode = "+i";
-		sendServerCommand("MODE", this.mode);
 
 		this.joinChannel(IrcServer.findChannel("#world"));
 	}
@@ -102,7 +108,7 @@ public class Connection extends IrcUser implements Runnable {
 		
 		if (line == null) return;
 
-		System.out.println("Processing line from " + nickname + ": " + line);
+		System.out.println(nickname + " >>> " + line);
 		String prefix = "";
 		if (line.startsWith(":")) {
 			String[] tokens = line.split(" ", 2);
@@ -232,11 +238,16 @@ public class Connection extends IrcUser implements Runnable {
 					}
 					else {
 						if (Channel.isValidPrefix(command.arguments[0].charAt(0))) { //Channel
-							IrcReply reply = new IrcReply(IrcServer.globalServerName, "324",  this.nickname + " " + command.arguments[0] + " +stn");
-							this.sendReply(reply);
+							Channel channel = IrcServer.findChannel(command.arguments[0]);
+							if (channel != null) { 
+								IrcReply reply = new IrcReply(IrcServer.globalServerName, "324",  this.nickname + " " + command.arguments[0] + " " + channel.mode);
+								this.sendReply(reply);
+							} else {
+								this.sendCommand("404", "No such channel");
+							}
 						}
 						else if (command.arguments[0].equals(this.nickname)){
-							IrcReply reply = new IrcReply(IrcServer.globalServerName, "221", this.nickname + " +i");
+							IrcReply reply = new IrcReply(IrcServer.globalServerName, "221", this.nickname + " " + this.mode);
 							this.sendReply(reply);
 						}
 					}
@@ -292,6 +303,11 @@ public class Connection extends IrcUser implements Runnable {
 						sendSelfNotice("No such nick");
 					}
 					break;
+				case PING:
+					String target = command.arguments[0];
+					
+					this.sendServerReply("PONG", IrcServer.globalServerName+" :"+IrcServer.globalServerName);
+					break;
 				default:
 					System.err.println("Unhandled IrcCommand");
 			}
@@ -301,7 +317,7 @@ public class Connection extends IrcUser implements Runnable {
 	
 	@Override
 	public void run() {
-		sendRawString(":" + IrcServer.globalServerName + " 020 :Please wait while we process your connection");
+		sendReply(new IrcReply(IrcServer.globalServerName, "020", ":Please wait while we process your connection"));
 
 		try {
 			

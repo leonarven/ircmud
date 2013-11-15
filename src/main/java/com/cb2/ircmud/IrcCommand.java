@@ -109,6 +109,24 @@ public enum IrcCommand {
 			this.argumentMap.put("command", "WHOIS");
 			this.argumentMap.put("mask", arguments[0]);
 		}
+	},
+	PING(1,1) {
+		@Override
+		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+			this.arguments = arguments;
+			
+			this.argumentMap.put("command", "PING");
+			this.argumentMap.put("target", arguments[0]);
+		}
+	},
+	PONG(1,1) {
+		@Override
+		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+			this.arguments = arguments;
+			
+			this.argumentMap.put("command", "PONG");
+			this.argumentMap.put("target", arguments[0]);
+		}
 	};
 
 	public void var_dump(Connection con, String prefix) {

@@ -13,6 +13,7 @@ public class IrcServer {
 	public static String globalServerName;
 	public static int    globalServerPort;
 	public static String globalServerInfo = "";
+	public static final String VERSION = "0.02";
 	
 	private static Map<String, IrcUser> userNicknameMap = new HashMap<String, IrcUser>();
 	private static Map<String, Channel>       channelMap = new HashMap<String, Channel>();
