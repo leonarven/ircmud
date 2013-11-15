@@ -35,7 +35,7 @@ public class GameCommand {
 		this.target = target;
 	}
 	public GameCommand(Action action) {
-		this(action, target);
+		this(action, Target.UNSPECIFIED);
 	}
 	
 	public Action action() {
