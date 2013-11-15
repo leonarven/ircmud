@@ -37,7 +37,7 @@ public class IrcReply {
 		return this.arguments.get(n);
 	}
 
-	public String postfix( int n ) {
+	public String postfix() {
 		return this.postfix;
 	}
 	

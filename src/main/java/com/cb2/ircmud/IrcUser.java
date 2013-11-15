@@ -17,6 +17,15 @@ public abstract class IrcUser {
 	protected String hostname;
 	protected Map<String, Channel> joinedChannels = new HashMap<String, Channel>();
 	
+	public static String getIrcUserRepresentation(String nick, String username, String hostname) {
+		return nick + "!" + username + "@" + hostname;
+	}
+	
+	public static String getNicknameFromRepresentation(String representation) {
+		return representation.split("!")[0];
+	}
+	
+	
 	abstract void sendReply(IrcReply reply);
 	abstract boolean isConnection();
 	
@@ -46,10 +55,6 @@ public abstract class IrcUser {
 	
 	public String getRepresentation() {
 		return getIrcUserRepresentation(nickname, username, hostname);
-	}
-	
-	public static String getIrcUserRepresentation(String nick, String username, String hostname) {
-		return nick + "!" + username + "@" + hostname;
 	}
 	
 	public void joinChannel(Channel chan) {

@@ -233,8 +233,6 @@ public class Connection extends IrcUser implements Runnable {
 		else { //Connection established
 			switch(command) {
 				case NICK:
-					
-					//TODO: Fix me
 					String n = command.arguments[0];
 					if (!this.tryChangeNickname(n)) {
 						sendRawString(":" + IrcServer.globalServerName + " " + Const.ERR_NICKNAMEINUSE + " " + n + ":Nickname in use");
@@ -357,6 +355,7 @@ public class Connection extends IrcUser implements Runnable {
 					break;
 				case PONG:
 					lastPongReply = new Date().getTime();
+					break;
 				default:
 					System.err.println("Unhandled IrcCommand");
 			}

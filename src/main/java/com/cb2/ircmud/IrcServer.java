@@ -4,6 +4,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 import java.io.IOException;
+import com.cb2.ircmud.LoginBot;
 
 import org.aspectj.weaver.patterns.ThisOrTargetAnnotationPointcut;
 
@@ -15,6 +16,7 @@ public class IrcServer {
 	public static String globalServerInfo = "";
 	public static final String VERSION = "0.02";
 	
+	private static LoginBot loginBot = new LoginBot("LoginBot", "LoginBot");
 	private static Map<String, IrcUser> userNicknameMap = new HashMap<String, IrcUser>();
 	private static Map<String, Channel>       channelMap = new HashMap<String, Channel>();
 		
@@ -31,9 +33,12 @@ public class IrcServer {
 
 		Channel worldChannel = new Channel(Config.WorldChannel);
 		channelMap.put(worldChannel.name, worldChannel);
+		
+		trySetNickname(loginBot, loginBot.getUsername());
 	}
 	
 	public static boolean trySetNickname(IrcUser user, String nick) {
+		nick = nick.toLowerCase();
 		synchronized (userNicknameMap) {
 			if (userNicknameMap.containsKey(nick)) return false;
 			userNicknameMap.put(nick, user);
@@ -42,6 +47,8 @@ public class IrcServer {
 	}
 	
 	public static boolean trySetNickname(IrcUser user, String newNick, String oldNick) {
+		newNick = newNick.toLowerCase();
+		oldNick = oldNick.toLowerCase();
 		synchronized (userNicknameMap) {
 			if (userNicknameMap.containsKey(newNick)) return false;
 			if (userNicknameMap.containsKey(oldNick)) {
@@ -53,18 +60,21 @@ public class IrcServer {
 	}
 	
 	public static Channel findChannel(String channelName) {
+		channelName = channelName.toLowerCase();
 		synchronized (channelMap) {
 			if (!channelMap.containsKey(channelName)) return null;
 			return channelMap.get(channelName);
 		}
 	}
 	public static IrcUser findUserByNickname(String nickName) {
+		nickName = nickName.toLowerCase();
 		synchronized (userNicknameMap) {
 			if (!userNicknameMap.containsKey(nickName)) return null;
 			return userNicknameMap.get(nickName);
 		}
 	}
 	public static void dropUser(String nickName) {
+		nickName = nickName.toLowerCase();
 		synchronized (userNicknameMap) {
 			if (!userNicknameMap.containsKey(nickName)) return;
 
@@ -73,6 +83,7 @@ public class IrcServer {
 		}
 	}
 	public static void dropChannel(String channelName) {
+		channelName = channelName.toLowerCase();
 		synchronized (channelMap) {
 			if (!channelMap.containsKey(channelName)) return;
 
@@ -81,7 +92,7 @@ public class IrcServer {
 	}
 	
 	public static void addChannel(Channel  chan) {
-		channelMap.put(chan.name, chan);
+		channelMap.put(chan.getName().toLowerCase(), chan);
 	}
 	
 	public static boolean run() {
