@@ -18,7 +18,7 @@ public class Config {
 	/* 
 	 * IRC-Serverin määrite: portti, jota kuunnellaan
 	 */
-	protected static int    ServerPort = 6667;
+	protected static int ServerPort = 6667;
 	
 	/* 
 	 * IRC-Serverin määrite: nimi, jolla serveriä ylläpidetään
@@ -30,6 +30,8 @@ public class Config {
 	 */
 	protected static String applicationContextFile = "src/main/resources/META-INF/spring/applicationContext.xml";
 
+	protected static String gameCommandPrefix = "!";
+	
 	/*
 	 * Config.load tulee lataamaan tiedostosta asetukset
 	 */
