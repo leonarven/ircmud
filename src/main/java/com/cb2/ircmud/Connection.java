@@ -211,13 +211,7 @@ public class Connection extends IrcUser implements Runnable {
 					
 					//TODO: Fix me
 					String n = command.arguments[0];
-					if (IrcServer.trySetNickname(this, n)) {
-						this.nickname = n;
-						sendSelfNotice("Nick changed to "+this.nickname);
-						if (this.username != null) {
-							acceptConnection();
-						}
-					} else {
+					if (!this.tryChangeNickname(n)) {
 						sendRawString(":" + IrcServer.globalServerName + " " + Const.ERR_NICKNAMEINUSE + " " + n + ":Nickname in use");
 					}
 					break;

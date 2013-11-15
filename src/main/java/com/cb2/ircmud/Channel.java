@@ -76,6 +76,7 @@ public class Channel {
 			channelMembers.add(user);
 		}
 	}
+
 	
 	public void memberLeave(IrcUser user, String msg) {
 		synchronized (channelMembers) {

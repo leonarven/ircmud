@@ -41,6 +41,17 @@ public class IrcServer {
 		return true;
 	}
 	
+	public static boolean trySetNickname(IrcUser user, String newNick, String oldNick) {
+		synchronized (userNicknameMap) {
+			if (userNicknameMap.containsKey(newNick)) return false;
+			if (userNicknameMap.containsKey(oldNick)) {
+				userNicknameMap.remove(oldNick);
+			}
+			userNicknameMap.put(newNick, user);
+		}
+		return true;
+	}
+	
 	public static Channel findChannel(String channelName) {
 		synchronized (channelMap) {
 			if (!channelMap.containsKey(channelName)) return null;

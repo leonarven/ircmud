@@ -1,7 +1,10 @@
 package com.cb2.ircmud;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 import com.cb2.ircmud.Channel;
 import com.cb2.ircmud.IrcReply;
@@ -23,8 +26,30 @@ public abstract class IrcUser {
 	public String getUsername() { return username; }
 	public String getMode() { return mode; }
 	
+	public boolean tryChangeNickname(String newNick) {
+		//Update IrcServer.userNicknameMap
+		if (!IrcServer.trySetNickname(this, newNick, nickname)) return false;
+		
+		//Send notification to all users in the same channels
+		Set<IrcUser> userSet = new HashSet<IrcUser>();
+		for (Map.Entry<String, Channel> entry : joinedChannels.entrySet()) {
+			userSet.addAll(entry.getValue().getChannelMembers());
+		}
+		IrcReply nickReply = new IrcReply(getRepresentation(), "NICK", newNick);
+		for (IrcUser user : userSet) {
+			user.sendReply(nickReply);
+		}
+		
+		nickname = newNick;
+		return true;
+	}
+	
 	public String getRepresentation() {
-		return this.nickname + "!" + this.username + "@" + this.hostname;
+		return getIrcUserRepresentation(nickname, username, hostname);
+	}
+	
+	public static String getIrcUserRepresentation(String nick, String username, String hostname) {
+		return nick + "!" + username + "@" + hostname;
 	}
 	
 	public void joinChannel(Channel chan) {
