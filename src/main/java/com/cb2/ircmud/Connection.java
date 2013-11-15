@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Queue;
+import java.util.Date;
 import java.util.concurrent.LinkedBlockingQueue;
 
 
@@ -22,6 +23,7 @@ import com.cb2.ircmud.IrcCommand;
 public class Connection extends IrcUser implements Runnable {
 	private InetSocketAddress address;
 	private Socket socket = null;
+	private long lastPongReply;
 	
 	public Connection(Socket socket){
 		this.socket = socket;
@@ -53,7 +55,30 @@ public class Connection extends IrcUser implements Runnable {
 			}
 		}
 	};
-	
+
+	private Thread pingPongThread = new Thread() {
+		public void run() {
+			lastPongReply = new Date().getTime();
+			try {
+				while (true) {
+					sendRawString("PING :"+IrcServer.globalServerName);
+					if (((new Date().getTime()) - lastPongReply) > Config.connectionPingTimeout) break;
+					
+					
+					try {
+					    Thread.sleep(Config.connectionPingTime);
+					} catch(InterruptedException ex) {
+					    Thread.currentThread().interrupt();
+					}
+				}
+				throw new Exception("Ping timeout ("+((new Date().getTime()) - lastPongReply)+"ms)");
+			} catch (Exception e) {
+				System.err.println("Connection: pingThread: "+e.getMessage());
+				e.printStackTrace();
+			}
+		}
+	};
+
 
 	public void sendRawString(String s) {
 		System.out.println(nickname + " <<< " + s);
@@ -330,6 +355,8 @@ public class Connection extends IrcUser implements Runnable {
 				case PING:
 					this.sendServerReply("PONG", IrcServer.globalServerName+" :"+IrcServer.globalServerName);
 					break;
+				case PONG:
+					lastPongReply = new Date().getTime();
 				default:
 					System.err.println("Unhandled IrcCommand");
 			}
@@ -348,6 +375,7 @@ public class Connection extends IrcUser implements Runnable {
 			System.out.println("Connection from host " + hostname);
 
 			outThread.start();
+			pingPongThread.start();
 
 			InputStream socketIn = socket.getInputStream();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(socketIn, "UTF-8"));

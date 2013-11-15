@@ -32,6 +32,9 @@ public class Config {
 
 	protected static String gameCommandPrefix = "!";
 	
+	protected static int connectionPingTime    = 30000;
+	protected static int connectionPingTimeout = 100000;
+	
 	/*
 	 * Config.load tulee lataamaan tiedostosta asetukset
 	 */
