@@ -41,6 +41,7 @@ public abstract class IrcUser {
 		Channel chan = IrcServer.findChannel(channelName);
 		if (chan == null) return false;
 		chan.memberLeave(this, msg);
+		if (chan.getChannelMembers().size() == 0) IrcServer.dropChannel(channelName);
 		return true;
 	}
 	

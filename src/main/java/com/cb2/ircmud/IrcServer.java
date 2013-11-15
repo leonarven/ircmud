@@ -61,6 +61,13 @@ public class IrcServer {
 			userNicknameMap.remove(nickName);
 		}
 	}
+	public static void dropChannel(String channelName) {
+		synchronized (channelMap) {
+			if (!channelMap.containsKey(channelName)) return;
+
+			channelMap.remove(channelName);
+		}
+	}
 	
 	public static void addChannel(Channel  chan) {
 		channelMap.put(chan.name, chan);
