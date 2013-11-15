@@ -243,7 +243,7 @@ public class Connection extends IrcUser implements Runnable {
 					//TODO: Implement modes
 					if (command.arguments.length >= 2) {
 						if (command.arguments[1].equals("b") && Channel.isValidPrefix(command.arguments[0].charAt(0))) { //Ban list
-							IrcReply reply = new IrcReply(IrcServer.globalServerName, Const.RPL_ENDOFBANLIST, command.arguments[0] + " :End of channel ban list");
+							IrcReply reply = IrcReply.serverReply(Const.RPL_ENDOFBANLIST, command.arguments[0], "End of channel ban list");
 							this.sendReply(reply);
 							break;
 						}
@@ -253,14 +253,14 @@ public class Connection extends IrcUser implements Runnable {
 						if (Channel.isValidPrefix(command.arguments[0].charAt(0))) { //Channel
 							Channel channel = IrcServer.findChannel(command.arguments[0]);
 							if (channel != null) { 
-								IrcReply reply = new IrcReply(IrcServer.globalServerName, Const.RPL_CHANNELMODEIS,  this.nickname + " " + command.arguments[0] + " " + channel.mode);
+								IrcReply reply = IrcReply.serverReply(Const.RPL_CHANNELMODEIS,  this.nickname, command.arguments[0], channel.mode, "");
 								this.sendReply(reply);
 							} else {
 								this.sendCommand(Const.ERR_CANNOTSENDTOCHAN, "No such channel");
 							}
 						}
 						else if (command.arguments[0].equals(this.nickname)){
-							IrcReply reply = new IrcReply(IrcServer.globalServerName, Const.RPL_UMODEIS, this.nickname + " " + this.mode);
+							IrcReply reply = IrcReply.serverReply(Const.RPL_UMODEIS, this.nickname, this.mode, "");
 							this.sendReply(reply);
 						}
 					}
@@ -277,7 +277,7 @@ public class Connection extends IrcUser implements Runnable {
 					break;
 				case PRIVMSG:
 					if (joinedChannels.containsKey(command.arguments[0])) {
-						joinedChannels.get(command.arguments[0]).sendReplyToAllExceptSender(new IrcReply(this, "PRIVMSG", command.arguments[0] + " :" + command.arguments[1]));
+						joinedChannels.get(command.arguments[0]).sendReplyToAllExceptSender(new IrcReply(this, "PRIVMSG", command.arguments[0], command.arguments[1]));
 					} else {
 						this.sendCommand(Const.ERR_CANNOTSENDTOCHAN, "No such channel");
 					}
@@ -330,7 +330,7 @@ public class Connection extends IrcUser implements Runnable {
 	
 	@Override
 	public void run() {
-		sendReply(new IrcReply(IrcServer.globalServerName, "020", ":Please wait while we process your connection"));
+		sendReply(IrcReply.serverReply("020", "Please wait while we process your connection"));
 
 		try {
 			
