@@ -18,8 +18,9 @@ public class GameCommand {
 		
 		private String target;
 		
-		public void setTarget (String target) {
+		public Target setTarget (String target) {
 			this.target = target;
+			return this;
 		}
 		
 		public String target() {
