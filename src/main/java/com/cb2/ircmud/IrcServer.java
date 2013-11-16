@@ -96,7 +96,7 @@ public class IrcServer {
 	}
 	
 	public static void addChannel(Channel  chan) {
-		System.out.println("DEBUG: IrcServer::addChannel("+chane.getName()+")");
+		System.out.println("DEBUG: IrcServer::addChannel("+chan.getName()+")");
 		channelMap.put(chan.getName().toLowerCase(), chan);
 	}
 	

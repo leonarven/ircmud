@@ -139,7 +139,9 @@ public class Connection extends IrcUser implements Runnable {
 
 		this.mode = "+i";
 
-		this.joinChannel(IrcServer.findChannel("#world"));
+		Channel worldChannel = IrcServer.findChannel("#world");
+		if (worldChannel == null) IrcServer.addChannel(worldChannel);
+		this.joinChannel(worldChannel);
 
 		pingPongThread.start();
 	}
