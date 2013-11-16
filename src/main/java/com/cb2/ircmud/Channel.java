@@ -45,10 +45,10 @@ public class Channel {
 			for(IrcUser _user : channelMembers) {
 				// TODO H/G => here/gone
 				// TODO: H/G:n perään tulee henkilön statuksen indikoiva merkki (+/@)
-				IrcReply whoReply = IrcReply.serverReply(Const.RPL_WHOREPLY, user.getNickname(), this.name, _user.getNickname(), _user.getHostname(), IrcServer.globalServerName, _user.getNickname(), "H", "0 0 " + _user.getRealname());
+				IrcReply whoReply = IrcReply.serverReply(IrcReplyCode.RPL_WHOREPLY, user.getNickname(), this.name, _user.getNickname(), _user.getHostname(), IrcServer.globalServerName, _user.getNickname(), "H", "0 0 " + _user.getRealname());
 				user.sendReply(whoReply);
 			}
-			IrcReply whoEndReply = IrcReply.serverReply(Const.RPL_ENDOFWHO, user.getNickname(), this.name, "End of /WHO list.");
+			IrcReply whoEndReply = IrcReply.serverReply(IrcReplyCode.RPL_ENDOFWHO, user.getNickname(), this.name, "End of /WHO list.");
 			user.sendReply(whoEndReply);
 	}
 	
@@ -59,7 +59,7 @@ public class Channel {
 			sendReplyToAll(joinReply);
 			
 			if (this.topic != null) {
-				IrcReply topicReply = IrcReply.serverReply(Const.RPL_TOPIC, user.nickname, this.name, this.topic);
+				IrcReply topicReply = IrcReply.serverReply(IrcReplyCode.RPL_TOPIC, user.nickname, this.name, this.topic);
 				IrcReply topicDateReply = IrcReply.serverReply("333", user.nickname, this.name, "admin!admin@IrcMud", "0", "");
 
 				user.sendReply(topicReply);
@@ -67,7 +67,7 @@ public class Channel {
 			}
 			String userlist = user.nickname;
 			for(IrcUser _user : channelMembers) userlist = userlist + " " +  _user.nickname;
-			IrcReply namesReply = IrcReply.serverReply(Const.RPL_NAMREPLY, user.nickname, "@", this.name, userlist.trim());
+			IrcReply namesReply = IrcReply.serverReply(IrcReplyCode.RPL_NAMREPLY, user.nickname, "@", this.name, userlist.trim());
 			IrcReply namesEndReply = IrcReply.serverReply("366", user.nickname, this.name , "End of /NAMES list.");
 
 			user.sendReply(namesReply);

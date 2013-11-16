@@ -37,6 +37,8 @@ public class IrcServer {
 		channelMap.put(worldChannel.name, worldChannel);
 		
 		trySetNickname(loginBot, loginBot.getUsername());
+		
+		PingService.init(1000, 10000);
 	}
 	
 	public static boolean trySetNickname(IrcUser user, String nick) {
@@ -100,20 +102,19 @@ public class IrcServer {
 		channelMap.put(chan.getName().toLowerCase(), chan);
 	}
 	
-	public static boolean run() {
+	public static void run() {
 		System.out.println("IrcServer: Starting server loop");
-		try {
-			while (true) {
+
+		while (true) {
+			try {
 				Socket	   socket = serverSocket.accept();
 				Connection connection = new Connection(socket);
 				Thread	   thread = new Thread(connection);
 				thread.start();
+			} catch(IOException e) {
+				System.err.println("IrcServer: IOException at Server.run: " + e.getMessage());
 			}
-		} catch(IOException e) {
-			System.err.println("IrcServer: IOException at Server.run: " + e.getMessage());
 		}
-		
-		return false;
 	}
 	
 	public static boolean close() throws IOException {

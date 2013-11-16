@@ -1,6 +1,6 @@
 package com.cb2.ircmud;
 
-public enum Const {
+public enum IrcReplyCode {
 
 
 	RPL_WELCOME("001"), //(RFC2812) :Welcome to the Internet Relay Network <nick>!<user>@<host>
@@ -464,7 +464,7 @@ public enum Const {
 	
 	public String num;
 	
-	private Const(String num) {
+	private IrcReplyCode(String num) {
 		this.num = num;
 	}
 	

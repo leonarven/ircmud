@@ -101,9 +101,9 @@ public abstract class IrcUser {
 		// RPL_WHOISUSER 311
 		// RPL_WHOISSERVER 312
 		// RPL_ENDOFWHOIS 318
-		IrcReply whoIsUserReply   = IrcReply.serverReply(Const.RPL_WHOISUSER, this.nickname, who.nickname, who.username, who.hostname, "*", who.realname);
-		IrcReply whoIsServerReply = IrcReply.serverReply(Const.RPL_WHOISSERVER, this.nickname, who.nickname, IrcServer.globalServerName, IrcServer.globalServerInfo);
-		IrcReply whoIsEndReply    = IrcReply.serverReply(Const.RPL_ENDOFWHOIS, this.nickname, who.nickname, "End of /WHOIS list.");
+		IrcReply whoIsUserReply   = IrcReply.serverReply(IrcReplyCode.RPL_WHOISUSER, this.nickname, who.nickname, who.username, who.hostname, "*", who.realname);
+		IrcReply whoIsServerReply = IrcReply.serverReply(IrcReplyCode.RPL_WHOISSERVER, this.nickname, who.nickname, IrcServer.globalServerName, IrcServer.globalServerInfo);
+		IrcReply whoIsEndReply    = IrcReply.serverReply(IrcReplyCode.RPL_ENDOFWHOIS, this.nickname, who.nickname, "End of /WHOIS list.");
 		// TODO if is IRCoperator RPL_WHOISOPERATOR 313
 		// TODO if is away RPL_WHOISIDLE 317
 
