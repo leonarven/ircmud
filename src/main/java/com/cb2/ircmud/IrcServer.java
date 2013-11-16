@@ -8,6 +8,8 @@ import com.cb2.ircmud.LoginBot;
 
 import org.aspectj.weaver.patterns.ThisOrTargetAnnotationPointcut;
 
+import com.cb2.ircmud.LoginBot;
+
 public class IrcServer {
 	
 	private static ServerSocket serverSocket;
@@ -74,6 +76,7 @@ public class IrcServer {
 		}
 	}
 	public static void dropUser(String nickName) {
+		System.out.println("DEBUG: IrcServer::dropUser("+nickName+")");
 		nickName = nickName.toLowerCase();
 		synchronized (userNicknameMap) {
 			if (!userNicknameMap.containsKey(nickName)) return;
@@ -83,6 +86,7 @@ public class IrcServer {
 		}
 	}
 	public static void dropChannel(String channelName) {
+		System.out.println("DEBUG: IrcServer::dropChannel("+channelName+")");
 		channelName = channelName.toLowerCase();
 		synchronized (channelMap) {
 			if (!channelMap.containsKey(channelName)) return;
@@ -92,6 +96,7 @@ public class IrcServer {
 	}
 	
 	public static void addChannel(Channel  chan) {
+		System.out.println("DEBUG: IrcServer::addChannel("+chane.getName()+")");
 		channelMap.put(chan.getName().toLowerCase(), chan);
 	}
 	

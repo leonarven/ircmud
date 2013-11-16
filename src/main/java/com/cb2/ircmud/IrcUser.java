@@ -70,6 +70,7 @@ public abstract class IrcUser {
 		joinedChannels.remove(channelName);
 		Channel chan = IrcServer.findChannel(channelName);
 		if (chan == null) return false;
+		sendDebug("Leaving channel "+chan.getName());
 		chan.memberLeave(this, msg);
 		if (chan.getChannelMembers().size() == 0) IrcServer.dropChannel(channelName);
 		return true;
@@ -88,6 +89,10 @@ public abstract class IrcUser {
 		sendReply(new IrcReply(sender, "PRIVMSG", this.nickname, msg));
 	}
 	
+	public void sendDebug(String msg) {
+		sendReply(new IrcReply(this, "NOTICE", "DEBUG: "+msg));
+	}
+	
 	public void sendWhoReply(Channel chan) {
 		chan.sendWhoReply(this);
 	}
@@ -96,15 +101,14 @@ public abstract class IrcUser {
 		// RPL_WHOISUSER 311
 		// RPL_WHOISSERVER 312
 		// RPL_ENDOFWHOIS 318
-		IrcReply whoIsUserReply = new IrcReply(IrcServer.globalServerName, "331", this.nickname+" "+who.nickname+" "+who.username+" "+who.hostname+" * :"+who.realname);
-		this.sendReply(whoIsUserReply);
-		
-		IrcReply whoIsServerReply = new IrcReply(IrcServer.globalServerName, "312", this.nickname+" "+who.nickname+" "+IrcServer.globalServerName+" :"+IrcServer.globalServerInfo);
-		this.sendReply(whoIsServerReply);
+		IrcReply whoIsUserReply   = IrcReply.serverReply(Const.RPL_WHOISUSER, this.nickname, who.nickname, who.username, who.hostname, "*", who.realname);
+		IrcReply whoIsServerReply = IrcReply.serverReply(Const.RPL_WHOISSERVER, this.nickname, who.nickname, IrcServer.globalServerName, IrcServer.globalServerInfo);
+		IrcReply whoIsEndReply    = IrcReply.serverReply(Const.RPL_ENDOFWHOIS, this.nickname, who.nickname, "End of /WHOIS list.");
 		// TODO if is IRCoperator RPL_WHOISOPERATOR 313
 		// TODO if is away RPL_WHOISIDLE 317
-		
-		IrcReply whoIsEndReply = new IrcReply(IrcServer.globalServerName, "318", this.nickname+" "+who.nickname+" :End of /WHOIS list.");
+
+		this.sendReply(whoIsUserReply);
+		this.sendReply(whoIsServerReply);
 		this.sendReply(whoIsEndReply);
 	}
 	

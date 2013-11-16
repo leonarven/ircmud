@@ -60,17 +60,17 @@ public class Channel {
 			
 			if (this.topic != null) {
 				IrcReply topicReply = IrcReply.serverReply(Const.RPL_TOPIC, user.nickname, this.name, this.topic);
-				user.sendReply(topicReply);
-				
 				IrcReply topicDateReply = IrcReply.serverReply("333", user.nickname, this.name, "admin!admin@IrcMud", "0", "");
+
+				user.sendReply(topicReply);
 				user.sendReply(topicDateReply);
 			}
 			String userlist = user.nickname;
 			for(IrcUser _user : channelMembers) userlist = userlist + " " +  _user.nickname;
-			IrcReply namesReply = new IrcReply(IrcServer.globalServerName, Const.RPL_NAMREPLY, user.nickname, "@", this.name, userlist.trim());
+			IrcReply namesReply = IrcReply.serverReply(Const.RPL_NAMREPLY, user.nickname, "@", this.name, userlist.trim());
+			IrcReply namesEndReply = IrcReply.serverReply("366", user.nickname, this.name , "End of /NAMES list.");
+
 			user.sendReply(namesReply);
-			
-			IrcReply namesEndReply = new IrcReply(IrcServer.globalServerName, "366", user.nickname, this.name , "End of /NAMES list.");
 			user.sendReply(namesEndReply);
 			
 			channelMembers.add(user);
@@ -82,7 +82,7 @@ public class Channel {
 		synchronized (channelMembers) {
 			channelMembers.remove(user);
 		}
-		sendReplyToAll(new IrcReply(user, "PART", msg));
+		sendReplyToAll(new IrcReply(user, "PART", this.getName(), msg));
 	}
 	
 	public void memberQuit(IrcUser user, String msg) {

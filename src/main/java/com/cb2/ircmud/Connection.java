@@ -71,7 +71,7 @@ public class Connection extends IrcUser implements Runnable {
 					    Thread.currentThread().interrupt();
 					}
 				}
-				throw new Exception("Ping timeout ("+((new Date().getTime()) - lastPongReply)+"ms)");
+				quit("Ping timeout ("+((new Date().getTime()) - lastPongReply)+"ms)");
 			} catch (Exception e) {
 				System.err.println("Connection: pingThread: "+e.getMessage());
 				e.printStackTrace();
@@ -140,6 +140,8 @@ public class Connection extends IrcUser implements Runnable {
 		this.mode = "+i";
 
 		this.joinChannel(IrcServer.findChannel("#world"));
+
+		pingPongThread.start();
 	}
 	
 	private void processLine(String line) throws Exception {
@@ -374,7 +376,6 @@ public class Connection extends IrcUser implements Runnable {
 			System.out.println("Connection from host " + hostname);
 
 			outThread.start();
-			pingPongThread.start();
 
 			InputStream socketIn = socket.getInputStream();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(socketIn, "UTF-8"));

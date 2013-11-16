@@ -72,7 +72,7 @@ public enum IrcCommand {
 		public void init(Connection con, String prefix, String[] arguments) throws Exception {
 			this.arguments  = arguments;
 
-			this.argumentMap.put("command",  "JOIN");
+			this.argumentMap.put("command",  "PART");
 			this.argumentMap.put("channels", arguments[0]);
 			if (arguments.length == 2)
 				this.argumentMap.put("leaveMessage", arguments[1]);
