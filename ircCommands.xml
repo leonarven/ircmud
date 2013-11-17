@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<commands>
+	<command>
+		<foo kek="bar">asd</foo>
+	</command>
+</commands>

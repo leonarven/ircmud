@@ -35,6 +35,8 @@ public class Config {
 	protected static int connectionPingTime    = 60000;
 	protected static int connectionPingTimeout = 100000;
 	
+	protected static String ircCommandsXmlFile = "ircCommands.xml";
+	
 	/*
 	 * Config.load tulee lataamaan tiedostosta asetukset
 	 */

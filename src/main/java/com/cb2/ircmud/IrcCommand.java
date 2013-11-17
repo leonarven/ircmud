@@ -3,6 +3,12 @@ package com.cb2.ircmud;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.io.File;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.*;
 
 public enum IrcCommand {
 	NICK(1, 1) {
@@ -174,4 +180,34 @@ public enum IrcCommand {
 	}
 	
 	public abstract void init(Connection con, String prefix, String[] arguments) throws Exception;
+	
+	public static void load(String file) {
+		System.out.println("Loading IrcCommand configurations");
+		try {
+			File fXmlFile = new File(file);
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(fXmlFile);
+			
+			doc.getDocumentElement().normalize();
+
+			NodeList nList = doc.getElementsByTagName("command");
+
+			for (int temp = 0; temp < nList.getLength(); temp++) {
+				 
+				Node nNode = nList.item(temp);
+		 
+				System.out.println("\nCurrent Element :" + nNode.getNodeName());
+		 
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+		 
+					Element eElement = (Element) nNode;
+		 
+				}
+			}
+		
+		} catch(Exception e) {
+			System.out.println("Error while initializing IrcCommands: "+e.getMessage());
+		}
+	}
 }

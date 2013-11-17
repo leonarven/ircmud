@@ -31,14 +31,22 @@ public class IrcServer {
 		System.out.println("IrcServer: Initializing ServerSocket");
 		serverSocket = new ServerSocket(globalServerPort);
 
+		// Init channel Config.WorldChannel
 		System.out.println("IrcServer: Initializing "+Config.WorldChannel);
-
 		Channel worldChannel = new Channel(Config.WorldChannel);
 		channelMap.put(worldChannel.name, worldChannel);
 		
+		// Try to set Loginbot's nickname
+		System.out.println("IrcServer: Initializing "+loginBot.getUsername());
 		trySetNickname(loginBot, loginBot.getUsername());
 		
+		// Try to init pingService
+		System.out.println("IrcServer: Initializing PingService");
 		PingService.init(Config.connectionPingTime, Config.connectionPingTimeout);
+		
+		// Initializing IrcCommands
+		System.out.println("IrcServer: Initializing IrcCommands");
+		IrcCommand.load(Config.ircCommandsXmlFile);
 	}
 	
 	public static boolean trySetNickname(IrcUser user, String nick) {
