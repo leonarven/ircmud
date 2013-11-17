@@ -38,7 +38,7 @@ public class IrcServer {
 		
 		trySetNickname(loginBot, loginBot.getUsername());
 		
-		PingService.init(1000, 10000);
+		PingService.init(Config.connectionPingTime, Config.connectionPingTimeout);
 	}
 	
 	public static boolean trySetNickname(IrcUser user, String nick) {
