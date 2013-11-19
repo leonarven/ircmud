@@ -23,29 +23,29 @@ public class IrcServer {
 	private static Map<String, Channel>       channelMap = new HashMap<String, Channel>();
 		
 	public static void init(String _globalServerName, int _globalServerPort) throws IOException {
-		System.out.println("Initializing IrcServer("+_globalServerName+":"+_globalServerPort+")");
+		Console.out("IrcServer", "Initializing IrcServer("+_globalServerName+":"+_globalServerPort+")");
 
 		globalServerPort = _globalServerPort;
 		globalServerName = _globalServerName;
 
-		System.out.println("IrcServer: Initializing ServerSocket");
+		Console.out("IrcServer", "Initializing ServerSocket");
 		serverSocket = new ServerSocket(globalServerPort);
 
 		// Init channel Config.WorldChannel
-		System.out.println("IrcServer: Initializing "+Config.WorldChannel);
+		Console.out("IrcServer", "Initializing "+Config.WorldChannel);
 		Channel worldChannel = new Channel(Config.WorldChannel);
 		channelMap.put(worldChannel.name, worldChannel);
 		
 		// Try to set Loginbot's nickname
-		System.out.println("IrcServer: Initializing "+loginBot.getUsername());
+		Console.out("IrcServer", "Initializing LoginBot("+loginBot.getUsername()+")");
 		trySetNickname(loginBot, loginBot.getUsername());
 		
 		// Try to init pingService
-		System.out.println("IrcServer: Initializing PingService");
+		Console.out("IrcServer", "Initializing PingService");
 		PingService.init(Config.connectionPingTime, Config.connectionPingTimeout);
 		
 		// Initializing IrcCommands
-		System.out.println("IrcServer: Initializing IrcCommands");
+		Console.debug("Initializing IrcCommands");
 		IrcCommand.load(Config.ircCommandsXmlFile);
 	}
 	
@@ -86,7 +86,7 @@ public class IrcServer {
 		}
 	}
 	public static void dropUser(String nickName) {
-		System.out.println("DEBUG: IrcServer::dropUser("+nickName+")");
+		Console.debug("IrcServer::dropUser("+nickName+")");
 		nickName = nickName.toLowerCase();
 		synchronized (userNicknameMap) {
 			if (!userNicknameMap.containsKey(nickName)) return;
@@ -96,7 +96,7 @@ public class IrcServer {
 		}
 	}
 	public static void dropChannel(String channelName) {
-		System.out.println("DEBUG: IrcServer::dropChannel("+channelName+")");
+		Console.debug("IrcServer::dropChannel("+channelName+")");
 		channelName = channelName.toLowerCase();
 		synchronized (channelMap) {
 			if (!channelMap.containsKey(channelName)) return;
@@ -106,12 +106,12 @@ public class IrcServer {
 	}
 	
 	public static void addChannel(Channel  chan) {
-		System.out.println("DEBUG: IrcServer::addChannel("+chan.getName()+")");
+		Console.debug("IrcServer::addChannel("+chan.getName()+")");
 		channelMap.put(chan.getName().toLowerCase(), chan);
 	}
 	
 	public static void run() {
-		System.out.println("IrcServer: Starting server loop");
+		Console.out("IrcServer", "Starting server loop");
 
 		while (true) {
 			try {

@@ -182,7 +182,7 @@ public enum IrcCommand {
 	public abstract void init(Connection con, String prefix, String[] arguments) throws Exception;
 	
 	public static void load(String file) {
-		System.out.println("Loading IrcCommand configurations");
+		Console.out("IrcCommand", "Loading IrcCommand configurations");
 		try {
 			File fXmlFile = new File(file);
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -196,8 +196,6 @@ public enum IrcCommand {
 			for (int temp = 0; temp < nList.getLength(); temp++) {
 				 
 				Node nNode = nList.item(temp);
-		 
-				System.out.println("\nCurrent Element :" + nNode.getNodeName());
 		 
 				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 		 

@@ -47,7 +47,6 @@ public class PingService implements Runnable {
 	}
 	
 	public static void init(int pingCheckTime, long pingTimeout) {
-		System.out.println("Initializing PingService");
 		PingService.pingCheckTime = pingCheckTime;
 		PingService.pingTimeout= pingTimeout;
 		
@@ -70,8 +69,10 @@ public class PingService implements Runnable {
 	        	user = IrcServer.findUserByNickname(entry.getKey());
 		        
 		        if (diff > PingService.pingTimeout) {
-		        	if (user != null)
+		        	if (user != null) {
 		        		user.quit("Ping timeout ("+diff+"ms)");
+		        		IrcServer.dropUser(entry.getKey());
+		        	}
 		        }
 	        }		    
 	        for (Map.Entry<String, Long> entry : PingService.lastPingMap.entrySet()) {

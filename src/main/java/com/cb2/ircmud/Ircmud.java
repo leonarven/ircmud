@@ -19,7 +19,7 @@ public class Ircmud {
 	public static int    globalServerPort = Config.ServerPort;
 
 	public void main(String[] args) {
-        System.out.println("DEBUG: Ircmud::main()");
+        Console.debug("Ircmud::main()");
 		Room room = new Room();
 		room.setName("olohuone");
 		room.persist();	
@@ -45,7 +45,7 @@ public class Ircmud {
 		}
 
 		try {
-			System.out.println("Creating Server");
+			Console.out("Creating Server");
 			IrcServer.init(globalServerName, globalServerPort);
 
 			IrcServer.run();
