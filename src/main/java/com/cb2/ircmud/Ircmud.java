@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 
 import com.cb2.ircmud.domain.Room;
+import com.cb2.ircmud.ircserver.IrcServer;
 
 @Component
 public class Ircmud {

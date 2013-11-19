@@ -48,5 +48,4 @@ public abstract class IrcBotUser extends IrcUser {
 	boolean isConnection() {
 		return false;
 	}
-
 }

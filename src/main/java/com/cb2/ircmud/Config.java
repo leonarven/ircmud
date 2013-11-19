@@ -13,29 +13,29 @@ public class Config {
 	/* 
 	 * Maailman oletustila/-kanava, johon pelaajat liitetään. Manjäristykset ja meteoripommitukset
 	 */
-	protected static String WorldChannel = WorldChannelPrefix + "world";
+	public static String WorldChannel = WorldChannelPrefix + "world";
 	
 	/* 
 	 * IRC-Serverin määrite: portti, jota kuunnellaan
 	 */
-	protected static int ServerPort = 6667;
+	public static int ServerPort = 6667;
 	
 	/* 
 	 * IRC-Serverin määrite: nimi, jolla serveriä ylläpidetään
 	 */
-	protected static String ServerName = "IrcMud";
+	public static String ServerName = "IrcMud";
 
 	/* 
 	 * 
 	 */
-	protected static String applicationContextFile = "src/main/resources/META-INF/spring/applicationContext.xml";
+	public static String applicationContextFile = "src/main/resources/META-INF/spring/applicationContext.xml";
 
-	protected static String gameCommandPrefix = "!";
+	public static String gameCommandPrefix = "!";
 	
-	protected static int connectionPingTime    = 60000;
-	protected static int connectionPingTimeout = 100000;
+	public static int connectionPingTime    = 60000;
+	public static int connectionPingTimeout = 100000;
 	
-	protected static String ircCommandsXmlFile = "ircCommands.xml";
+	public static String ircCommandsXmlFile = "ircCommands.xml";
 	
 	/*
 	 * Config.load tulee lataamaan tiedostosta asetukset
@@ -44,7 +44,7 @@ public class Config {
 		
 		//TODO: Make me
 		
-		System.out.println("Config: Loading configurations from file " +file);
+		Console.out("Config", "Loading configurations from file " +file);
 
 		Properties config = new Properties();
 		

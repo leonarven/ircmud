@@ -24,10 +24,8 @@ public abstract class IrcUser {
 	}
 	
 	
-	abstract void sendRawString(String s);
 	abstract void sendReply(IrcReply reply);
 	abstract boolean isConnection();
-	abstract void closeConnection() throws IOException;
 	
 	public String getNickname() { return nickname; }
 	public String getRealname() { return realname; }
@@ -82,7 +80,7 @@ public abstract class IrcUser {
 				entry.getValue().memberQuit(this, msg);
 			}
 		}
-		sendRawString("ERROR: Closing Link: "+this.getRepresentation()+"(\""+msg+"\")");
+		sendReply(new IrcReply("ERROR", "Closing Link: "+this.getRepresentation()+"(\""+msg+"\")"));
 		return true;
 	}
 	
