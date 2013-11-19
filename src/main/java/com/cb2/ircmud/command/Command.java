@@ -7,7 +7,7 @@ import com.cb2.ircmud.command.CommandDefinition;
 
 public class Command {
 	private CommandDefinition definition;
-	private Vector<CommandParameter> parameters;
+	private Vector<CommandParameter> parameters = new Vector<CommandParameter>();
 	Command(CommandDefinition def) {
 		definition = def;
 	}

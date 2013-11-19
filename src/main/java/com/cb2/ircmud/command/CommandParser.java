@@ -12,8 +12,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CommandParser {
-	private Vector<CommandDefinition> commandDefinitions;
+	private Vector<CommandDefinition> commandDefinitions = new Vector<CommandDefinition>();
 	private Pattern defaultPreParamPattern;
+	private Pattern defaultEndPattern;
 	private Pattern integerPattern;
 	private Pattern locationPattern;
 	private Pattern itemPattern;
@@ -21,10 +22,11 @@ public class CommandParser {
 	
 	public CommandParser() {
 		defaultPreParamPattern = Pattern.compile("^\\s+");
+		defaultEndPattern = Pattern.compile("^(\\s|\\.|!)*");
 		integerPattern = Pattern.compile("^-?[1-9][0-9]*");
 		stringPattern = Pattern.compile("^\"(.*)\"");
 		locationPattern = Pattern.compile("^(the\\s+)?([a-zA-Z]+)");
-		itemPattern = Pattern.compile("^(a|the|all|every|my|[0-9]+)?\\s+ ([a-z]+)", Pattern.CASE_INSENSITIVE);
+		itemPattern = Pattern.compile("^(an?|the|all|every|my|[0-9]+)?\\s+([a-z]+)", Pattern.CASE_INSENSITIVE);
 	}
 	
 	void addCommandDefinition(CommandDefinition def) {
@@ -60,6 +62,7 @@ public class CommandParser {
 			throw new CommandParsingException(MessageFormat.format("Can't find command \"{0}\"", cmdName));
 		}
 		Command cmd = new Command(cmdDef);
+		cmdLine = cmdLine.substring(charIndex);
 		
 		Iterator<CommandParameter.Type> paramTyIt = cmdDef.getParameterTypes().iterator();
 		Iterator<Pattern> preParamPatternIt = cmdDef.getPreParameterPatterns().iterator();
@@ -79,8 +82,14 @@ public class CommandParser {
 			cmdLine = parseParameter(cmdLine, paramTy, cmd);
 		}
 		
-		
-		return null;
+		if (cmdLine != null) {
+			Pattern endPattern = cmdDef.getEndPattern();
+			if (endPattern == null) endPattern = defaultEndPattern;
+			if (!endPattern.matcher(cmdLine).matches()) {
+				throw new CommandParsingException(MessageFormat.format("The command end pattern \"{0}\" didn't match \"{1}\" ", endPattern.toString(), cmdLine));
+			}
+		}
+		return cmd;
 	}
 	
 	public String parseParameter(String cmdLine, CommandParameter.Type type, Command cmd) throws CommandParsingException {
@@ -127,7 +136,7 @@ public class CommandParser {
 			cmd.addParameter(new StringParameter(stringVal));
 			
 		} else {
-			throw new CommandParsingException(MessageFormat.format("Expecting location... \"{0}\"", cmdLine));
+			throw new CommandParsingException(MessageFormat.format("Expecting string... \"{0}\"", cmdLine));
 		}
 		return null;
 	}
@@ -154,7 +163,7 @@ public class CommandParser {
 			ItemParameter param = null;
 			if (preString.isEmpty()) {
 				param = new ItemParameter(1, itemName);
-			} else if (preString.equals("a")) {
+			} else if (preString.equals("a") || preString.equals("an")) {
 				param = new ItemParameter(1, itemName);
 			} else if (preString.equals("the")) {
 				param = new ItemParameter(ItemParameter.QuantityType.Specific, itemName);
@@ -177,21 +186,27 @@ public class CommandParser {
 			return cmdLine;
 			
 		} else {
-			throw new CommandParsingException(MessageFormat.format("Expecting location... \"{0}\"", cmdLine));
+			throw new CommandParsingException(MessageFormat.format("Expecting item... \"{0}\"", cmdLine));
 		}
 	}
-	/*
+	
 	public static void main(String[] args) {
 		CommandParser parser = new CommandParser();
 		CommandDefinition runDefinition = new CommandDefinition("run", "runs?");
 		runDefinition.addParameter(Pattern.compile("^\\s+(to\\s+)?", Pattern.CASE_INSENSITIVE), CommandParameter.Type.Location);
 		parser.addCommandDefinition(runDefinition);
 		
+		CommandDefinition eatDefinition = new CommandDefinition("eat", "eats?");
+		eatDefinition.addParameter(Pattern.compile("^\\s+", Pattern.CASE_INSENSITIVE), CommandParameter.Type.Item);
+		parser.addCommandDefinition(eatDefinition);
+		
 		try {
-			Command cmd = parser.parse("run to the west");
+			Command cmd = parser.parse("eat 23 apples");
+			Console.out(cmd);
 		} catch (CommandParsingException ex) {
 			Console.out(ex);
 		}
-	}*/
+		
+	}
 	
 }
