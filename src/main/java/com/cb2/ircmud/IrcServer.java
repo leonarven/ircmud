@@ -91,8 +91,8 @@ public class IrcServer {
 		synchronized (userNicknameMap) {
 			if (!userNicknameMap.containsKey(nickName)) return;
 
-			userNicknameMap.get(nickName).quit("Quitting");
 			userNicknameMap.remove(nickName);
+			PingService.dropPartner(nickName);
 		}
 	}
 	public static void dropChannel(String channelName) {

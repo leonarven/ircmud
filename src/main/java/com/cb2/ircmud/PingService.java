@@ -21,6 +21,11 @@ public class PingService implements Runnable {
 	public static void addPartner(IrcUser user) {
 		addPartner(user.getNickname().toLowerCase());
 	}
+	public static void dropPartner(String nickName) {
+		System.out.println("DEBUG: PingService:dropPartner("+nickName+")");
+		lastPongMap.remove(nickName);
+		lastPingMap.remove(nickName);
+	}
 	
 	public static void pongFrom(String nickName) {
 		System.out.println("DEBUG: PingService:pongFrom("+nickName+") :"+(lastPongMap.containsKey(nickName)?(""+lastPongMap.get(nickName)):"no"));
