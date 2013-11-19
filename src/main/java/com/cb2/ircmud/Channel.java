@@ -64,9 +64,15 @@ public class Channel {
 
 				user.sendReply(topicReply);
 				user.sendReply(topicDateReply);
+			} else {
+				IrcReply topicReply = IrcReply.serverReply(IrcReplyCode.RPL_NOTOPIC, user.nickname, this.name, "No topic is set");
+
+				user.sendReply(topicReply);
 			}
+
 			String userlist = user.nickname;
 			for(IrcUser _user : channelMembers) userlist = userlist + " " +  _user.nickname;
+
 			IrcReply namesReply = IrcReply.serverReply(IrcReplyCode.RPL_NAMREPLY, user.nickname, "@", this.name, userlist.trim());
 			IrcReply namesEndReply = IrcReply.serverReply("366", user.nickname, this.name , "End of /NAMES list.");
 
