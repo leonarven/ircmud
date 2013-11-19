@@ -29,8 +29,9 @@ public class LoginBot extends IrcBotUser {
 		
 		
 		//Test command
-		String cantFindTheseUsers = "";
-		if (command.equals("notify")) {
+		if (command.toUpperCase().equals("NOTIFY")) {
+
+			String cantFindTheseUsers = "";
 			for (String notifyUser : params) {
 				IrcUser nuser = IrcServer.findUserByNickname(notifyUser);
 				if (nuser != null) {
@@ -42,6 +43,32 @@ public class LoginBot extends IrcBotUser {
 			}
 			if (!cantFindTheseUsers.isEmpty()) {
 				user.sendMessage(this, "Can't find nicks:" + cantFindTheseUsers);
+			}
+		} else if (command.toUpperCase().equals("AUTH")) {
+
+			if (params != null && params.length == 2) {
+				String username = params[0];
+				String password = params[1];
+
+				boolean login = AuthService.testLogin(username);
+				AuthService.Account acc = AuthService.login(username, password);
+
+				if (acc != null) {
+
+					if (!login) {
+
+						user.sendMessage(this, "Login successfully");
+
+					} else {
+						user.sendMessage(this, "You have login already");
+					}
+
+				} else {
+					user.sendMessage(this, "Invalid username or password");
+				}
+
+			} else {
+				user.sendMessage(this, "Usage: auth <username> <password>");
 			}
 		}
 		else {

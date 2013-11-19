@@ -36,6 +36,14 @@ public class IrcServer {
 		Channel worldChannel = new Channel(Config.WorldChannel);
 		channelMap.put(worldChannel.name, worldChannel);
 		
+		// Try to init pingService
+		Console.out("IrcServer", "Initializing AuthService");
+        AuthService.init();
+        
+        AuthService.addAccount("test", "test");
+        AuthService.addAccount("foo",  "test");
+        AuthService.addAccount("bar",  "test");
+		
 		// Try to set Loginbot's nickname
 		Console.out("IrcServer", "Initializing LoginBot("+loginBot.getUsername()+")");
 		trySetNickname(loginBot, loginBot.getUsername());
