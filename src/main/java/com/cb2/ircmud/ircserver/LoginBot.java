@@ -26,6 +26,11 @@ public class LoginBot extends IrcBotUser {
 	}
 	
 	@Override
+	public void sendPing(String ping) {
+		
+	}
+	
+	@Override
 	public void receivePrivateMessage(String sender, String msg) {
 		IrcUser user = IrcServer.findUserByNickname(sender);
 		if (user == null) return;

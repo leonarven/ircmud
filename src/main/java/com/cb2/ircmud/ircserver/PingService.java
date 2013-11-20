@@ -81,7 +81,7 @@ public class PingService implements Runnable {
 		        diff = currentTime - entry.getValue().longValue();
 	        	
 	        	if (diff > PingService.newPingTime) {
-	        		user.sendReply(new IrcReply("PING", IrcServer.globalServerName));
+	        		user.sendPing(IrcServer.globalServerName);
 	        		lastPingMap.put(entry.getKey(), new Date().getTime());
 	        	}
 	        }

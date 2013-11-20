@@ -94,11 +94,16 @@ public class Connection extends IrcUser implements Runnable {
 		}
 	}
 	
+	public void sendPing(String ping) {
+		sendRawString("PING :"+ping);
+	}
+	
 	public void acceptConnection() {
 		sendServerCommand(IrcReplyCode.RPL_WELCOME, "Welcome to "+IrcServer.globalServerName+", "+getRepresentation()+"("+realname+")");
 		sendServerCommand(IrcReplyCode.RPL_YOURHOST, "Your host is "+IrcServer.globalServerName+", running version "+IrcServer.VERSION);
 
-		sendServerReply(IrcReplyCode.RPL_BOUNCE, "RFC2812 PREFIX=(ov)@+ CHANTYPES=#&!+ MODES=3 CHANLIMIT=#&!+:21 NICKLEN=15 TOPICLEN=255 KICKLEN=255 CHANNELLEN=50 IDCHAN=!:5 :are supported by this server");
+		sendServerReply(IrcReplyCode.RPL_BOUNCE, "RFC2812 PREFIX=(ov)@+ CHANTYPES=#&!+ MODES=3 CHANLIMIT=#&!+:21 :are supported by this server");
+		sendServerReply(IrcReplyCode.RPL_BOUNCE, "NICKLEN=15 TOPICLEN=255 KICKLEN=255 CHANNELLEN=50 IDCHAN=!:5 :are supported by this server");
 		sendServerReply(IrcReplyCode.RPL_BOUNCE, "PENALTY FNC EXCEPTS=e INVEX=I CASEMAPPING=ascii NETWORK=IrcMud :are supported by this server");
 
 		sendServerCommand(IrcReplyCode.RPL_MOTDSTART, IrcServer.globalServerName+" - Message Of The Day:");
@@ -146,13 +151,11 @@ public class Connection extends IrcUser implements Runnable {
 		if (command.matches("[0-9][0-9][0-9]"))
 			command = "n" + command;
 		IrcCommand commandObject = null;
+		try {
+			commandObject = IrcCommand.valueOf(command.toUpperCase());
+		} catch(IllegalArgumentException e) {}
 		if (commandObject == null) {
-			try {
-				commandObject = IrcCommand.valueOf(command.toUpperCase());
-			} catch(IllegalArgumentException e) {}
-		}
-		if (commandObject == null) {
-			sendRawString(":" + IrcServer.globalServerName + " "+IrcReplyCode.ERR_UNKNOWNCOMMAND+" " + nickname + " " + command + " :Unknown command ");
+			sendServerReply(IrcReplyCode.ERR_UNKNOWNCOMMAND, command + " :Unknown command ");
 			return;
 		}
 		if (arguments.length < commandObject.getMin() || arguments.length > commandObject.getMax()) {
@@ -180,7 +183,7 @@ public class Connection extends IrcUser implements Runnable {
 							acceptConnection();
 						}
 					} else {
-						sendRawString(":" + IrcServer.globalServerName + " " + IrcReplyCode.ERR_NICKNAMEINUSE + " " + n + ":Nickname in use");
+						sendServerCommand(IrcReplyCode.ERR_NICKNAMEINUSE,  n + " :Nickname in use");
 					}
 					break;
 				case USER:
@@ -199,7 +202,6 @@ public class Connection extends IrcUser implements Runnable {
 					break;
 				default:
 					sendRawString("ERROR :Closing connection " + getRepresentation() + " (Invalid command)");
-
 			}
 		}
 		else { //Connection established

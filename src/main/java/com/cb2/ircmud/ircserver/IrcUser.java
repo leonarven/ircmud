@@ -26,6 +26,7 @@ public abstract class IrcUser {
 	
 	
 	abstract void sendReply(IrcReply reply);
+	abstract void sendPing(String ping);
 	abstract boolean isConnection();
 	
 	public String getNickname() { return nickname; }
