@@ -18,8 +18,6 @@ public class IrcReply {
 		}
 
 		for( String argv: args ) if (!argv.isEmpty()) this.arguments.add(argv);
-
-		for(String str : this.arguments) System.out.println("args[]:"+str);
 	}
 	public IrcReply(IrcUser sender, Object command, String... args) {
 		this(sender.getRepresentation(), command, args);

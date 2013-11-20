@@ -21,8 +21,6 @@ public enum IrcCommand {
 
 			this.argumentMap.put("command",  "NICK");
 			this.argumentMap.put("nick", arguments[0]);
-			
-			var_dump(con, prefix);
 		}
 	},
 	USER(1, 4) {
@@ -35,8 +33,6 @@ public enum IrcCommand {
 			this.argumentMap.put("mode",     arguments[1]);
 			this.argumentMap.put("unused",   arguments[2]);
 			this.argumentMap.put("realname", arguments[3]);
-
-			var_dump(con, prefix);
 		}
 	},
 	QUIT(1, 1) {
@@ -46,8 +42,6 @@ public enum IrcCommand {
 
 			this.argumentMap.put("command",  "QUIT");
 			this.argumentMap.put("quitMessage", arguments[0]);
-
-			var_dump(con, prefix);
 		}
 	},
 	MODE(0, 2) { // TODO: If user queries channel mode no 2. parameter. Now causes java.lang.ArrayIndexOutOfBoundsException
@@ -59,8 +53,6 @@ public enum IrcCommand {
 			this.argumentMap.put("target", arguments[0]);
 			if (arguments.length == 2)
 				this.argumentMap.put("mode", arguments[1]);
-
-			var_dump(con, prefix);
 		}
 	},
 	JOIN(1, 2){
@@ -72,8 +64,6 @@ public enum IrcCommand {
 			this.argumentMap.put("channels", arguments[0]);
 			if (arguments.length == 2)
 				this.argumentMap.put("passwords", arguments[1]);
-
-			var_dump(con, prefix);
 		}
 	},
 	PART(1, 2){
@@ -85,8 +75,6 @@ public enum IrcCommand {
 			this.argumentMap.put("channels", arguments[0]);
 			if (arguments.length == 2)
 				this.argumentMap.put("leaveMessage", arguments[1]);
-
-			var_dump(con, prefix);
 		}
 	},
 	PRIVMSG(2, 2) {

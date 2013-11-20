@@ -38,7 +38,7 @@ public class Connection extends IrcUser implements Runnable {
 		public void run() {
 			try {
 				OutputStream out = socket.getOutputStream();
-				while (true) {
+				while (keepRunning) {
 					String s = outQueue.take();
 					s = s.replace("\n", "").replace("\r", "");
 					s = s + "\r\n";
@@ -46,15 +46,14 @@ public class Connection extends IrcUser implements Runnable {
 					out.flush();
 				}
 			} catch (Exception e) {
-				System.err.println("Connection:outThread: Outqueue died");
+				System.err.println("Connection: outThread: Outqueue died");
 				outQueue.clear();
 				outQueue = null;
-				e.printStackTrace();
-				try {
-					closeConnection();
-				} catch (Exception e2) {
-					e2.printStackTrace();
-				}
+			}
+			try {
+				closeConnection();
+			} catch (Exception e2) {
+				e2.printStackTrace();
 			}
 		}
 	};
@@ -147,7 +146,9 @@ public class Connection extends IrcUser implements Runnable {
 			command = "n" + command;
 		IrcCommand commandObject = null;
 		if (commandObject == null) {
-			commandObject = IrcCommand.valueOf(command.toUpperCase());
+			try {
+				commandObject = IrcCommand.valueOf(command.toUpperCase());
+			} catch(IllegalArgumentException e) {}
 		}
 		if (commandObject == null) {
 			sendRawString(":" + IrcServer.globalServerName + " "+IrcReplyCode.ERR_UNKNOWNCOMMAND+" " + nickname + " " + command + " :Unknown command ");
@@ -349,7 +350,7 @@ public class Connection extends IrcUser implements Runnable {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(socketIn, "UTF-8"));
 			String line;
 			
-			while ((line = reader.readLine()) != null) {
+			while ((line = reader.readLine()) != null && this.keepRunning) {
 				try {
 					processLine(line);
 				} catch (Exception e) {
@@ -358,13 +359,12 @@ public class Connection extends IrcUser implements Runnable {
 				}
 			}
 		} catch (IOException e) {
+			System.err.println("IOException in Connection::run : " + e.getMessage());
+		} finally {
 			try {
 				closeConnection();
 			} catch (IOException e2) {
 			}
-			System.err.println("IOException in Connection::run : " + e.getMessage());
-		} finally {
-			
 		}		
 	}
 

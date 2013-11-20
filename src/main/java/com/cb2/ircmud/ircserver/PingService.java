@@ -7,6 +7,7 @@ import java.util.Date;
 
 public class PingService implements Runnable {
 
+	public final static String VERSION = "0.06";
 	private static long pingTimeout  = 10000;
 	private static int pingCheckTime = 1000;
 	private static long newPingTime  = 10000;

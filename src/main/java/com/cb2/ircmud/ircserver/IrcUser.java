@@ -13,6 +13,7 @@ public abstract class IrcUser {
 	protected String realname;
 	protected String username;
 	protected String hostname;
+	protected boolean keepRunning = true;
 	protected Map<String, Channel> joinedChannels = new HashMap<String, Channel>();
 	
 	public static String getIrcUserRepresentation(String nick, String username, String hostname) {
@@ -81,6 +82,7 @@ public abstract class IrcUser {
 			}
 		}
 		sendReply(new IrcReply("ERROR", "Closing Link: "+this.getRepresentation()+"(\""+msg+"\")"));
+		keepRunning = false;
 		return true;
 	}
 	

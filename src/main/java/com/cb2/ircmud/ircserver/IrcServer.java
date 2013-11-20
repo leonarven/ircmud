@@ -94,6 +94,7 @@ public class IrcServer {
 		}
 	}
 	public static void dropUser(String nickName) {
+		if (nickName == null) return;
 		Console.debug("IrcServer::dropUser("+nickName+")");
 		nickName = nickName.toLowerCase();
 		synchronized (userNicknameMap) {
