@@ -65,7 +65,9 @@ public class PingService implements Runnable {
 		while(true) {
 	        currentTime = new Date().getTime();
 
-	        for (Map.Entry<String, Long> entry : PingService.lastPongMap.entrySet()) {
+	        Iterator<Map.Entry<String, Long>> pongit = PingService.lastPongMap.entrySet().iterator();
+	        while (pongit.hasNext()) {
+	            Map.Entry<String, Long> entry = (Map.Entry<String, Long>)pongit.next();
 		        diff = currentTime - entry.getValue().longValue();
 	        	user = IrcServer.findUserByNickname(entry.getKey());
 		        
@@ -75,8 +77,13 @@ public class PingService implements Runnable {
 		        		IrcServer.dropUser(entry.getKey());
 		        	}
 		        }
-	        }		    
-	        for (Map.Entry<String, Long> entry : PingService.lastPingMap.entrySet()) {
+		        pongit.remove();
+	        }	        
+	        
+	        Iterator<Map.Entry<String, Long>> pingit = PingService.lastPingMap.entrySet().iterator();
+	        while (pingit.hasNext()) {
+	            Map.Entry<String, Long> entry = (Map.Entry<String, Long>)pingit.next();
+		        
 	        	user = IrcServer.findUserByNickname(entry.getKey());
 		        diff = currentTime - entry.getValue().longValue();
 	        	
@@ -84,7 +91,8 @@ public class PingService implements Runnable {
 	        		user.sendPing(IrcServer.globalServerName);
 	        		lastPingMap.put(entry.getKey(), new Date().getTime());
 	        	}
-	        }
+	            pingit.remove();
+	        }	        
 		    
 		    try {
 				Thread.sleep(PingService.pingCheckTime);
