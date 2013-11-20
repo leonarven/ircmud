@@ -19,6 +19,7 @@ public class CommandParser {
 	private Pattern locationPattern;
 	private Pattern itemPattern;
 	private Pattern stringPattern;
+	private Pattern itemSeparatorPattern;
 	
 	public CommandParser() {
 		defaultPreParamPattern = Pattern.compile("^\\s+");
@@ -26,7 +27,8 @@ public class CommandParser {
 		integerPattern = Pattern.compile("^-?[1-9][0-9]*");
 		stringPattern = Pattern.compile("^\"(.*)\"");
 		locationPattern = Pattern.compile("^(the\\s+)?([a-zA-Z]+)");
-		itemPattern = Pattern.compile("^(an?|the|all|every|my|[0-9]+)?\\s+([a-z]+)", Pattern.CASE_INSENSITIVE);
+		itemPattern = Pattern.compile("^((an?|the|all|every|my|[0-9]+)\\s+)?([a-z]+(\\s+[a-z]+)*)+", Pattern.CASE_INSENSITIVE);
+		itemSeparatorPattern = Pattern.compile("((\\s+and)|(\\s*,))\\s+", Pattern.CASE_INSENSITIVE);
 	}
 	
 	void addCommandDefinition(CommandDefinition def) {
@@ -64,23 +66,19 @@ public class CommandParser {
 		Command cmd = new Command(cmdDef);
 		cmdLine = cmdLine.substring(charIndex);
 		
-		Iterator<CommandParameter.Type> paramTyIt = cmdDef.getParameterTypes().iterator();
-		Iterator<Pattern> preParamPatternIt = cmdDef.getPreParameterPatterns().iterator();
 		
-		while(paramTyIt.hasNext()) {
-			CommandParameter.Type paramTy = paramTyIt.next();
-			Pattern preParamPattern = preParamPatternIt.next();
-			if (preParamPattern == null) preParamPattern = defaultPreParamPattern;
-			
-			Matcher matcher = preParamPattern.matcher(cmdLine);
-			if (matcher.lookingAt()) {
-				cmdLine = cmdLine.substring(matcher.end()); //remove PreParamPattern
-			} else {
-				throw new CommandParsingException(MessageFormat.format("Pre param pattern \"{0}\" didn't match the start of \"{1}\"", preParamPattern.toString(), cmdLine));
-			}
-			
-			cmdLine = parseParameter(cmdLine, paramTy, cmd);
+		CommandParameter.Type paramTy = cmdDef.getParameterType();
+		Pattern preParamPattern = cmdDef.getPreParameterPattern();
+		if (preParamPattern == null) preParamPattern = defaultPreParamPattern;
+		
+		Matcher matcher = preParamPattern.matcher(cmdLine);
+		if (matcher.lookingAt()) {
+			cmdLine = cmdLine.substring(matcher.end()); //remove PreParamPattern
+		} else {
+			throw new CommandParsingException(MessageFormat.format("Pre param pattern \"{0}\" didn't match the start of \"{1}\"", preParamPattern.toString(), cmdLine));
 		}
+		
+		cmdLine = parseParameter(cmdLine, paramTy, cmd);
 		
 		if (cmdLine != null) {
 			Pattern endPattern = cmdDef.getEndPattern();
@@ -129,7 +127,7 @@ public class CommandParser {
 		}
 	}
 	public String parseString(String cmdLine, Command cmd)  throws CommandParsingException {
-		Matcher matcher = locationPattern.matcher(cmdLine);
+		Matcher matcher = stringPattern.matcher(cmdLine);
 		if (matcher.lookingAt()) {
 			String stringVal = matcher.group(1);
 			cmdLine = cmdLine.substring(matcher.end()); //remove
@@ -154,54 +152,68 @@ public class CommandParser {
 		return null;
 	}
 	public String parseItem(String cmdLine, Command cmd)  throws CommandParsingException {
-		Matcher matcher = itemPattern.matcher(cmdLine);
-		if (matcher.lookingAt()) {
-			String preString = matcher.group(1).toLowerCase();
-			String itemName = matcher.group(2);
-			cmdLine = cmdLine.substring(matcher.end()); //remove
-			
-			ItemParameter param = null;
-			if (preString.isEmpty()) {
-				param = new ItemParameter(1, itemName);
-			} else if (preString.equals("a") || preString.equals("an")) {
-				param = new ItemParameter(1, itemName);
-			} else if (preString.equals("the")) {
-				param = new ItemParameter(ItemParameter.QuantityType.Specific, itemName);
-			} else if (preString.equals("my")) {
-				param = new ItemParameter(ItemParameter.QuantityType.Specific, itemName);
-				param.setOwner(ItemParameter.Owner.Caller);
-			} else if (preString.equals("all") || preString.equals("every")) {
-				param = new ItemParameter(ItemParameter.QuantityType.All, itemName);
-			} else if (Character.isDigit(preString.charAt(0))) {
-				try {
-					int val = Integer.parseInt(preString);
-					param = new ItemParameter(val, itemName);
-				} catch (NumberFormatException e) {
-					throw new CommandParsingException(MessageFormat.format("Integer parsing failed \"{0}\"", preString));
+		String[] items = itemSeparatorPattern.split(cmdLine);
+		int index = 1;
+		for (String itemString : items) {
+			itemString = itemString.trim();
+			Matcher matcher = itemPattern.matcher(itemString);
+			if (matcher.lookingAt()) {
+				String preString = matcher.group(2).toLowerCase();
+				String itemName = matcher.group(3).trim().replaceAll("\\s+", " ");
+				itemString = itemString.substring(matcher.end()); //remove
+				
+				ItemParameter param = null;
+				if (preString.isEmpty()) {
+					param = new ItemParameter(1, itemName);
+				} else if (preString.equals("a") || preString.equals("an")) {
+					param = new ItemParameter(1, itemName);
+				} else if (preString.equals("the")) {
+					param = new ItemParameter(ItemParameter.QuantityType.Specific, itemName);
+				} else if (preString.equals("my")) {
+					param = new ItemParameter(ItemParameter.QuantityType.Specific, itemName);
+					param.setOwner(ItemParameter.Owner.Caller);
+				} else if (preString.equals("all") || preString.equals("every")) {
+					param = new ItemParameter(ItemParameter.QuantityType.All, itemName);
+				} else if (Character.isDigit(preString.charAt(0))) {
+					try {
+						int val = Integer.parseInt(preString);
+						param = new ItemParameter(val, itemName);
+					} catch (NumberFormatException e) {
+						throw new CommandParsingException(MessageFormat.format("Integer parsing failed \"{0}\"", preString));
+					}
+				} else {
+					throw new CommandParsingException("WTF error");
+				}
+				cmd.addParameter(param);
+				if (index == items.length) {
+					return itemString;
+				} else {
+					if (itemString != null && !itemString.isEmpty()) {
+						throw new CommandParsingException(MessageFormat.format("Unexpected \"{0}\", while parsing the item name", itemString));
+					}
 				}
 			} else {
-				throw new CommandParsingException("WTF error");
+				throw new CommandParsingException(MessageFormat.format("Expecting item... \"{0}\"", itemString));
 			}
-			cmd.addParameter(param);
-			return cmdLine;
-			
-		} else {
-			throw new CommandParsingException(MessageFormat.format("Expecting item... \"{0}\"", cmdLine));
+			index++;
 		}
+		return null;
 	}
 	
 	public static void main(String[] args) {
 		CommandParser parser = new CommandParser();
 		CommandDefinition runDefinition = new CommandDefinition("run", "runs?");
-		runDefinition.addParameter(Pattern.compile("^\\s+(to\\s+)?", Pattern.CASE_INSENSITIVE), CommandParameter.Type.Location);
+		runDefinition.setParameterType(CommandParameter.Type.Location);
+		runDefinition.setPreparameterPattern(Pattern.compile("^\\s+(to\\s+)?", Pattern.CASE_INSENSITIVE));
 		parser.addCommandDefinition(runDefinition);
 		
 		CommandDefinition eatDefinition = new CommandDefinition("eat", "eats?");
-		eatDefinition.addParameter(Pattern.compile("^\\s+", Pattern.CASE_INSENSITIVE), CommandParameter.Type.Item);
+		eatDefinition.setParameterType(CommandParameter.Type.Item);
+		eatDefinition.setPreparameterPattern(Pattern.compile("^\\s+", Pattern.CASE_INSENSITIVE));
 		parser.addCommandDefinition(eatDefinition);
 		
 		try {
-			Command cmd = parser.parse("eat 23 apples");
+			Command cmd = parser.parse("eat 23 apples , a sword, the dead king and the banana");
 			Console.out(cmd);
 		} catch (CommandParsingException ex) {
 			Console.out(ex);
