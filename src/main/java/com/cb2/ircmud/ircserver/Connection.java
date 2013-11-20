@@ -9,11 +9,13 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Queue;
 import java.util.Date;
 import java.util.concurrent.LinkedBlockingQueue;
+
 
 
 
@@ -100,10 +102,9 @@ public class Connection extends IrcUser implements Runnable {
 		sendServerReply(IrcReplyCode.RPL_BOUNCE, "PENALTY FNC EXCEPTS=e INVEX=I CASEMAPPING=ascii NETWORK=IrcMud :are supported by this server");
 
 		sendServerCommand(IrcReplyCode.RPL_MOTDSTART, IrcServer.globalServerName+" - Message Of The Day:");
-		sendServerCommand(IrcReplyCode.RPL_MOTD, "Tissit on kivoja.");
-		sendServerCommand(IrcReplyCode.RPL_MOTD, "Niin on kuppikakutkin.");
-		sendServerCommand(IrcReplyCode.RPL_MOTD, "");
-		sendServerCommand(IrcReplyCode.RPL_MOTD, "On mahdotonta olla masentunut, jos sinulla on ilmapallo. -Nalle Puh");
+	    Iterator<String> itr = IrcServer.MOTD.iterator();
+	    while (itr.hasNext())
+			sendServerCommand(IrcReplyCode.RPL_MOTD, itr.next());
 		sendServerCommand(IrcReplyCode.RPL_ENDOFMOTD, "End of /MOTD command.");
 
 		this.mode = "+i";

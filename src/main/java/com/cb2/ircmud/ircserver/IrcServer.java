@@ -21,6 +21,8 @@ public class IrcServer {
 	private static LoginBot loginBot = new LoginBot("LoginBot", "LoginBot");
 	private static Map<String, IrcUser> userNicknameMap = new HashMap<String, IrcUser>();
 	private static Map<String, Channel>       channelMap = new HashMap<String, Channel>();
+	
+	public static ArrayList<String> MOTD = new ArrayList<String>(); 
 		
 	public static void init(String _globalServerName, int _globalServerPort) throws IOException {
 		Console.out("IrcServer", "Initializing IrcServer("+_globalServerName+":"+_globalServerPort+")");
@@ -55,6 +57,11 @@ public class IrcServer {
 		// Initializing IrcCommands
 		Console.debug("Initializing IrcCommands");
 		IrcCommand.load(Config.ircCommandsXmlFile);
+		
+		MOTD = new ArrayList<String>(Arrays.asList(new String(
+				"Tissit on kivoja.\n"+
+				"Niin on kuppikakutkin.\n\n"+
+				"On mahdotonta olla masentunut, jos sinulla on ilmapallo. -Nalle Puh").split("\n") ) );
 	}
 	
 	public static boolean trySetNickname(IrcUser user, String nick) {
