@@ -6,29 +6,38 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import com.cb2.ircmud.Console;
+import com.cb2.ircmud.Player;
+
 
 public class AuthService {
+	
+	public static enum AuthError {
+		ERR_OK,
+		ERR_INVALIDLOGIN,
+		ERR_ALREADYLOGGED,
+	}
 	
 	public static class Account {
 		public String  username;
 		public byte[]  passdigest;
-		public boolean login;
+		public IrcUser user;
 		
 		public Account(String username, byte[] passdigest) {
 			this.username   = username;
 			this.passdigest = passdigest;
-			this.login      = false;
+			this.user       = null;
 		}
 		public void var_dump() {
-			Console.debug("AuthService.Account", "User  " + this.username);
-			Console.debug("AuthService.Account", "Hash  " + new String(this.passdigest));
-			Console.debug("AuthService.Account", "Login " + (this.login?"true":"false"));
+			Console.debug("AuthService.Account", "User    " + this.username);
+			Console.debug("AuthService.Account", "Hash    " + new String(this.passdigest));
+			Console.debug("AuthService.Account", "IrcUser " + (this.user==null?"null":this.user.getRepresentation()));
 		}
 	}
 	
 	private static MessageDigest digestInstance = null;
 	
 	private static HashMap<String, Account> accountMap = new HashMap<String, Account>();
+	private static HashMap<String, String> loginMap = new HashMap<String, String>();
 	
 	public static void init() {
 		try {
@@ -50,19 +59,27 @@ public class AuthService {
 	private static boolean compareBytes(byte[] bytes1, byte[] bytes2) {
 		return Arrays.equals(bytes1, bytes2);
 	}
-	public static Account login(String username, byte[] passdigest) {
+	
+	private static Player getPlayer(Account account) {
+		// TODO: 
+		return new Player(account.user.getNickname(), account.username);
+	}
+
+	public static Account login(String username, byte[] passdigest, IrcUser user) {
 		if (!accountMap.containsKey(username))  return null;
 		if (!compareBytes(accountMap.get(username).passdigest, passdigest)) return null;
 
-		accountMap.get(username).login = true;
+		accountMap.get(username).user = user;
 		return accountMap.get(username);
 	}
+
+	public static Account login(String username, String password, IrcUser user) {
+		return login(username, AuthService.digestInstance.digest(password.getBytes()), user);
+	}
+
 	public static boolean testLogin(String username) {
 		if (!accountMap.containsKey(username)) return false;
 
-		return accountMap.get(username).login;
-	}
-	public static Account login(String username, String password) {
-		return login(username, AuthService.digestInstance.digest(password.getBytes()));
+		return accountMap.get(username).user != null;
 	}
 }
