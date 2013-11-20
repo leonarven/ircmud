@@ -213,10 +213,10 @@ public enum IrcReplyCode {
 	RPL_ENDOFBANLIST("368"), //(RFC1459) <channel> :<info>
 	RPL_ENDOFWHOWAS("369"), //(RFC1459) <nick> :<info>
 	RPL_INFO("371"), //(RFC1459) :<string>
-	RPL_MOTD("378"), //(AustHex) 
 	RPL_INFOSTART("373"), //(RFC1459) 
 	RPL_ENDOFINFO("374"), //(RFC1459) :<info>
 	RPL_MOTDSTART("375"), //(RFC1459) :- <server> Message of the day -
+	RPL_MOTD("372"), 
 	RPL_ENDOFMOTD("376"), //(RFC1459) :<info>
 	RPL_KICKEXPIRED("377"), //(aircd) 
 	RPL_SPAM("377"), //(AustHex) :<text>
