@@ -1,4 +1,7 @@
-package com.cb2.ircmud.domain;
+package com.cb2.ircmud.domain.components;
+
+import com.cb2.ircmud.domain.containers.Room;
+import javax.persistence.ManyToOne;
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.addon.tostring.RooToString;
@@ -6,16 +9,8 @@ import org.springframework.roo.addon.tostring.RooToString;
 @RooJavaBean
 @RooToString
 @RooJpaActiveRecord
-public class UserCharacter {
+public class Door extends Component {
 
-    /**
-     */
-    private String name;
-    
-    /**
-     * Attributes
-     */
-    private int age;
-    private int health;
-    
+    @ManyToOne
+    private Room targetRoom;
 }
