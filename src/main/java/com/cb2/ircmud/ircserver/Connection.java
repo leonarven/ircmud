@@ -234,7 +234,7 @@ public class Connection extends IrcUser implements Runnable {
 					//TODO: Implement modes
 					if (command.arguments.length >= 2) {
 						if (command.arguments[1].equals("b") && Channel.isValidPrefix(command.arguments[0].charAt(0))) { //Ban list
-							IrcReply reply = IrcReply.serverReply(IrcReplyCode.RPL_ENDOFBANLIST, command.arguments[0], "End of channel ban list");
+							IrcReply reply = IrcReply.serverReply(IrcReplyCode.RPL_ENDOFBANLIST, this.getNickname(), command.arguments[0], "End of channel ban list");
 							this.sendReply(reply);
 							break;
 						}

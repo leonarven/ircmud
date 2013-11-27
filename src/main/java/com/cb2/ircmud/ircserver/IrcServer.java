@@ -19,7 +19,7 @@ public class IrcServer {
 	public static String globalServerInfo = "";
 	public static final String VERSION = "0.02";
 	
-	private static LoginBot loginBot = new LoginBot("LoginBot", "LoginBot");
+	private static LoginBot loginBot = new LoginBot("ACCOUNT", "Account bot");
 	private static Map<String, IrcUser> userNicknameMap = new HashMap<String, IrcUser>();
 	private static Map<String, Channel>       channelMap = new HashMap<String, Channel>();
 	
@@ -43,10 +43,9 @@ public class IrcServer {
 		Console.out("IrcServer", "Initializing AuthService");
         AuthService.init();
         
-        AuthService.addAccount("test", "test");
-        AuthService.addAccount("foo",  "test");
-        AuthService.addAccount("bar",  "test");
-		
+      //TODO: No hard-coded admin accounts :P
+  		AuthService.addAccount("admin", "password", Player.ACCESS_ADMIN);
+        
 		// Try to set Loginbot's nickname
 		Console.out("IrcServer", "Initializing LoginBot("+loginBot.getUsername()+")");
 		trySetNickname(loginBot, loginBot.getUsername());
@@ -58,9 +57,6 @@ public class IrcServer {
 		// Initializing IrcCommands
 		Console.debug("Initializing IrcCommands");
 		IrcCommand.load(Config.ircCommandsXmlFile);
-		
-		//TODO: No hard-coded admin accounts :P
-		AuthService.addAccount("admin", "password", Player.ACCESS_ADMIN);
 		
 		
 		MOTD = new ArrayList<String>(Arrays.asList(new String(
