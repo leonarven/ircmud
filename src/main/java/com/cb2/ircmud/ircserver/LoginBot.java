@@ -1,11 +1,14 @@
 package com.cb2.ircmud.ircserver;
 
+import com.cb2.ircmud.domain.Player;
+
 
 public class LoginBot extends IrcBotUser {
 	
 	public enum Command {
 		NOTIFY("NOTIFY", "[<username>[, <username>[, ...]]]"),
-		AUTH(  "AUTH",   "<username> <password>"),
+		LOGIN("LOGIN",   "<username> <password>"),
+		LOGOUT("LOGOUT", ""),
 		INFO(  "INFO",   "<username>"),
 		UNKNOWN(  "",   "");
 		
@@ -58,31 +61,33 @@ public class LoginBot extends IrcBotUser {
 		
 		if (command != null) {
 			switch(command) {
-				case AUTH:
+				case LOGIN:
 					if (params != null && params.length == 2) {
 						String username = params[0];
 						String password = params[1];
 	
-						boolean login = AuthService.testLogin(username);
-						AuthService.Account acc = AuthService.login(username, password, user);
-	
-						if (acc != null) {
-	
-							if (!login) {
-	
-								user.sendMessage(this, "Login successfully");
-	
-							} else {
-								user.sendMessage(this, "You have login already");
-							}
-	
+						if (user.getPlayer() != null) {
+							user.sendMessage(this, "You have logged in already");
 						} else {
-							user.sendMessage(this, "Invalid username or password");
+							
+							Player acc = AuthService.login(username, password, user);
+		
+							if (acc != null) {
+								user.sendMessage(this, "You have successfully logged in");
+							} else {
+								user.sendMessage(this, "Invalid username or password");
+							}
 						}
-						
-						acc.var_dump();
 	
 					} else user.sendMessage(this, command.usage());
+					break;
+				case LOGOUT:
+					if (user.getPlayer() == null) {
+						user.sendMessage(this, "You haven't logged in");
+					} else {
+						AuthService.logout(user.getPlayer());
+						user.sendMessage(this, "You have logged out");
+					}
 					break;
 				case NOTIFY:
 					if (params != null && params.length >= 1) {

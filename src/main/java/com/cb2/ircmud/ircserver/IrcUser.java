@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 import java.io.IOException;
+import com.cb2.ircmud.domain.Player;
 
 public abstract class IrcUser {
 	protected String nickname;
@@ -15,6 +16,7 @@ public abstract class IrcUser {
 	protected String hostname;
 	protected boolean keepRunning = true;
 	protected Map<String, Channel> joinedChannels = new HashMap<String, Channel>();
+	protected Player player = null;
 	
 	public static String getIrcUserRepresentation(String nick, String username, String hostname) {
 		return nick + "!" + username + "@" + hostname;
@@ -34,6 +36,16 @@ public abstract class IrcUser {
 	public String getHostname() { return hostname; }
 	public String getUsername() { return username; }
 	public String getMode() { return mode; }
+	public Player getPlayer() { return player; }
+	
+	/**
+	 * Only for AuthService
+	 * @param player
+	 */
+	public void setPlayer(Player player) {
+		this.player = player;
+		//TODO: Kick IrcUser (player == null) if doesn't have access to the channel anymore
+	}
 	
 	public boolean tryChangeNickname(String newNick) {
 		//Update IrcServer.userNicknameMap

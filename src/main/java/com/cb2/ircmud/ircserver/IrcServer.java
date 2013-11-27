@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import com.cb2.ircmud.Config;
 import com.cb2.ircmud.Console;
+import com.cb2.ircmud.domain.Player;
 
 import org.aspectj.weaver.patterns.ThisOrTargetAnnotationPointcut;
 
@@ -57,6 +58,10 @@ public class IrcServer {
 		// Initializing IrcCommands
 		Console.debug("Initializing IrcCommands");
 		IrcCommand.load(Config.ircCommandsXmlFile);
+		
+		//TODO: No hard-coded admin accounts :P
+		AuthService.addAccount("admin", "password", Player.ACCESS_ADMIN);
+		
 		
 		MOTD = new ArrayList<String>(Arrays.asList(new String(
 				  "Tissit on kivoja.\n"
