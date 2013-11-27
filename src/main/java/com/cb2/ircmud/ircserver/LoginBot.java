@@ -1,15 +1,21 @@
 package com.cb2.ircmud.ircserver;
 
+import java.util.regex.Pattern;
+
 import com.cb2.ircmud.domain.Player;
 
 
 public class LoginBot extends IrcBotUser {
 	
+	private Pattern usernamePattern;
+	private Pattern passwordPattern;
+	
 	public enum Command {
-		NOTIFY("NOTIFY", "[<username>[, <username>[, ...]]]"),
-		LOGIN("LOGIN",   "<username> <password>"),
+		//NOTIFY("NOTIFY", "[<username>[, <username>[, ...]]]"),
+		LOGIN("LOGIN",   "<username (your email address)> <password>"),
 		LOGOUT("LOGOUT", ""),
-		INFO(  "INFO",   "<username>"),
+		CREATE("CREATE", "<email> <password> <password>"),
+		INFO(  "INFO",   ""),
 		UNKNOWN(  "",   "");
 		
 		public String command, usage;
@@ -26,6 +32,12 @@ public class LoginBot extends IrcBotUser {
 	public LoginBot(String nick, String realname) {
 		super(nick, realname);
 		parsePrivateMessages = true;
+		
+		//Email pattern
+		usernamePattern = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$", Pattern.CASE_INSENSITIVE);
+		
+		//TODO: a good password pattern
+		passwordPattern = Pattern.compile(".+", Pattern.CASE_INSENSITIVE);
 	}
 	
 	@Override
@@ -89,7 +101,40 @@ public class LoginBot extends IrcBotUser {
 						user.sendMessage(this, "You have logged out");
 					}
 					break;
-				case NOTIFY:
+				case CREATE:
+					if (params != null && params.length == 3) {
+						if (user.getPlayer() != null) {
+							user.sendMessage(this, "You have logged in");
+							break;
+						}
+						String username = params[0];
+						String password = params[1];
+						String password2 = params[2];
+						if (!password.equals(password2)) {
+							user.sendMessage(this, "Passwords don't match");
+							break;
+						}
+						//TODO: Enable username validation
+						/*if (!usernamePattern.matcher(username).matches()) {
+							user.sendMessage(this, "Invalid email address");
+							break;
+						}*/
+						//TODO: Enable password validation
+						/*if (!passwordPattern.matcher(password).matches()) {
+							user.sendMessage(this, "Invalid password address");
+							break;
+						}*/
+						
+						if (!AuthService.addAccount(username, password)) {
+							user.sendMessage(this, "Already created an account with the same email");
+							break;
+						}
+						
+						AuthService.login(username, password, user);
+						user.sendMessage(this, "You have successfully created an account. You are now logged in.");
+					} else user.sendMessage(this, command.usage());
+					break;
+				/*case NOTIFY:
 					if (params != null && params.length >= 1) {
 						String cantFindTheseUsers = "";
 						for (String notifyUser : params) {
@@ -105,11 +150,15 @@ public class LoginBot extends IrcBotUser {
 							user.sendMessage(this, "Can't find nicks:" + cantFindTheseUsers);
 						}
 					} else user.sendMessage(this, command.usage());
-					break;
+					break;*/
 				case INFO:
-					if (params != null && params.length == 1) {
-						// TODO
-					} else user.sendMessage(this, command.usage());
+					if (!user.isLoggedIn()) {
+						user.sendMessage(this, "You must be logged in to use this command");
+						break;
+					}
+					
+					user.sendMessage(this, "You are logged in as \"" + user.getPlayer().getUsername() + "\"");
+					
 					break;
 				case UNKNOWN:
 				default:

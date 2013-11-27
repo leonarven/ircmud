@@ -37,6 +37,7 @@ public abstract class IrcUser {
 	public String getUsername() { return username; }
 	public String getMode() { return mode; }
 	public Player getPlayer() { return player; }
+	public boolean isLoggedIn() { return player != null; }
 	
 	/**
 	 * Only for AuthService
