@@ -2,7 +2,11 @@ package com.cb2.ircmud.domain.containers;
 
 
 import com.cb2.ircmud.domain.World;
+import com.cb2.ircmud.ircserver.Channel;
+
 import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
+
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.addon.tostring.RooToString;
@@ -17,4 +21,6 @@ public class Room extends Container {
     @ManyToOne
     private World world;
 
+    @Transient
+    private Channel channel;
 }
