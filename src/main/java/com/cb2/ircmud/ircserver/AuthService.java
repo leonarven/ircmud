@@ -31,6 +31,7 @@ public class AuthService {
 	}
 	
 	public static boolean addAccount(String username, String password, int access) {
+		username = username.toLowerCase();
 		List<Player> playerList = Player.findPlayersByUsernameEquals(username).getResultList();
 		if (!playerList.isEmpty()) { //Already created an account with the same user name
 			return false;
@@ -45,6 +46,7 @@ public class AuthService {
 	}
 
 	public static Player login(String username, String password, IrcUser user) {
+		username = username.toLowerCase();
 		List<Player> playerList = Player.findPlayersByUsernameEquals(username).getResultList();
 		if (playerList.isEmpty()) { //Already created an account with the same user name
 			return null;
