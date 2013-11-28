@@ -1,8 +1,13 @@
 package com.cb2.ircmud.domain;
+import java.util.List;
+
 import javax.persistence.Transient;
+
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.addon.tostring.RooToString;
+
+import com.cb2.ircmud.PlayerState;
 import com.cb2.ircmud.ircserver.IrcUser;
 
 @RooJavaBean
@@ -28,6 +33,9 @@ public class Player {
 
     @Transient
     private IrcUser ircUser;
+    
+    @Transient
+    private List<PlayerState> state;
     
     @Transient
     boolean hasGamemasterAccess() {

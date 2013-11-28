@@ -5,8 +5,8 @@ import java.util.ArrayList;
 
 public class Channel {
 
-	private ArrayList<IrcUser> channelMembers = new ArrayList<IrcUser>();
-	private String topic;
+	protected ArrayList<IrcUser> channelMembers = new ArrayList<IrcUser>();
+	protected String topic;
 	protected String name;
 	public String mode;
 	
@@ -54,22 +54,22 @@ public class Channel {
 			sendReplyToAll(joinReply);
 			
 			if (this.topic != null) {
-				IrcReply topicReply = IrcReply.serverReply(IrcReplyCode.RPL_TOPIC, user.nickname, this.name, this.topic);
-				IrcReply topicDateReply = IrcReply.serverReply("333", user.nickname, this.name, "admin!admin@IrcMud", "0", "");
+				IrcReply topicReply = IrcReply.serverReply(IrcReplyCode.RPL_TOPIC, user.getNickname(), this.name, this.topic);
+				IrcReply topicDateReply = IrcReply.serverReply("333", user.getNickname(), this.name, "admin!admin@IrcMud", "0", "");
 
 				user.sendReply(topicReply);
 				user.sendReply(topicDateReply);
 			} else {
-				IrcReply topicReply = IrcReply.serverReply(IrcReplyCode.RPL_NOTOPIC, user.nickname, this.name, "No topic is set");
+				IrcReply topicReply = IrcReply.serverReply(IrcReplyCode.RPL_NOTOPIC, user.getNickname(), this.name, "No topic is set");
 
 				user.sendReply(topicReply);
 			}
 
-			String userlist = user.nickname;
-			for(IrcUser _user : channelMembers) userlist = userlist + " " +  _user.nickname;
+			String userlist = user.getNickname();
+			for(IrcUser _user : channelMembers) userlist = userlist + " " +  _user.getNickname();
 
-			IrcReply namesReply = IrcReply.serverReply(IrcReplyCode.RPL_NAMREPLY, user.nickname, "@", this.name, userlist.trim());
-			IrcReply namesEndReply = IrcReply.serverReply("366", user.nickname, this.name , "End of /NAMES list.");
+			IrcReply namesReply = IrcReply.serverReply(IrcReplyCode.RPL_NAMREPLY, user.getNickname(), "@", this.name, userlist.trim());
+			IrcReply namesEndReply = IrcReply.serverReply("366", user.getNickname(), this.name , "End of /NAMES list.");
 
 			user.sendReply(namesReply);
 			user.sendReply(namesEndReply);
