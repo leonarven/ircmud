@@ -2,8 +2,6 @@ package com.cb2.ircmud.ircserver;
 
 import java.util.ArrayList;
 
-import com.cb2.ircmud.ChannelReplyProxy;
-import com.cb2.ircmud.DefaultChannelReplyProxy;
 
 public class Channel {
 
@@ -11,7 +9,6 @@ public class Channel {
 	private String topic;
 	protected String name;
 	public String mode;
-	private ChannelReplyProxy messageProxy = new DefaultChannelReplyProxy();
 	
 	public Channel(String name) {
 		this.name = name;
@@ -23,19 +20,17 @@ public class Channel {
 	public ArrayList<IrcUser> getChannelMembers() { return channelMembers; }
 	
 	public void sendReplyToAll(IrcReply reply) {
-		IrcReply proxyReply = messageProxy.reply(reply);
 		synchronized (channelMembers) {
 			for (IrcUser user : channelMembers) {
-				user.sendReply(proxyReply);
+				user.sendReply(reply);
 			}
 		}
 	}
 	
 	public void sendReplyToAllExceptSender(IrcReply reply) {
-		IrcReply proxyReply = messageProxy.reply(reply);
 		synchronized (channelMembers) {
 			for (IrcUser user : channelMembers) {
-				if (user != reply.getSender()) user.sendReply(proxyReply);
+				if (user != reply.getSender()) user.sendReply(reply);
 			}
 		}
 	}

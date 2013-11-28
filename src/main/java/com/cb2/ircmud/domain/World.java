@@ -19,4 +19,6 @@ public class World {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy="world")
     private Set<Room> rooms = new HashSet<Room>();
+	
+	private String name;
 }

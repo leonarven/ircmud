@@ -20,7 +20,4 @@ public class Room extends Container {
 
     @ManyToOne
     private World world;
-
-    @Transient
-    private Channel channel;
 }
