@@ -14,35 +14,35 @@ public abstract class IrcBotUser extends IrcUser {
 	
 	@Override
 	public void sendReply(IrcReply reply) {
-		if ((parsePrivateMessages || parseChannelMessages) && reply.command().equals("PRIVMSG")) {
+		if ((parsePrivateMessages || parseChannelMessages) && reply.getCommandName().equals("PRIVMSG")) {
 			parsePrivateMessage(reply);
 		}
-		else if (parseJoinMessages && reply.command().equals("JOIN")) {
+		else if (parseJoinMessages && reply.getCommandName().equals("JOIN")) {
 			
 		}
 	}
 	
 	public void parsePrivateMessage(IrcReply reply) {
-		String sender = IrcUser.getNicknameFromRepresentation(reply.sender());
+		IrcUser sender = reply.getSender();
 		if (Channel.isValidPrefix(reply.argument(0).charAt(0))) { //Channel msg
 			if (parseChannelMessages) {
-				receiveChannelMessage(sender, reply.argument(0), reply.postfix());
+				receiveChannelMessage(sender, reply.argument(0), reply.getPostfix());
 			}
 		}
 		else if (parsePrivateMessages) {
-			receivePrivateMessage(sender, reply.postfix());
+			receivePrivateMessage(sender, reply.getPostfix());
 		}
 	}
 	
 	public void parseJoinMessage(IrcReply join) {
-		String joinedUser = IrcUser.getNicknameFromRepresentation(join.sender());
+		IrcUser joinedUser = join.getSender();
 		String channel = join.argument(0);
 		receiveJoinMessage(joinedUser, channel);
 	}
 	
-	public void receivePrivateMessage(String sender, String msg) {}
-	public void receiveChannelMessage(String sender, String chan, String msg) {}
-	public void receiveJoinMessage(String joinedUser, String channel) {}
+	public void receivePrivateMessage(IrcUser sender, String msg) {}
+	public void receiveChannelMessage(IrcUser sender, String chan, String msg) {}
+	public void receiveJoinMessage(IrcUser joinedUser, String channel) {}
 
 	@Override
 	boolean isConnection() {

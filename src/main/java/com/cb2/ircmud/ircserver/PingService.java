@@ -11,40 +11,36 @@ public class PingService implements Runnable {
 	private static long pingTimeout  = 10000;
 	private static int pingCheckTime = 1000;
 	private static long newPingTime  = 10000;
-	private static HashMap<String, Long> lastPongMap = new HashMap<String, Long>();
-	private static HashMap<String, Long> lastPingMap = new HashMap<String, Long>();
+	private static HashMap<Connection, Long> lastPongMap = new HashMap<Connection, Long>();
+	private static HashMap<Connection, Long> lastPingMap = new HashMap<Connection, Long>();
 
-	public static void addPartner(String nickName) {
-		System.out.println("DEBUG: PingService:addPartner("+nickName+")");
-		lastPongMap.put(nickName, new Date().getTime());
-		lastPingMap.put(nickName, new Date().getTime());
+	public static void addPartner(Connection connection) {
+		System.out.println("DEBUG: PingService:addPartner("+connection.getRepresentation()+")");
+		lastPongMap.put(connection, new Date().getTime());
+		lastPingMap.put(connection, new Date().getTime());
 	}
-	public static void addPartner(IrcUser user) {
-		addPartner(user.getNickname().toLowerCase());
-	}
-	public static void dropPartner(String nickName) {
-		System.out.println("DEBUG: PingService:dropPartner("+nickName+")");
-		lastPongMap.remove(nickName);
-		lastPingMap.remove(nickName);
+
+	public static void dropPartner(Connection connection) {
+		System.out.println("DEBUG: PingService:dropPartner("+connection.getRepresentation()+")");
+		lastPongMap.remove(connection);
+		lastPingMap.remove(connection);
 	}
 	
-	public static void pongFrom(String nickName) {
-		System.out.println("DEBUG: PingService:pongFrom("+nickName+") :"+(lastPongMap.containsKey(nickName)?(""+lastPongMap.get(nickName)):"no"));
-		if (lastPongMap.containsKey(nickName)) return;
+	public static void pongFrom(Connection connection) {
+		System.out.println("DEBUG: PingService:pongFrom("+connection.getRepresentation()+") :"+(lastPongMap.containsKey(connection)?(""+lastPongMap.get(connection)):"no"));
+		if (lastPongMap.containsKey(connection)) return;
 
-		lastPongMap.put(nickName, new Date().getTime());
-	}
-	public static void pongFrom(IrcUser user) {
-		pongFrom(user.getNickname().toLowerCase());
+		lastPongMap.put(connection, new Date().getTime());
 	}
 	
-	private static long pingTimeDiff(String nickName, long time) {
-		if (!lastPongMap.containsKey(nickName)) return -1;
+	private static long pingTimeDiff(Connection connection, long time) {
+		if (!lastPongMap.containsKey(connection)) return -1;
 		
-		return time - lastPongMap.get(nickName).longValue();
+		return time - lastPongMap.get(connection).longValue();
 	}
-	private static long pingTimeDiff(String nickName) {
-		return pingTimeDiff(nickName, new Date().getTime());
+	
+	private static long pingTimeDiff(Connection connection) {
+		return pingTimeDiff(connection, new Date().getTime());
 	}
 	
 	public static void init(int pingCheckTime, long pingTimeout) {
@@ -61,38 +57,36 @@ public class PingService implements Runnable {
 	public void run() {
 		
 		long currentTime, diff;
-		IrcUser user;
+		Connection user;
 		while(true) {
 	        currentTime = new Date().getTime();
 
-	        Iterator<Map.Entry<String, Long>> pongit = PingService.lastPongMap.entrySet().iterator();
+	        Iterator<Map.Entry<Connection, Long>> pongit = PingService.lastPongMap.entrySet().iterator();
 	        while (pongit.hasNext()) {
-	            Map.Entry<String, Long> entry = (Map.Entry<String, Long>)pongit.next();
+	            Map.Entry<Connection, Long> entry = (Map.Entry<Connection, Long>)pongit.next();
 		        diff = currentTime - entry.getValue().longValue();
-	        	user = IrcServer.findUserByNickname(entry.getKey());
 		        
+		        user = entry.getKey();
 		        if (diff > PingService.pingTimeout) {
-		        	if (user != null) {
-		        		user.quit("Ping timeout ("+diff+"ms)");
-		        		IrcServer.dropUser(entry.getKey());
-		        	}
+	        		user.quit("Ping timeout ("+diff+"ms)");
+	        		IrcServer.dropConnection(user);
 		        }
 		        pongit.remove();
 	        }	        
 	        
-	        Iterator<Map.Entry<String, Long>> pingit = PingService.lastPingMap.entrySet().iterator();
+	        Iterator<Map.Entry<Connection, Long>> pingit = PingService.lastPingMap.entrySet().iterator();
 	        while (pingit.hasNext()) {
-	            Map.Entry<String, Long> entry = (Map.Entry<String, Long>)pingit.next();
+	            Map.Entry<Connection, Long> entry = (Map.Entry<Connection, Long>)pingit.next();
 		        
-	        	user = IrcServer.findUserByNickname(entry.getKey());
+	        	user = entry.getKey();
 		        diff = currentTime - entry.getValue().longValue();
 	        	
 	        	if (diff > PingService.newPingTime) {
 	        		user.sendPing(IrcServer.globalServerName);
-	        		lastPingMap.put(entry.getKey(), new Date().getTime());
+	        		lastPingMap.put(user, new Date().getTime());
 	        	}
 	            pingit.remove();
-	        }	        
+	        }
 		    
 		    try {
 				Thread.sleep(PingService.pingCheckTime);

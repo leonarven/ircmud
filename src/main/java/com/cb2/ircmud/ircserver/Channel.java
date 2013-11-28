@@ -35,7 +35,7 @@ public class Channel {
 		IrcReply proxyReply = messageProxy.reply(reply);
 		synchronized (channelMembers) {
 			for (IrcUser user : channelMembers) {
-				if (!user.getRepresentation().equals(reply.sender())) user.sendReply(proxyReply);
+				if (user != reply.getSender()) user.sendReply(proxyReply);
 			}
 		}
 	}

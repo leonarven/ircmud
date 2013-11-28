@@ -28,7 +28,6 @@ import com.cb2.ircmud.ircserver.IrcCommand;
 public class Connection extends IrcUser implements Runnable {
 	private InetSocketAddress address;
 	private Socket socket = null;
-	private long lastPongReply;
 	
 	public Connection(Socket socket){
 		this.socket = socket;

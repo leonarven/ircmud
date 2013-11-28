@@ -40,14 +40,9 @@ public class LoginBot extends IrcBotUser {
 		passwordPattern = Pattern.compile(".+", Pattern.CASE_INSENSITIVE);
 	}
 	
-	@Override
-	public void sendPing(String ping) {
-		
-	}
 	
 	@Override
-	public void receivePrivateMessage(String sender, String msg) {
-		IrcUser user = IrcServer.findUserByNickname(sender);
+	public void receivePrivateMessage(IrcUser user, String msg) {
 		if (user == null) return;
 		
 		String[] parts = msg.split(" ");

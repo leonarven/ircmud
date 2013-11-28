@@ -157,11 +157,24 @@ public class IrcServer {
 		nickName = nickName.toLowerCase();
 		synchronized (userNicknameMap) {
 			if (!userNicknameMap.containsKey(nickName)) return;
-
+			IrcUser u = userNicknameMap.get(nickName);
 			userNicknameMap.remove(nickName);
-			PingService.dropPartner(nickName);
+			
+			if (u instanceof Connection)
+				PingService.dropPartner((Connection)u);
 		}
 	}
+	public static void dropConnection(Connection con) {
+		Console.debug("IrcServer::dropConnection("+con.getRepresentation()+")");
+		String nickName = con.getNickname().toLowerCase();
+		synchronized (userNicknameMap) {
+			if (!userNicknameMap.containsKey(nickName)) return;
+
+			userNicknameMap.remove(nickName);
+			PingService.dropPartner(con);
+		}
+	}
+	
 	public static void dropChannel(String channelName) {
 		Console.debug("IrcServer::dropChannel("+channelName+")");
 		channelName = channelName.toLowerCase();

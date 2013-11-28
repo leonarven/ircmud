@@ -28,7 +28,6 @@ public abstract class IrcUser {
 	
 	
 	abstract void sendReply(IrcReply reply);
-	abstract void sendPing(String ping);
 	abstract boolean isConnection();
 	
 	public String getNickname() { return nickname; }
@@ -57,7 +56,7 @@ public abstract class IrcUser {
 		for (Map.Entry<String, Channel> entry : joinedChannels.entrySet()) {
 			userSet.addAll(entry.getValue().getChannelMembers());
 		}
-		IrcReply nickReply = new IrcReply(getRepresentation(), "NICK", newNick);
+		IrcReply nickReply = new IrcReply(this, "NICK", newNick);
 		for (IrcUser user : userSet) {
 			user.sendReply(nickReply);
 		}
@@ -95,7 +94,9 @@ public abstract class IrcUser {
 				entry.getValue().memberQuit(this, msg);
 			}
 		}
-		sendReply(new IrcReply("ERROR", "Closing Link: "+this.getRepresentation()+"(\""+msg+"\")"));
+		if (this instanceof Connection) {
+			((Connection)this).sendRawString("ERROR :Closing Link: " + this.getRepresentation() + " (\"" + msg + "\")");
+		}
 		keepRunning = false;
 		return true;
 	}

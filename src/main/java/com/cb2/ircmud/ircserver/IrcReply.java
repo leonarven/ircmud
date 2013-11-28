@@ -6,10 +6,10 @@ public class IrcReply {
 
 	private ArrayList<String> arguments = new ArrayList<String>();
 	private String postfix = null;
-	private String sender = null;
+	private IrcUser sender = null;
 	private String command = null;
 
-	public IrcReply(String sender, Object command, String... args) {
+	public IrcReply(IrcUser sender, Object command, String... args) {
 		this.sender = sender;
 		this.command = command.toString();
 		if (args.length > 0) {
@@ -19,12 +19,9 @@ public class IrcReply {
 
 		for( String argv: args ) if (!argv.isEmpty()) this.arguments.add(argv);
 	}
-	public IrcReply(IrcUser sender, Object command, String... args) {
-		this(sender.getRepresentation(), command, args);
-	}
 
 	public static IrcReply serverReply(Object command, String... args) {
-		return new IrcReply(IrcServer.globalServerName, command, args);
+		return new IrcReply(null, command, args);
 	}
 	
 	public String argument( int n ) {
@@ -35,20 +32,27 @@ public class IrcReply {
 		return this.arguments.get(n);
 	}
 
-	public String postfix() {
+	public String getPostfix() {
 		return this.postfix;
 	}
 	
-	public String sender() {
+	public String senderRepresentation() {
+		if (this.sender == null)
+			return IrcServer.globalServerName;
+		return this.sender.getRepresentation();
+	}
+	
+	public IrcUser getSender() {
 		return this.sender;
 	}
+	
 
-	public String command() {
+	public String getCommandName() {
 		return this.command;
 	}
 	
 	public String toString() {
-		String string = ":" + this.sender + " "  + this.command + " ";
+		String string = ":" + senderRepresentation() + " "  + this.command + " ";
 		for( String str : this.arguments )
 			string = string + str + " ";
 		if (this.postfix != null)
@@ -57,7 +61,7 @@ public class IrcReply {
 	}
 	public void var_dump() {
 		System.out.println("DEBUG: IrcReply::var_dump()");
-		System.out.println("Sender = "+sender);
+		System.out.println("Sender = "+senderRepresentation());
 		System.out.println("Command = "+this.command);
 		for( String str : this.arguments )
 			System.out.println("Argument[] = "+str);
