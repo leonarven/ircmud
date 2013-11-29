@@ -2,7 +2,6 @@ package com.cb2.ircmud.command;
 
 import java.util.regex.Pattern;
 import com.cb2.ircmud.command.CommandParameter;
-import java.util.Vector;
 
 public class CommandDefinition {
 	protected String						name;

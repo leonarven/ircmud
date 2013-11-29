@@ -5,8 +5,6 @@ import com.cb2.ircmud.command.Command;
 import com.cb2.ircmud.command.CommandDefinition;
 
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

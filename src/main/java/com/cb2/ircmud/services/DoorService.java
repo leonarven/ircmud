@@ -2,7 +2,6 @@ package com.cb2.ircmud.services;
 
 import java.util.List;
 
-import javax.persistence.TypedQuery;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

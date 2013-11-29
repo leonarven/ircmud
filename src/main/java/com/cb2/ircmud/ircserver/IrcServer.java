@@ -191,7 +191,7 @@ public class IrcServer {
 		channelMap.put(chan.getName().toLowerCase(), chan);
 	}
 	
-	public void run() {
+	public void run() throws IOException {
 		Console.out("IrcServer", "Starting server loop");
 
 		while (true) {
@@ -202,6 +202,8 @@ public class IrcServer {
 				thread.start();
 			} catch(IOException e) {
 				System.err.println("IrcServer: IOException at Server.run: " + e.getMessage());
+			} finally {
+					close();
 			}
 		}
 	}

@@ -5,11 +5,14 @@ import org.springframework.stereotype.Component;
 import com.cb2.ircmud.domain.Player;
 import com.cb2.ircmud.services.PlayerService;
 
-//@Component
-//@Scope("prototype")
+@Component
 public class AdminBot extends IrcBotUser {
-	//@Autowired
-	protected PlayerService playerService;
+	@Autowired
+	private PlayerService playerService;
+	
+	public AdminBot(){
+		super("Admin", "");
+    }
 	
 	public enum Command {
 		GIVE("GIVE",   "ADMIN/GAMEMASTER <nickname or username(email)>"),

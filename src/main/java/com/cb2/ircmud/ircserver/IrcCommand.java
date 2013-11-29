@@ -1,13 +1,13 @@
 package com.cb2.ircmud.ircserver;
 
-import java.util.Map;
+
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.io.File;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.*;
 
@@ -130,9 +130,9 @@ public enum IrcCommand {
 		System.out.println("DEBUG: Command " + argument("command") + " from " +con.getRepresentation());
 		System.out.print("DEBUG: prefix:" + prefix);
 		
-		Iterator it = this.argumentMap.entrySet().iterator();
+		Iterator<Entry<String, String>> it = this.argumentMap.entrySet().iterator();
 		while (it.hasNext()) {
-			Map.Entry pairs = (Map.Entry)it.next();
+			Entry<String, String> pairs = it.next();
 
 			if (pairs.getKey().equals("command")) continue;
 

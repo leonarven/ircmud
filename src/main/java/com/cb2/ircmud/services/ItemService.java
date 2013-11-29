@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cb2.ircmud.domain.Item;
 import com.cb2.ircmud.domain.containers.Container;
-import com.cb2.ircmud.domain.containers.Room;
 
 @Service
 public class ItemService {
