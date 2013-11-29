@@ -371,12 +371,12 @@ public class Connection extends IrcUser implements Runnable {
 	}
 
 	@Override
-	void sendReply(IrcReply reply) {
+	public void sendReply(IrcReply reply) {
 		this.sendRawString(reply.toString());
 	}
 
 	@Override
-	boolean isConnection() {
+	public boolean isConnection() {
 		return true;
 	}
 		

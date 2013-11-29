@@ -1,5 +1,7 @@
 package com.cb2.ircmud.domain;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
 import javax.persistence.Transient;
 
@@ -7,6 +9,7 @@ import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.addon.tostring.RooToString;
 
+import com.cb2.ircmud.PlayerGameState;
 import com.cb2.ircmud.PlayerState;
 import com.cb2.ircmud.ircserver.IrcUser;
 
@@ -15,9 +18,10 @@ import com.cb2.ircmud.ircserver.IrcUser;
 @RooJpaActiveRecord(finders = { "findPlayersByUsernameEquals" })
 public class Player {
 
-	public final static int ACCESS_NORMAL = 0;
-	public final static int ACCESS_GAMEMASTER = 10;
-	public final static int ACCESS_ADMIN = 100;
+	public final static int ACCESS_NORMAL = 0;		//00
+	public final static int ACCESS_GAMEMASTER = 1;	//01
+	public final static int ACCESS_ADMIN_ONLY = 2;  //10
+	public final static int ACCESS_ADMIN = 3;		//11
 	
 	
 	
@@ -30,20 +34,69 @@ public class Player {
     /**
      */
     private String passwordHash;
+    
+    
+    private List<Item> characters  = new Vector<Item>();
 
     @Transient
     private IrcUser ircUser;
     
     @Transient
-    private List<PlayerState> state;
+    private List<PlayerState> state = new Vector<PlayerState>();
     
-    @Transient
-    boolean hasGamemasterAccess() {
-    	return access >= ACCESS_GAMEMASTER;
+    public Item findCharacterByName(String name) {
+    	Iterator<Item> i = characters.iterator();
+    	while (i.hasNext()) {
+    		Item item = i.next();
+    		if (item.getName().equals(name)) {
+    			return item;
+    		}
+    	}
+    	return null;
     }
     
-    @Transient
-    boolean hasAdminAccess() {
-    	return access >= ACCESS_ADMIN;
+    public PlayerGameState getGameState() {
+    	for (Iterator<PlayerState> i = state.iterator(); i.hasNext();) {
+    		PlayerState s = i.next();
+    		if (s instanceof PlayerGameState) {
+    			return (PlayerGameState)s;
+    		}
+    	}
+    	return null;
+    }
+    
+    public boolean hasStateWithGroup(int group) {
+    	return getStateByGroup(group) != null;
+    }
+    
+    public PlayerState getStateByGroup(int group) {
+    	for (Iterator<PlayerState> i = state.iterator(); i.hasNext();) {
+    		PlayerState s = i.next();
+    		if (s.getStateGroup() == group) {
+    			return s;
+    		}
+    	}
+    	return null;
+    }
+    
+    public boolean playing() {
+    	return getGameState() != null;
+    }
+    
+    
+    public boolean hasGamemasterAccess() {
+    	return (access & ACCESS_GAMEMASTER) == ACCESS_GAMEMASTER;
+    }
+    
+    public boolean hasAdminAccess() {
+    	return (access & ACCESS_ADMIN) == ACCESS_ADMIN;
+    }
+    
+    public void giveAccess(int access) {
+    	this.access |= access;
+    }
+    
+    public void removeAccess(int access) {
+    	this.access &= ~access;
     }
 }

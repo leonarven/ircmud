@@ -12,5 +12,20 @@ public class CharacterComponent {
      * Attributes
      */
     private int age;
+    private int height;
+    private int speed;
+    private int awareness;
+    
+    /**
+     * Skills
+     */
+    private int skillDodging;
+    private int skillMeleeAttack;
+    private int skillSwordAttack;
+    private int skillBowAttack;
+    private int skillThrowing;
+    private int skillSneaking;
+    private int skillHiding;
+    private int skillRepairing;
     
 }

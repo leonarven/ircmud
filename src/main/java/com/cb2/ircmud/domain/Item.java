@@ -3,7 +3,9 @@ package com.cb2.ircmud.domain;
 import com.cb2.ircmud.domain.components.Component;
 import com.cb2.ircmud.domain.containers.Container;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -26,6 +28,8 @@ public class Item {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy="item")
     private Set<Component> components = new HashSet<Component>();
+    
+    private Map<String, Component> componentsById = new HashMap<String, Component>();
 
     @ManyToOne
     private Container location;
