@@ -6,7 +6,7 @@ import org.springframework.roo.addon.tostring.RooToString;
 @RooJavaBean
 @RooToString
 @RooJpaActiveRecord
-public class CharacterComponent {
+public class CharacterComponent extends Component {
 
     /**
      * Attributes

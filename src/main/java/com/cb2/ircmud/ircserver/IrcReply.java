@@ -2,13 +2,18 @@ package com.cb2.ircmud.ircserver;
 
 import java.util.ArrayList;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 public class IrcReply {
 
 	private ArrayList<String> arguments = new ArrayList<String>();
 	private String postfix = null;
 	private IrcUser sender = null;
 	private String command = null;
-
+	
+	@Autowired 
+	IrcServer server;
+	
 	public IrcReply(IrcUser sender, Object command, String... args) {
 		this.sender = sender;
 		this.command = command.toString();
@@ -38,7 +43,7 @@ public class IrcReply {
 	
 	public String senderRepresentation() {
 		if (this.sender == null)
-			return IrcServer.globalServerName;
+			return server.globalServerName;
 		return this.sender.getRepresentation();
 	}
 	

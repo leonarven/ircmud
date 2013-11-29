@@ -2,6 +2,7 @@ package com.cb2.ircmud;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.cb2.ircmud.ircserver.IrcServer;
@@ -11,7 +12,10 @@ public class Ircmud {
 	
 	public static String globalServerName = Config.ServerName;
 	public static int    globalServerPort = Config.ServerPort;
-
+	
+	@Autowired
+	IrcServer server;
+	
 	public void main(String[] args) {
         Console.debug("Ircmud::main()");
 
@@ -31,11 +35,11 @@ public class Ircmud {
 
 		try {
 			Console.out("Creating Server");
-			IrcServer.init(globalServerName, globalServerPort);
+			server.init(globalServerName, globalServerPort);
 
-			IrcServer.run();
+			server.run();
 
-			IrcServer.close();
+			server.close();
 			
 		} catch(IOException e) {
 			

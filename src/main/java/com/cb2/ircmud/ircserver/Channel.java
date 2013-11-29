@@ -2,6 +2,8 @@ package com.cb2.ircmud.ircserver;
 
 import java.util.ArrayList;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 
 public class Channel {
 
@@ -9,6 +11,10 @@ public class Channel {
 	protected String topic;
 	protected String name;
 	public String mode;
+	
+	@Autowired 
+	IrcServer server;
+	
 	
 	public Channel(String name) {
 		this.name = name;
@@ -40,7 +46,7 @@ public class Channel {
 			for(IrcUser _user : channelMembers) {
 				// TODO H/G => here/gone
 				// TODO: H/G:n perään tulee henkilön statuksen indikoiva merkki (+/@)
-				IrcReply whoReply = IrcReply.serverReply(IrcReplyCode.RPL_WHOREPLY, user.getNickname(), this.name, _user.getNickname(), _user.getHostname(), IrcServer.globalServerName, _user.getNickname(), "H", "0 0 " + _user.getRealname());
+				IrcReply whoReply = IrcReply.serverReply(IrcReplyCode.RPL_WHOREPLY, user.getNickname(), this.name, _user.getNickname(), _user.getHostname(), server.globalServerName, _user.getNickname(), "H", "0 0 " + _user.getRealname());
 				user.sendReply(whoReply);
 			}
 			IrcReply whoEndReply = IrcReply.serverReply(IrcReplyCode.RPL_ENDOFWHO, user.getNickname(), this.name, "End of /WHO list.");

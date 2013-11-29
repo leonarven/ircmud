@@ -9,6 +9,7 @@ public class Main {
 
         ApplicationContext ctx = new FileSystemXmlApplicationContext(Config.applicationContextFile);
         
+        //Do what @Autowired would do, because we are not in the context yet
         Ircmud ircmud = ctx.getBean(Ircmud.class);
         ircmud.main(args);
     }

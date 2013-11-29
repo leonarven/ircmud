@@ -1,8 +1,10 @@
 package com.cb2.ircmud.domain;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
+import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
 import org.springframework.roo.addon.javabean.RooJavaBean;
@@ -11,6 +13,7 @@ import org.springframework.roo.addon.tostring.RooToString;
 
 import com.cb2.ircmud.PlayerGameState;
 import com.cb2.ircmud.PlayerState;
+import com.cb2.ircmud.domain.components.CharacterComponent;
 import com.cb2.ircmud.ircserver.IrcUser;
 
 @RooJavaBean
@@ -36,7 +39,8 @@ public class Player {
     private String passwordHash;
     
     
-    private List<Item> characters  = new Vector<Item>();
+    @OneToMany
+    private Set<CharacterComponent> characters;
 
     @Transient
     private IrcUser ircUser;
@@ -45,9 +49,8 @@ public class Player {
     private List<PlayerState> state = new Vector<PlayerState>();
     
     public Item findCharacterByName(String name) {
-    	Iterator<Item> i = characters.iterator();
-    	while (i.hasNext()) {
-    		Item item = i.next();
+    	for (CharacterComponent c : characters) {
+			Item item = c.getItem();
     		if (item.getName().equals(name)) {
     			return item;
     		}

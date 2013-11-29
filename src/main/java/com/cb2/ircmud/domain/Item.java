@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.ElementCollection;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -29,6 +30,7 @@ public class Item {
     @OneToMany(cascade = CascadeType.ALL, mappedBy="item")
     private Set<Component> components = new HashSet<Component>();
     
+    @ElementCollection
     private Map<String, Component> componentsById = new HashMap<String, Component>();
 
     @ManyToOne

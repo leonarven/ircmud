@@ -9,23 +9,24 @@ import com.cb2.ircmud.Config;
 import com.cb2.ircmud.Console;
 import com.cb2.ircmud.domain.Player;
 
-import org.aspectj.weaver.patterns.ThisOrTargetAnnotationPointcut;
+import org.springframework.stereotype.Component;
 
+@Component
 public class IrcServer {
 	
-	private static ServerSocket serverSocket;
-	public static String globalServerName;
-	public static int    globalServerPort;
-	public static String globalServerInfo = "";
-	public static final String VERSION = "0.02";
+	private ServerSocket serverSocket;
+	public String globalServerName;
+	public int    globalServerPort;
+	public String globalServerInfo = "";
+	public final String VERSION = "0.02";
 	
-	private static LoginBot loginBot = new LoginBot("ACCOUNT", "Account bot");
-	private static Map<String, IrcUser> userNicknameMap = new HashMap<String, IrcUser>();
-	private static Map<String, Channel>       channelMap = new HashMap<String, Channel>();
+	private LoginBot loginBot = new LoginBot("ACCOUNT", "Account bot");
+	private Map<String, IrcUser> userNicknameMap = new HashMap<String, IrcUser>();
+	private Map<String, Channel>       channelMap = new HashMap<String, Channel>();
 	
-	public static ArrayList<String> MOTD = new ArrayList<String>(); 
+	public ArrayList<String> MOTD = new ArrayList<String>(); 
 		
-	public static void init(String _globalServerName, int _globalServerPort) throws IOException {
+	public void init(String _globalServerName, int _globalServerPort) throws IOException {
 		Console.out("IrcServer", "Initializing IrcServer("+_globalServerName+":"+_globalServerPort+")");
 
 		globalServerPort = _globalServerPort;
@@ -115,7 +116,7 @@ public class IrcServer {
 				+ "....,...,...,,.,,......,...................,..........?  ...\n").split("\n")));
 	}
 	
-	public static boolean trySetNickname(IrcUser user, String nick) {
+	public boolean trySetNickname(IrcUser user, String nick) {
 		nick = nick.toLowerCase();
 		synchronized (userNicknameMap) {
 			if (userNicknameMap.containsKey(nick)) return false;
@@ -124,7 +125,7 @@ public class IrcServer {
 		return true;
 	}
 	
-	public static boolean trySetNickname(IrcUser user, String newNick, String oldNick) {
+	public boolean trySetNickname(IrcUser user, String newNick, String oldNick) {
 		newNick = newNick.toLowerCase();
 		oldNick = oldNick.toLowerCase();
 		synchronized (userNicknameMap) {
@@ -137,21 +138,21 @@ public class IrcServer {
 		return true;
 	}
 	
-	public static Channel findChannel(String channelName) {
+	public Channel findChannel(String channelName) {
 		channelName = channelName.toLowerCase();
 		synchronized (channelMap) {
 			if (!channelMap.containsKey(channelName)) return null;
 			return channelMap.get(channelName);
 		}
 	}
-	public static IrcUser findUserByNickname(String nickName) {
+	public IrcUser findUserByNickname(String nickName) {
 		nickName = nickName.toLowerCase();
 		synchronized (userNicknameMap) {
 			if (!userNicknameMap.containsKey(nickName)) return null;
 			return userNicknameMap.get(nickName);
 		}
 	}
-	public static void dropUser(String nickName) {
+	public void dropUser(String nickName) {
 		if (nickName == null) return;
 		Console.debug("IrcServer::dropUser("+nickName+")");
 		nickName = nickName.toLowerCase();
@@ -164,7 +165,7 @@ public class IrcServer {
 				PingService.dropPartner((Connection)u);
 		}
 	}
-	public static void dropConnection(Connection con) {
+	public void dropConnection(Connection con) {
 		Console.debug("IrcServer::dropConnection("+con.getRepresentation()+")");
 		String nickName = con.getNickname().toLowerCase();
 		synchronized (userNicknameMap) {
@@ -175,7 +176,7 @@ public class IrcServer {
 		}
 	}
 	
-	public static void dropChannel(String channelName) {
+	public void dropChannel(String channelName) {
 		Console.debug("IrcServer::dropChannel("+channelName+")");
 		channelName = channelName.toLowerCase();
 		synchronized (channelMap) {
@@ -185,12 +186,12 @@ public class IrcServer {
 		}
 	}
 	
-	public static void addChannel(Channel  chan) {
+	public void addChannel(Channel  chan) {
 		Console.debug("IrcServer::addChannel("+chan.getName()+")");
 		channelMap.put(chan.getName().toLowerCase(), chan);
 	}
 	
-	public static void run() {
+	public void run() {
 		Console.out("IrcServer", "Starting server loop");
 
 		while (true) {
@@ -205,7 +206,7 @@ public class IrcServer {
 		}
 	}
 	
-	public static boolean close() throws IOException {
+	public boolean close() throws IOException {
 
 		serverSocket.close();
 	

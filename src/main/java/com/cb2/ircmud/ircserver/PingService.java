@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 public class PingService implements Runnable {
 
 	public final static String VERSION = "0.06";
@@ -13,6 +15,11 @@ public class PingService implements Runnable {
 	private static long newPingTime  = 10000;
 	private static HashMap<Connection, Long> lastPongMap = new HashMap<Connection, Long>();
 	private static HashMap<Connection, Long> lastPingMap = new HashMap<Connection, Long>();
+	
+	
+	@Autowired 
+	IrcServer server;
+	
 
 	public static void addPartner(Connection connection) {
 		System.out.println("DEBUG: PingService:addPartner("+connection.getRepresentation()+")");
@@ -69,7 +76,7 @@ public class PingService implements Runnable {
 		        user = entry.getKey();
 		        if (diff > PingService.pingTimeout) {
 	        		user.quit("Ping timeout ("+diff+"ms)");
-	        		IrcServer.dropConnection(user);
+	        		server.dropConnection(user);
 		        }
 		        pongit.remove();
 	        }	        
@@ -82,7 +89,7 @@ public class PingService implements Runnable {
 		        diff = currentTime - entry.getValue().longValue();
 	        	
 	        	if (diff > PingService.newPingTime) {
-	        		user.sendPing(IrcServer.globalServerName);
+	        		user.sendPing(server.globalServerName);
 	        		lastPingMap.put(user, new Date().getTime());
 	        	}
 	            pingit.remove();

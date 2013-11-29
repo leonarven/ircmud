@@ -2,6 +2,7 @@ package com.cb2.ircmud.services;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.cb2.ircmud.domain.Player;
@@ -10,6 +11,10 @@ import com.cb2.ircmud.ircserver.IrcUser;
 
 @Service
 public class PlayerService {
+	
+	@Autowired 
+	IrcServer server;
+	
 	public Player findPlayerByUsername(String username) {
 		List<Player> playerList = Player.findPlayersByUsernameEquals(username.toLowerCase()).getResultList();
 		if (playerList.size() == 0) return null;
@@ -18,7 +23,7 @@ public class PlayerService {
 	}
 	
 	public Player findPlayerByNickname(String nick) {
-		IrcUser ircUser = IrcServer.findUserByNickname(nick);
+		IrcUser ircUser = server.findUserByNickname(nick);
 		if (ircUser != null) {
 			return ircUser.getPlayer();
 		}
