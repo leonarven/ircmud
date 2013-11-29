@@ -9,11 +9,15 @@ import java.io.File;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.w3c.dom.*;
 
 import com.cb2.ircmud.Console;
 
+@Component
 public enum IrcCommand {
+
 	NICK(1, 1) {
 		@Override
 		public void init(Connection con, String prefix, String[] arguments) throws Exception {
@@ -170,10 +174,12 @@ public enum IrcCommand {
 			return null;
 	}
 	
+	
 	public abstract void init(Connection con, String prefix, String[] arguments) throws Exception;
 	
 	public static void load(String file) {
-		Console.out("IrcCommand", "Loading IrcCommand configurations");
+		//TODO: find a way to inject logger here or get this out of here
+		//logger.out("IrcCommand", "Loading IrcCommand configurations");
 		try {
 			File fXmlFile = new File(file);
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();

@@ -4,39 +4,45 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.cb2.ircmud.Console;
 import com.cb2.ircmud.domain.Player;
 
-
+@Component
 public class AuthService {
 	
-	public static enum AuthError {
+	@Autowired
+	Console logger;
+	
+	public enum AuthError {
 		ERR_OK,
 		ERR_INVALIDLOGIN,
 		ERR_ALREADYLOGGED,
 	}
 	
-	private static MessageDigest digestInstance = null;
+	private MessageDigest digestInstance = null;
 	
-	public static void init() {
+	public void init() {
 		try {
 			digestInstance = MessageDigest.getInstance("MD5");
 		} catch(NoSuchAlgorithmException e) {
-			Console.err("AuthService", "NoSuchAlgorithmException: "+e.getMessage());
+			logger.err("AuthService", "NoSuchAlgorithmException: "+e.getMessage());
 		}
 	}
 	
-	public static boolean addAccount(String username, String password) {
-		return AuthService.addAccount(username, password, Player.ACCESS_NORMAL);
+	public boolean addAccount(String username, String password) {
+		return addAccount(username, password, Player.ACCESS_NORMAL);
 	}
 	
-	public static boolean addAccount(String username, String password, int access) {
+	public boolean addAccount(String username, String password, int access) {
 		username = username.toLowerCase();
 		List<Player> playerList = Player.findPlayersByUsernameEquals(username).getResultList();
 		if (!playerList.isEmpty()) { //Already created an account with the same user name
 			return false;
 		}
-		String passwordHash = new String(AuthService.digestInstance.digest(password.getBytes()));
+		String passwordHash = new String(digestInstance.digest(password.getBytes()));
 		Player player = new Player();
 		player.setUsername(username);
 		player.setPasswordHash(passwordHash);
@@ -45,13 +51,13 @@ public class AuthService {
 		return true;
 	}
 
-	public static Player login(String username, String password, IrcUser user) {
+	public Player login(String username, String password, IrcUser user) {
 		username = username.toLowerCase();
 		List<Player> playerList = Player.findPlayersByUsernameEquals(username).getResultList();
 		if (playerList.isEmpty()) { //Already created an account with the same user name
 			return null;
 		}
-		String passwordHash = new String(AuthService.digestInstance.digest(password.getBytes()));
+		String passwordHash = new String(digestInstance.digest(password.getBytes()));
 		
 		Player player = playerList.get(0);
 		if (!player.getPasswordHash().equals(passwordHash)) {
@@ -65,7 +71,7 @@ public class AuthService {
 		return player;
 	}
 	
-	public static void logout(Player player) {
+	public void logout(Player player) {
 		player.getIrcUser().setPlayer(null);
 		player.setIrcUser(null);
 	}

@@ -2,6 +2,8 @@ package com.cb2.ircmud.ircserver;
 
 import java.util.regex.Pattern;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.cb2.ircmud.domain.Player;
 
 
@@ -28,6 +30,9 @@ public class LoginBot extends IrcBotUser {
 			return "Usage: "+command+" "+usage;
 		}
 	}
+	
+	@Autowired
+	AuthService authService;
 	
 	public LoginBot(String nick, String realname) {
 		super(nick, realname);
@@ -77,7 +82,7 @@ public class LoginBot extends IrcBotUser {
 							user.sendMessage(this, "You have logged in already");
 						} else {
 							
-							Player acc = AuthService.login(username, password, user);
+							Player acc = authService.login(username, password, user);
 		
 							if (acc != null) {
 								user.sendMessage(this, "You have successfully logged in");
@@ -92,7 +97,7 @@ public class LoginBot extends IrcBotUser {
 					if (user.getPlayer() == null) {
 						user.sendMessage(this, "You haven't logged in");
 					} else {
-						AuthService.logout(user.getPlayer());
+						authService.logout(user.getPlayer());
 						user.sendMessage(this, "You have logged out");
 					}
 					break;
@@ -120,12 +125,12 @@ public class LoginBot extends IrcBotUser {
 							break;
 						}*/
 						
-						if (!AuthService.addAccount(username, password)) {
+						if (!authService.addAccount(username, password)) {
 							user.sendMessage(this, "Already created an account with the same email");
 							break;
 						}
 						
-						AuthService.login(username, password, user);
+						authService.login(username, password, user);
 						user.sendMessage(this, "You have successfully created an account. You are now logged in.");
 					} else user.sendMessage(this, command.usage());
 					break;

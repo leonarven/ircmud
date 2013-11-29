@@ -9,6 +9,7 @@ import com.cb2.ircmud.Config;
 import com.cb2.ircmud.Console;
 import com.cb2.ircmud.domain.Player;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,38 +27,45 @@ public class IrcServer {
 	
 	public ArrayList<String> MOTD = new ArrayList<String>(); 
 		
+	@Autowired
+	Console logger;
+	@Autowired
+	AuthService authService;
+	@Autowired
+	Config config;
+	
 	public void init(String _globalServerName, int _globalServerPort) throws IOException {
-		Console.out("IrcServer", "Initializing IrcServer("+_globalServerName+":"+_globalServerPort+")");
+		logger.out("IrcServer", "Initializing IrcServer("+_globalServerName+":"+_globalServerPort+")");
 
 		globalServerPort = _globalServerPort;
 		globalServerName = _globalServerName;
 
-		Console.out("IrcServer", "Initializing ServerSocket");
+		logger.out("IrcServer", "Initializing ServerSocket");
 		serverSocket = new ServerSocket(globalServerPort);
 
 		// Init channel Config.WorldChannel
-		Console.out("IrcServer", "Initializing "+Config.WorldChannel);
-		Channel worldChannel = new Channel(Config.WorldChannel);
+		logger.out("IrcServer", "Initializing "+config.WorldChannel);
+		Channel worldChannel = new Channel(config.WorldChannel);
 		channelMap.put(worldChannel.name, worldChannel);
 		
 		// Try to init pingService
-		Console.out("IrcServer", "Initializing AuthService");
-        AuthService.init();
+		logger.out("IrcServer", "Initializing AuthService");
+        authService.init();
         
       //TODO: No hard-coded admin accounts :P
-  		AuthService.addAccount("admin", "password", Player.ACCESS_ADMIN);
+  		authService.addAccount("admin", "password", Player.ACCESS_ADMIN);
         
 		// Try to set Loginbot's nickname
-		Console.out("IrcServer", "Initializing LoginBot("+loginBot.getUsername()+")");
+  		logger.out("IrcServer", "Initializing LoginBot("+loginBot.getUsername()+")");
 		trySetNickname(loginBot, loginBot.getUsername());
 		
 		// Try to init pingService
-		Console.out("IrcServer", "Initializing PingService");
-		PingService.init(Config.connectionPingTime, Config.connectionPingTimeout);
+		logger.out("IrcServer", "Initializing PingService");
+		PingService.init(config.connectionPingTime, config.connectionPingTimeout);
 		
 		// Initializing IrcCommands
-		Console.debug("Initializing IrcCommands");
-		IrcCommand.load(Config.ircCommandsXmlFile);
+		logger.debug("Initializing IrcCommands");
+		IrcCommand.load(config.ircCommandsXmlFile);
 		
 		
 		MOTD = new ArrayList<String>(Arrays.asList(new String(
@@ -154,7 +162,7 @@ public class IrcServer {
 	}
 	public void dropUser(String nickName) {
 		if (nickName == null) return;
-		Console.debug("IrcServer::dropUser("+nickName+")");
+		logger.debug("IrcServer::dropUser("+nickName+")");
 		nickName = nickName.toLowerCase();
 		synchronized (userNicknameMap) {
 			if (!userNicknameMap.containsKey(nickName)) return;
@@ -166,7 +174,7 @@ public class IrcServer {
 		}
 	}
 	public void dropConnection(Connection con) {
-		Console.debug("IrcServer::dropConnection("+con.getRepresentation()+")");
+		logger.debug("IrcServer::dropConnection("+con.getRepresentation()+")");
 		String nickName = con.getNickname().toLowerCase();
 		synchronized (userNicknameMap) {
 			if (!userNicknameMap.containsKey(nickName)) return;
@@ -177,7 +185,7 @@ public class IrcServer {
 	}
 	
 	public void dropChannel(String channelName) {
-		Console.debug("IrcServer::dropChannel("+channelName+")");
+		logger.debug("IrcServer::dropChannel("+channelName+")");
 		channelName = channelName.toLowerCase();
 		synchronized (channelMap) {
 			if (!channelMap.containsKey(channelName)) return;
@@ -187,12 +195,12 @@ public class IrcServer {
 	}
 	
 	public void addChannel(Channel  chan) {
-		Console.debug("IrcServer::addChannel("+chan.getName()+")");
+		logger.debug("IrcServer::addChannel("+chan.getName()+")");
 		channelMap.put(chan.getName().toLowerCase(), chan);
 	}
 	
-	public void run() throws IOException {
-		Console.out("IrcServer", "Starting server loop");
+	public void run() {
+		logger.out("IrcServer", "Starting server loop");
 
 		while (true) {
 			try {
@@ -202,8 +210,6 @@ public class IrcServer {
 				thread.start();
 			} catch(IOException e) {
 				System.err.println("IrcServer: IOException at Server.run: " + e.getMessage());
-			} finally {
-					close();
 			}
 		}
 	}

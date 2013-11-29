@@ -7,7 +7,7 @@ public class Main {
 	public static void main(String[] args) {
         System.out.println("DEBUG: Main::main()");
 
-        ApplicationContext ctx = new FileSystemXmlApplicationContext(Config.applicationContextFile);
+        ApplicationContext ctx = new FileSystemXmlApplicationContext("src/main/resources/META-INF/spring/applicationContext.xml");
         
         //Do what @Autowired would do, because we are not in the context yet
         Ircmud ircmud = ctx.getBean(Ircmud.class);

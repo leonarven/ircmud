@@ -9,6 +9,8 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 public class CommandParser {
 	private Vector<CommandDefinition> commandDefinitions = new Vector<CommandDefinition>();
 	private Pattern defaultPreParamPattern;
@@ -18,6 +20,9 @@ public class CommandParser {
 	private Pattern itemPattern;
 	private Pattern stringPattern;
 	private Pattern itemSeparatorPattern;
+	
+	@Autowired
+	Console logger;
 	
 	public CommandParser() {
 		defaultPreParamPattern = Pattern.compile("^\\s+");
@@ -198,7 +203,7 @@ public class CommandParser {
 		return null;
 	}
 	
-	public static void main(String[] args) {
+	public void main(String[] args) {
 		CommandParser parser = new CommandParser();
 		CommandDefinition runDefinition = new CommandDefinition("run", "runs?");
 		runDefinition.setParameterType(CommandParameter.Type.Location);
@@ -212,9 +217,9 @@ public class CommandParser {
 		
 		try {
 			Command cmd = parser.parse("eat 23 apples , a sword, the dead king and the banana");
-			Console.out(cmd);
+			logger.out(cmd);
 		} catch (CommandParsingException ex) {
-			Console.out(ex);
+			logger.out(ex);
 		}
 		
 	}
