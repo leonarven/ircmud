@@ -5,12 +5,13 @@ import java.net.Socket;
 import java.util.*;
 import java.io.IOException;
 
+import javax.annotation.PostConstruct;
+
 import com.cb2.ircmud.Config;
 import com.cb2.ircmud.domain.Player;
-
 import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
-import org.slf4j.Logger;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,37 +36,33 @@ public class IrcServer {
 	@Autowired
 	AuthService authService;
 	@Autowired
+	PingService pingService;
+	@Autowired
 	Config config;
 
-	
-	public void init(String _globalServerName, int _globalServerPort) throws IOException {
-		logger.info("IrcServer", "Initializing IrcServer("+_globalServerName+":"+_globalServerPort+")");
-
-		globalServerPort = _globalServerPort;
-		globalServerName = _globalServerName;
+	@PostConstruct
+	public void init() throws IOException {
+		
+		globalServerPort = config.ServerPort;
+		globalServerName = config.ServerName;
+		
+		logger.info("Initializing IrcServer({}: {})",globalServerName, globalServerPort);
 
 		logger.info("Initializing ServerSocket");
 		serverSocket = new ServerSocket(globalServerPort);
 
 		// Init channel Config.WorldChannel
-		logger.info("Initializing "+config.WorldChannel);
+		logger.info("Initializing {}", config.WorldChannel);
 		Channel worldChannel = new Channel(config.WorldChannel);
 		channelMap.put(worldChannel.name, worldChannel);
 		
-		// Try to init pingService
-		logger.info("Initializing AuthService");
-        authService.init();
         
-      //TODO: No hard-coded admin accounts :P
+       //TODO: No hard-coded admin accounts :P
   		authService.addAccount("admin", "password", Player.ACCESS_ADMIN);
         
 		// Try to set Loginbot's nickname
   		logger.info("Initializing LoginBot("+loginBot.getUsername()+")");
-		trySetNickname(loginBot, loginBot.getUsername());
-		
-		// Try to init pingService
-		logger.info("Initializing PingService");
-		PingService.init(config.connectionPingTime, config.connectionPingTimeout);
+		trySetNickname(loginBot, loginBot.getUsername());		
 		
 		// Initializing IrcCommands
 		logger.debug("Initializing IrcCommands");
@@ -166,7 +163,7 @@ public class IrcServer {
 	}
 	public void dropUser(String nickName) {
 		if (nickName == null) return;
-		logger.debug("IrcServer::dropUser("+nickName+")");
+		logger.info("dropUser({})",nickName);
 		nickName = nickName.toLowerCase();
 		synchronized (userNicknameMap) {
 			if (!userNicknameMap.containsKey(nickName)) return;
@@ -174,22 +171,22 @@ public class IrcServer {
 			userNicknameMap.remove(nickName);
 			
 			if (u instanceof Connection)
-				PingService.dropPartner((Connection)u);
+				pingService.dropPartner((Connection)u);
 		}
 	}
 	public void dropConnection(Connection con) {
-		logger.debug("IrcServer::dropConnection("+con.getRepresentation()+")");
+		logger.info("dropConnection({})",con.getRepresentation());
 		String nickName = con.getNickname().toLowerCase();
 		synchronized (userNicknameMap) {
 			if (!userNicknameMap.containsKey(nickName)) return;
 
 			userNicknameMap.remove(nickName);
-			PingService.dropPartner(con);
+			pingService.dropPartner(con);
 		}
 	}
 	
 	public void dropChannel(String channelName) {
-		logger.debug("IrcServer::dropChannel("+channelName+")");
+		logger.debug("dropChannel({})",channelName);
 		channelName = channelName.toLowerCase();
 		synchronized (channelMap) {
 			if (!channelMap.containsKey(channelName)) return;
@@ -199,7 +196,7 @@ public class IrcServer {
 	}
 	
 	public void addChannel(Channel  chan) {
-		logger.debug("IrcServer::addChannel("+chan.getName()+")");
+		logger.debug("addChannel({})",chan.getName());
 		channelMap.put(chan.getName().toLowerCase(), chan);
 	}
 	
@@ -213,7 +210,7 @@ public class IrcServer {
 				Thread	   thread = new Thread(connection);
 				thread.start();
 			} catch(IOException e) {
-				System.err.println("IrcServer: IOException at Server.run: " + e.getMessage());
+				logger.error("IOException at Server.run: {}", e.getMessage());
 			}
 		}
 	}

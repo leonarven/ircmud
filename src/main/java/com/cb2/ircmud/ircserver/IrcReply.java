@@ -3,7 +3,11 @@ package com.cb2.ircmud.ircserver;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+@Component
+@Scope("prototype")
 public class IrcReply {
 
 	private ArrayList<String> arguments = new ArrayList<String>();

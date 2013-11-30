@@ -4,6 +4,8 @@ import java.util.Properties;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +43,11 @@ public class Config {
 	public int connectionPingTimeout = 100000;
 	
 	public String ircCommandsXmlFile = "ircCommands.xml";
+	
+	@PostConstruct
+	public void init(){
+		logger.info("Initializing Config");
+	}
 	
 	/*
 	 * Config.load tulee lataamaan tiedostosta asetukset

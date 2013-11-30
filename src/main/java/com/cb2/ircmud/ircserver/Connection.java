@@ -15,9 +15,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 
 
+
+
+
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.cb2.ircmud.Config;
 import com.cb2.ircmud.ircserver.IrcCommand;
+import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
 public class Connection extends IrcUser implements Runnable {
 	private InetSocketAddress address;
@@ -25,6 +31,12 @@ public class Connection extends IrcUser implements Runnable {
 
 	@Autowired 
 	IrcServer server;
+	@Autowired 
+	PingService pingService;
+	@AutowiredLogger
+	Logger logger;
+	@Autowired 
+	Config config;
 	
 	
 	public Connection(Socket socket){
@@ -45,7 +57,7 @@ public class Connection extends IrcUser implements Runnable {
 					out.flush();
 				}
 			} catch (Exception e) {
-				System.err.println("Connection: outThread: Outqueue died");
+				logger.error("outThread: Outqueue died");
 				outQueue.clear();
 				outQueue = null;
 			}
@@ -96,6 +108,7 @@ public class Connection extends IrcUser implements Runnable {
 	}
 	
 	public void acceptConnection() {
+		logger.debug("acceptConnection()");
 		sendServerCommand(IrcReplyCode.RPL_WELCOME, "Welcome to "+server.globalServerName+", "+getRepresentation()+"("+realname+")");
 		sendServerCommand(IrcReplyCode.RPL_YOURHOST, "Your host is "+server.globalServerName+", running version "+server.VERSION);
 
@@ -111,11 +124,11 @@ public class Connection extends IrcUser implements Runnable {
 
 		this.mode = "+i";
 
-		Channel worldChannel = server.findChannel("#world");
+		Channel worldChannel = server.findChannel(config.WorldChannel);
 		if (worldChannel == null) server.addChannel(worldChannel);
 		this.joinChannel(worldChannel);
 
-		PingService.addPartner(this);
+		pingService.addPartner(this);
 	}
 	
 	private void processLine(String line) throws Exception {
@@ -325,10 +338,10 @@ public class Connection extends IrcUser implements Runnable {
 					this.sendServerReply("PONG", server.globalServerName+" :"+server.globalServerName);
 					break;
 				case PONG:
-					PingService.pongFrom(this);
+					pingService.pongFrom(this);
 					break;
 				default:
-					System.err.println("Unhandled IrcCommand");
+					logger.error("Unhandled IrcCommand");
 			}
 			
 		}
@@ -342,7 +355,7 @@ public class Connection extends IrcUser implements Runnable {
 			
 			this.address = (InetSocketAddress) socket.getRemoteSocketAddress();
 			this.hostname = address.getAddress().getHostAddress();
-			System.out.println("Connection from host " + hostname);
+			logger.info("Connection from host {}", hostname);
 
 			outThread.start();
 
@@ -354,12 +367,12 @@ public class Connection extends IrcUser implements Runnable {
 				try {
 					processLine(line);
 				} catch (Exception e) {
-					System.err.println("ERROR: Exception in Connection.run: " + e.getMessage() + "\n Stacktrace: ");
+					logger.error("ERROR: Exception in Connection.run: {} \n Stacktrace: ",e.getMessage());
 					e.printStackTrace();
 				}
 			}
 		} catch (IOException e) {
-			System.err.println("IOException in Connection::run : " + e.getMessage());
+			logger.error("IOException in run : ", e.getMessage());
 		} finally {
 			try {
 				closeConnection();

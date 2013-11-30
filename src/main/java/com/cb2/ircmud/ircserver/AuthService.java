@@ -4,6 +4,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +26,9 @@ public class AuthService {
 	
 	private MessageDigest digestInstance = null;
 	
+	@PostConstruct
 	public void init() {
+		logger.info("Initializing AuthService");
 		try {
 			digestInstance = MessageDigest.getInstance("MD5");
 		} catch(NoSuchAlgorithmException e) {

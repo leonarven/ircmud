@@ -174,8 +174,9 @@ public enum IrcCommand {
 	
 	public abstract void init(Connection con, String prefix, String[] arguments) throws Exception;
 	
+	//TODO: REMOVE THIS, seems out dated and unnecessary.
 	public static void load(String file) {
-		//TODO: find a way to inject logger here or get this out of here
+		
 		//logger.out("IrcCommand", "Loading IrcCommand configurations");
 		try {
 			File fXmlFile = new File(file);

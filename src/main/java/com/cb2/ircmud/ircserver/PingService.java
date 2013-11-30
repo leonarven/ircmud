@@ -5,54 +5,69 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.cb2.ircmud.Config;
+import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
+
+@Component
 public class PingService implements Runnable {
 
 	public final static String VERSION = "0.06";
-	private static long pingTimeout  = 10000;
-	private static int pingCheckTime = 1000;
-	private static long newPingTime  = 10000;
-	private static HashMap<Connection, Long> lastPongMap = new HashMap<Connection, Long>();
-	private static HashMap<Connection, Long> lastPingMap = new HashMap<Connection, Long>();
+	private long pingTimeout  = 10000;
+	private int pingCheckTime = 1000;
+	private long newPingTime  = 10000;
+	private HashMap<Connection, Long> lastPongMap = new HashMap<Connection, Long>();
+	private HashMap<Connection, Long> lastPingMap = new HashMap<Connection, Long>();
 	
 	
 	@Autowired 
 	IrcServer server;
+	@AutowiredLogger
+	Logger logger;
+	@Autowired 
+	Config config;
 	
 
-	public static void addPartner(Connection connection) {
-		System.out.println("DEBUG: PingService:addPartner("+connection.getRepresentation()+")");
+	public void addPartner(Connection connection) {
+		logger.debug("addPartner({})",connection.getRepresentation());
 		lastPongMap.put(connection, new Date().getTime());
 		lastPingMap.put(connection, new Date().getTime());
 	}
 
-	public static void dropPartner(Connection connection) {
-		System.out.println("DEBUG: PingService:dropPartner("+connection.getRepresentation()+")");
+	public void dropPartner(Connection connection) {
+		logger.debug("DEBUG: PingService:dropPartner({})",connection.getRepresentation());
 		lastPongMap.remove(connection);
 		lastPingMap.remove(connection);
 	}
 	
-	public static void pongFrom(Connection connection) {
-		System.out.println("DEBUG: PingService:pongFrom("+connection.getRepresentation()+") :"+(lastPongMap.containsKey(connection)?(""+lastPongMap.get(connection)):"no"));
+	public void pongFrom(Connection connection) {
+		logger.debug("DEBUG: PingService:pongFrom({}) : {}",connection.getRepresentation(),lastPongMap.containsKey(connection)?(""+lastPongMap.get(connection)):"no");
 		if (lastPongMap.containsKey(connection)) return;
 
 		lastPongMap.put(connection, new Date().getTime());
 	}
 	
-	private static long pingTimeDiff(Connection connection, long time) {
+	private long pingTimeDiff(Connection connection, long time) {
 		if (!lastPongMap.containsKey(connection)) return -1;
 		
 		return time - lastPongMap.get(connection).longValue();
 	}
 	
-	private static long pingTimeDiff(Connection connection) {
+	private long pingTimeDiff(Connection connection) {
 		return pingTimeDiff(connection, new Date().getTime());
 	}
 	
-	public static void init(int pingCheckTime, long pingTimeout) {
-		PingService.pingCheckTime = pingCheckTime;
-		PingService.pingTimeout= pingTimeout;
+	@PostConstruct
+	public void init() {
+		logger.info("Initializing PingService");
+		
+		pingCheckTime = config.connectionPingTime;
+		pingTimeout= config.connectionPingTimeout;
 		
 		Thread pingService = new Thread(new PingService());
 		
@@ -62,33 +77,34 @@ public class PingService implements Runnable {
 	
 	@Override
 	public void run() {
+		//TODO heaps would make this clearer and propably more robust
 		
 		long currentTime, diff;
 		Connection user;
 		while(true) {
 	        currentTime = new Date().getTime();
 
-	        Iterator<Map.Entry<Connection, Long>> pongit = PingService.lastPongMap.entrySet().iterator();
+	        Iterator<Map.Entry<Connection, Long>> pongit = lastPongMap.entrySet().iterator();
 	        while (pongit.hasNext()) {
 	            Map.Entry<Connection, Long> entry = (Map.Entry<Connection, Long>)pongit.next();
 		        diff = currentTime - entry.getValue().longValue();
 		        
 		        user = entry.getKey();
-		        if (diff > PingService.pingTimeout) {
+		        if (diff > pingTimeout) {
 	        		user.quit("Ping timeout ("+diff+"ms)");
 	        		server.dropConnection(user);
 		        }
 		        pongit.remove();
 	        }	        
 	        
-	        Iterator<Map.Entry<Connection, Long>> pingit = PingService.lastPingMap.entrySet().iterator();
+	        Iterator<Map.Entry<Connection, Long>> pingit = lastPingMap.entrySet().iterator();
 	        while (pingit.hasNext()) {
 	            Map.Entry<Connection, Long> entry = (Map.Entry<Connection, Long>)pingit.next();
 		        
 	        	user = entry.getKey();
 		        diff = currentTime - entry.getValue().longValue();
 	        	
-	        	if (diff > PingService.newPingTime) {
+	        	if (diff > newPingTime) {
 	        		user.sendPing(server.globalServerName);
 	        		lastPingMap.put(user, new Date().getTime());
 	        	}
@@ -96,7 +112,7 @@ public class PingService implements Runnable {
 	        }
 		    
 		    try {
-				Thread.sleep(PingService.pingCheckTime);
+				Thread.sleep(pingCheckTime);
 			} catch(Exception e) {
 				
 			}
