@@ -9,11 +9,8 @@ import java.io.File;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.*;
-
-import com.cb2.ircmud.Console;
 
 @Component
 public enum IrcCommand {

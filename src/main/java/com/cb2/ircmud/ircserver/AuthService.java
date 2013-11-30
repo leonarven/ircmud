@@ -4,17 +4,17 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
-import com.cb2.ircmud.Console;
 import com.cb2.ircmud.domain.Player;
+import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
 @Component
 public class AuthService {
 	
-	@Autowired
-	Console logger;
+	@AutowiredLogger
+	Logger logger;
 	
 	public enum AuthError {
 		ERR_OK,
@@ -28,7 +28,7 @@ public class AuthService {
 		try {
 			digestInstance = MessageDigest.getInstance("MD5");
 		} catch(NoSuchAlgorithmException e) {
-			logger.err("AuthService", "NoSuchAlgorithmException: "+e.getMessage());
+			logger.error("NoSuchAlgorithmException: {}", e.getMessage());
 		}
 	}
 	

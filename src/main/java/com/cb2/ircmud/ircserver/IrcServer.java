@@ -6,13 +6,16 @@ import java.util.*;
 import java.io.IOException;
 
 import com.cb2.ircmud.Config;
-import com.cb2.ircmud.Console;
 import com.cb2.ircmud.domain.Player;
+
+import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
+import org.slf4j.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+
 public class IrcServer {
 	
 	private ServerSocket serverSocket;
@@ -27,40 +30,41 @@ public class IrcServer {
 	
 	public ArrayList<String> MOTD = new ArrayList<String>(); 
 		
-	@Autowired
-	Console logger;
+	@AutowiredLogger
+	Logger logger;
 	@Autowired
 	AuthService authService;
 	@Autowired
 	Config config;
+
 	
 	public void init(String _globalServerName, int _globalServerPort) throws IOException {
-		logger.out("IrcServer", "Initializing IrcServer("+_globalServerName+":"+_globalServerPort+")");
+		logger.info("IrcServer", "Initializing IrcServer("+_globalServerName+":"+_globalServerPort+")");
 
 		globalServerPort = _globalServerPort;
 		globalServerName = _globalServerName;
 
-		logger.out("IrcServer", "Initializing ServerSocket");
+		logger.info("Initializing ServerSocket");
 		serverSocket = new ServerSocket(globalServerPort);
 
 		// Init channel Config.WorldChannel
-		logger.out("IrcServer", "Initializing "+config.WorldChannel);
+		logger.info("Initializing "+config.WorldChannel);
 		Channel worldChannel = new Channel(config.WorldChannel);
 		channelMap.put(worldChannel.name, worldChannel);
 		
 		// Try to init pingService
-		logger.out("IrcServer", "Initializing AuthService");
+		logger.info("Initializing AuthService");
         authService.init();
         
       //TODO: No hard-coded admin accounts :P
   		authService.addAccount("admin", "password", Player.ACCESS_ADMIN);
         
 		// Try to set Loginbot's nickname
-  		logger.out("IrcServer", "Initializing LoginBot("+loginBot.getUsername()+")");
+  		logger.info("Initializing LoginBot("+loginBot.getUsername()+")");
 		trySetNickname(loginBot, loginBot.getUsername());
 		
 		// Try to init pingService
-		logger.out("IrcServer", "Initializing PingService");
+		logger.info("Initializing PingService");
 		PingService.init(config.connectionPingTime, config.connectionPingTimeout);
 		
 		// Initializing IrcCommands
@@ -200,7 +204,7 @@ public class IrcServer {
 	}
 	
 	public void run() {
-		logger.out("IrcServer", "Starting server loop");
+		logger.info("Starting server loop");
 
 		while (true) {
 			try {

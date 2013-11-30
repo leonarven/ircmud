@@ -4,10 +4,12 @@ import java.io.IOException;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.cb2.ircmud.ircserver.IrcServer;
+import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
 @Component
 public class Ircmud {
@@ -18,8 +20,8 @@ public class Ircmud {
 	
 	@Autowired
 	IrcServer server;
-	@Autowired
-	Console logger;
+	@AutowiredLogger
+	Logger logger;
 	@Autowired
 	Config config;
 	
@@ -47,7 +49,7 @@ public class Ircmud {
 		}
 
 		try {
-			logger.out("Creating Server");
+			logger.info("Creating Server");
 			server.init(globalServerName, globalServerPort);
 
 			server.run();

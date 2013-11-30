@@ -1,15 +1,15 @@
 package com.cb2.ircmud.command;
 
-import com.cb2.ircmud.Console;
 import com.cb2.ircmud.command.Command;
 import com.cb2.ircmud.command.CommandDefinition;
+import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
 import java.text.MessageFormat;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
 
 public class CommandParser {
 	private Vector<CommandDefinition> commandDefinitions = new Vector<CommandDefinition>();
@@ -21,8 +21,8 @@ public class CommandParser {
 	private Pattern stringPattern;
 	private Pattern itemSeparatorPattern;
 	
-	@Autowired
-	Console logger;
+	@AutowiredLogger
+	Logger logger;
 	
 	public CommandParser() {
 		defaultPreParamPattern = Pattern.compile("^\\s+");
@@ -217,9 +217,9 @@ public class CommandParser {
 		
 		try {
 			Command cmd = parser.parse("eat 23 apples , a sword, the dead king and the banana");
-			logger.out(cmd);
+			logger.info("{}",cmd);
 		} catch (CommandParsingException ex) {
-			logger.out(ex);
+			logger.info("{}",ex);
 		}
 		
 	}

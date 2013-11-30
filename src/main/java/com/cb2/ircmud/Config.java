@@ -4,14 +4,16 @@ import java.util.Properties;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
+
+import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
 @Component
 public class Config {
 	
-	@Autowired
-	Console logger;
+	@AutowiredLogger
+	Logger logger;
 	
 	/* Kanaviin liittyvä rajoite
 	 * Maailman tiloihin viittaavien kanavien etuliite
@@ -47,7 +49,7 @@ public class Config {
 		
 		//TODO: Make me
 		
-		logger.out("Config", "Loading configurations from file " +file);
+		logger.info("Config", "Loading configurations from file " +file);
 
 		Properties config = new Properties();
 		
