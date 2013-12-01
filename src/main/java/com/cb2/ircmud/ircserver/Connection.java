@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.core.env.Environment;
 
 import com.cb2.ircmud.ircserver.IrcCommand;
+import com.cb2.ircmud.ircserver.services.ChannelService;
+import com.cb2.ircmud.ircserver.services.UserService;
 import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
 @Configurable
@@ -28,7 +30,11 @@ public class Connection extends IrcUser implements Runnable {
 	@Autowired 
 	IrcServer server;
 	@Autowired 
+	UserService users;
+	@Autowired 
 	PingService pingService;
+	@Autowired 
+	ChannelService channels;
 	@AutowiredLogger
 	Logger logger;
 	@Autowired
@@ -66,7 +72,7 @@ public class Connection extends IrcUser implements Runnable {
 	};
 
 	public void sendRawString(String s) {
-		System.out.println(nickname + " <<< " + s);
+		logger.debug("{} <<< {}", nickname, s);
 		outQueue.add(s);
 	}
 	
@@ -95,7 +101,7 @@ public class Connection extends IrcUser implements Runnable {
 		synchronized (socket) {
 			if (socket.isConnected())
 				socket.close();
-			server.dropUser(this.nickname);
+			users.dropUser(this.nickname);
 		}
 	}
 	
@@ -120,8 +126,8 @@ public class Connection extends IrcUser implements Runnable {
 
 		this.mode = "+i";
 
-		Channel worldChannel = server.findChannel(env.getProperty("config.server.WorldChannel"));
-		if (worldChannel == null) server.addChannel(worldChannel);
+		Channel worldChannel = channels.find(env.getProperty("config.server.WorldChannel"));
+		if (worldChannel == null) channels.add(worldChannel);
 		this.joinChannel(worldChannel);
 
 		pingService.addPartner(this);
@@ -131,7 +137,7 @@ public class Connection extends IrcUser implements Runnable {
 		
 		if (line == null) return;
 
-		System.out.println(nickname + " >>> " + line);
+		logger.debug("{} >>> {}",nickname ,line);
 		String prefix = "";
 		if (line.startsWith(":")) {
 			String[] tokens = line.split(" ", 2);
@@ -182,7 +188,7 @@ public class Connection extends IrcUser implements Runnable {
 			switch(command) {
 				case NICK:
 					String n = command.arguments[0];
-					if (server.trySetNickname(this, n)) {
+					if (users.trySetNickname(this, n)) {
 						this.nickname = n;
 						sendSelfNotice("Nick changed to "+this.nickname);
 						if (this.username != null) {
@@ -222,16 +228,16 @@ public class Connection extends IrcUser implements Runnable {
 					sendSelfNotice("You cannot change userinfo");
 					break;
 				case JOIN:
-					String[] channels = command.arguments[0].split(",");
-	                for (String channelName : channels) {
+					String[] chans = command.arguments[0].split(",");
+	                for (String channelName : chans) {
 	                	if (joinedChannels.containsKey(channelName)) {
 	                		//Already joined to channel
 	                		break;
 	                	}
-	                	Channel chan = server.findChannel(channelName);
+	                	Channel chan = channels.find(channelName);
 	                	if (chan == null) {
 							chan = new Channel(channelName);
-							server.addChannel(chan);
+							channels.add(chan);
 	                	}
 	                	this.joinChannel(chan);
 	                }
@@ -248,7 +254,7 @@ public class Connection extends IrcUser implements Runnable {
 					}
 					else {
 						if (Channel.isValidPrefix(command.arguments[0].charAt(0))) { //Channel
-							Channel channel = server.findChannel(command.arguments[0]);
+							Channel channel = channels.find(command.arguments[0]);
 							if (channel != null) { 
 								IrcReply reply = IrcReply.serverReply(IrcReplyCode.RPL_CHANNELMODEIS,  this.nickname, command.arguments[0], channel.mode, "");
 								this.sendReply(reply);
@@ -275,9 +281,9 @@ public class Connection extends IrcUser implements Runnable {
 				case PRIVMSG:
 					String target  = command.arguments[0];
 					if (Channel.isValidPrefix(target.charAt(0))) { //Channel
-						if (server.findChannel(target) != null) {
+						if (channels.find(target) != null) {
 							if (joinedChannels.containsKey(target)) {
-								joinedChannels.get(command.arguments[0]).sendReplyToAllExceptSender(new IrcReply(this, "PRIVMSG", target, command.arguments[1]));
+								joinedChannels.get(target).sendReplyToAllExceptSender(new IrcReply(this, "PRIVMSG", target, command.arguments[1]));
 							} else {
 								this.sendCommand(IrcReplyCode.ERR_CANNOTSENDTOCHAN, "Cannot send to channels you have not joined");
 							}
@@ -287,7 +293,7 @@ public class Connection extends IrcUser implements Runnable {
 						}
 					}
 					else {
-						IrcUser user = server.findUserByNickname(target);
+						IrcUser user = users.findUserByNickname(target);
 						if (user != null) {
 							user.sendMessage(this, command.arguments[1]);
 						}
@@ -298,12 +304,12 @@ public class Connection extends IrcUser implements Runnable {
 					break;
 				case WHO:
 					mask = command.arguments[0];
-					String op = "";
+					String op;
 					if (command.arguments.length == 2)
 						op = command.arguments[1];
 					if (Channel.isValidPrefix(mask.charAt(0))) {
 						if (joinedChannels.containsKey(mask)) {
-							Channel channel = server.findChannel(mask);
+							Channel channel = channels.find(mask);
 							if (channel != null) {
 								this.sendWhoReply(channel);
 							} else {
@@ -320,7 +326,7 @@ public class Connection extends IrcUser implements Runnable {
 				case WHOIS:
 					mask = command.arguments[0];
 					
-					IrcUser con = server.findUserByNickname(mask);
+					IrcUser con = users.findUserByNickname(mask);
 					if (con != null) {
 						
 						this.sendWhoIsReply(con);

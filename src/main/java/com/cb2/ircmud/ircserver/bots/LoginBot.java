@@ -1,15 +1,16 @@
-package com.cb2.ircmud.ircserver;
+package com.cb2.ircmud.ircserver.bots;
 
 import java.util.regex.Pattern;
 
-import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import com.cb2.ircmud.domain.Player;
+import com.cb2.ircmud.ircserver.IrcUser;
+import com.cb2.ircmud.ircserver.services.AuthService;
 import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
 @Component
@@ -39,16 +40,15 @@ public class LoginBot extends IrcBotUser {
 	
 	@Autowired
 	AuthService authService;
+	@Autowired
+	Environment env;
 	@AutowiredLogger
 	Logger logger;
 	
-	@Value("${config.bots.login.name}")
-	protected String nickname;
-	@Value("${config.bots.login.realname}")
-	protected String realname;
-	
-	public LoginBot() {
-		super("", "");
+
+	public void init() {
+		nickname=env.getProperty("config.bots.login.name");
+		System.out.println(nickname);
 		
 		parsePrivateMessages = true;
 		
@@ -58,31 +58,12 @@ public class LoginBot extends IrcBotUser {
 		//TODO: a good password pattern
 		passwordPattern = Pattern.compile(".+", Pattern.CASE_INSENSITIVE);
 	}
-	
-	@PostConstruct
-	protected void init(){
-		logger.info("Initializing LoginBot({}: {})",nickname, realname);
-	}
-	
-	
-	@Override
-	public void receivePrivateMessage(IrcUser user, String msg) {
-		if (user == null) return;
-		
-		String[] parts = msg.split(" ");
-		String command = parts[0].toLowerCase();
-		String[] params = null;
-		if (parts.length > 1) {
-			params = new String[parts.length - 1];
-			System.arraycopy(parts, 1, params, 0, parts.length - 1);
-		}
-		
-		handleCommand(user, command, params);
-	}
+
 	
 	public void handleCommand(IrcUser user, String command_str, String[] params) {
 		//TODO: EBIN Login System        ELS
 		
+		logger.info("recieved: {}", command_str);
 		
 		Command command = null;
 		

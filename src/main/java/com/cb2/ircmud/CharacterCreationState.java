@@ -1,5 +1,6 @@
 package com.cb2.ircmud;
 
+
 public class CharacterCreationState extends PlayerState {
 	private static final String stateName = "CharacterCreationState";
 	

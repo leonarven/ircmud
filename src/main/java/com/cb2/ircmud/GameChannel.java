@@ -1,9 +1,8 @@
 package com.cb2.ircmud;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 
-import com.cb2.ircmud.domain.World;
+import com.cb2.ircmud.communication.CommunicationService;
 import com.cb2.ircmud.ircserver.Channel;
 import com.cb2.ircmud.ircserver.IrcReply;
 import com.cb2.ircmud.ircserver.IrcReplyCode;
@@ -12,10 +11,11 @@ import com.cb2.ircmud.ircserver.IrcUser;
 
 
 public class GameChannel extends Channel {
-	private World world;
-	
+
 	@Autowired 
 	IrcServer server;
+	@Autowired
+	CommunicationService communication;
 	
 	public GameChannel(String name) {
 		super(name);
@@ -35,7 +35,7 @@ public class GameChannel extends Channel {
 	
 	
 	public void handlePrivateMessage(IrcReply privMsg) {
-		
+		communication.handle(privMsg);
 	}
 	
 	public void sendWhoReply(IrcUser user) {

@@ -1,4 +1,4 @@
-package com.cb2.ircmud.ircserver;
+package com.cb2.ircmud.ircserver.services;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.cb2.ircmud.domain.Player;
+import com.cb2.ircmud.ircserver.IrcUser;
 import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
 @Component

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import com.cb2.ircmud.ircserver.services.UserService;
 import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
 @Component
@@ -27,9 +28,8 @@ public class PingService implements Runnable {
 	private HashMap<Connection, Long> lastPongMap = new HashMap<Connection, Long>();
 	private HashMap<Connection, Long> lastPingMap = new HashMap<Connection, Long>();
 	
-	
 	@Autowired 
-	IrcServer server;
+	UserService users;
 	@AutowiredLogger
 	Logger logger;
 	@Autowired
@@ -92,7 +92,7 @@ public class PingService implements Runnable {
 		        user = entry.getKey();
 		        if (diff > pingTimeout) {
 	        		user.quit("Ping timeout ("+diff+"ms)");
-	        		server.dropConnection(user);
+	        		users.dropConnection(user);
 		        }
 		        pongit.remove();
 	        }	        
@@ -105,7 +105,7 @@ public class PingService implements Runnable {
 		        diff = currentTime - entry.getValue().longValue();
 	        	
 	        	if (diff > newPingTime) {
-	        		user.sendPing(server.serverName);
+	        		user.sendPing(env.getProperty("config.server.name"));
 	        		lastPingMap.put(user, new Date().getTime());
 	        	}
 	            pingit.remove();

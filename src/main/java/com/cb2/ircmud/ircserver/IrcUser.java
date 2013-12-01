@@ -5,10 +5,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 
 import com.cb2.ircmud.domain.Player;
+import com.cb2.ircmud.ircserver.services.ChannelService;
+import com.cb2.ircmud.ircserver.services.UserService;
 
 public abstract class IrcUser {
 
@@ -22,7 +24,11 @@ public abstract class IrcUser {
 	protected Player player = null;
 	
 	@Autowired 
-	IrcServer server;
+	Environment env;
+	@Autowired 
+	UserService users;
+	@Autowired 
+	ChannelService channels;
 	
 	
 	public static String getIrcUserRepresentation(String nick, String username, String hostname) {
@@ -35,7 +41,7 @@ public abstract class IrcUser {
 	
 	
 	public abstract void sendReply(IrcReply reply);
-	abstract boolean isConnection();
+	protected abstract boolean isConnection();
 	
 	public String getNickname() { return nickname; }
 	public String getRealname() { return realname; }
@@ -56,7 +62,7 @@ public abstract class IrcUser {
 	
 	public boolean tryChangeNickname(String newNick) {
 		//Update IrcServer.userNicknameMap
-		if (!server.trySetNickname(this, newNick, nickname)) return false;
+		if (!users.trySetNickname(this, newNick, nickname)) return false;
 		
 		//Send notification to all users in the same channels
 		Set<IrcUser> userSet = new HashSet<IrcUser>();
@@ -87,11 +93,11 @@ public abstract class IrcUser {
 	public boolean leaveChannel(String channelName, String msg) {
 		if (!joinedChannels.containsKey(channelName)) return false;
 		joinedChannels.remove(channelName);
-		Channel chan = server.findChannel(channelName);
+		Channel chan = channels.find(channelName);
 		if (chan == null) return false;
 		sendDebug("Leaving channel "+chan.getName());
 		chan.memberLeave(this, msg);
-		if (chan.getChannelMembers().size() == 0) server.dropChannel(channelName);
+		if (chan.getChannelMembers().size() == 0) channels.dropChannel(channelName);
 		return true;
 	}
 	
@@ -125,7 +131,10 @@ public abstract class IrcUser {
 		// RPL_WHOISSERVER 312
 		// RPL_ENDOFWHOIS 318
 		IrcReply whoIsUserReply   = IrcReply.serverReply(IrcReplyCode.RPL_WHOISUSER, this.nickname, who.nickname, who.username, who.hostname, "*", who.realname);
-		IrcReply whoIsServerReply = IrcReply.serverReply(IrcReplyCode.RPL_WHOISSERVER, this.nickname, who.nickname, server.serverName, server.globalServerInfo);
+		IrcReply whoIsServerReply = 
+				IrcReply.serverReply(IrcReplyCode.RPL_WHOISSERVER, this.nickname, who.nickname, 
+				env.getProperty("config.server.name"), 
+				env.getProperty("config.server.info"));
 		IrcReply whoIsEndReply    = IrcReply.serverReply(IrcReplyCode.RPL_ENDOFWHOIS, this.nickname, who.nickname, "End of /WHOIS list.");
 		// TODO if is IRCoperator RPL_WHOISOPERATOR 313
 		// TODO if is away RPL_WHOISIDLE 317

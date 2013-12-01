@@ -2,12 +2,17 @@ package com.cb2.ircmud.ircserver;
 
 import java.util.ArrayList;
 
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
+
 @Configurable
-public class Channel {
+public  class Channel {
 
 	protected ArrayList<IrcUser> channelMembers = new ArrayList<IrcUser>();
 	protected String topic;
@@ -18,11 +23,18 @@ public class Channel {
 	
 	@Autowired 
 	IrcServer server;
+	@AutowiredLogger
+	Logger logger;
 	
 	
 	public Channel(String name) {
 		this.name = name;
 		this.mode = "+stn";
+	}
+	
+	@PostConstruct
+	protected void init(){
+		logger.info("Channel created: {} class: {}",name,this.getClass().getSimpleName());
 	}
 	
 	public String getName() { return name; }

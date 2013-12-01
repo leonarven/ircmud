@@ -194,7 +194,7 @@ public enum IrcCommand {
 		 
 				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 		 
-					Element eElement = (Element) nNode;
+					//Element eElement = (Element) nNode;
 		 
 				}
 			}

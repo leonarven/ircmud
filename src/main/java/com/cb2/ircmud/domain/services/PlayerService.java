@@ -1,4 +1,4 @@
-package com.cb2.ircmud.services;
+package com.cb2.ircmud.domain.services;
 
 import java.util.List;
 
@@ -8,12 +8,15 @@ import org.springframework.stereotype.Service;
 import com.cb2.ircmud.domain.Player;
 import com.cb2.ircmud.ircserver.IrcServer;
 import com.cb2.ircmud.ircserver.IrcUser;
+import com.cb2.ircmud.ircserver.services.UserService;
 
 @Service
 public class PlayerService {
 	
 	@Autowired 
 	IrcServer server;
+	@Autowired 
+	UserService users;
 	
 	public Player findPlayerByUsername(String username) {
 		List<Player> playerList = Player.findPlayersByUsernameEquals(username.toLowerCase()).getResultList();
@@ -23,7 +26,7 @@ public class PlayerService {
 	}
 	
 	public Player findPlayerByNickname(String nick) {
-		IrcUser ircUser = server.findUserByNickname(nick);
+		IrcUser ircUser = users.findUserByNickname(nick);
 		if (ircUser != null) {
 			return ircUser.getPlayer();
 		}

@@ -9,6 +9,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import com.cb2.ircmud.domain.Player;
+import com.cb2.ircmud.ircserver.services.AuthService;
+import com.cb2.ircmud.ircserver.services.ChannelService;
 import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
 import org.slf4j.Logger;
@@ -25,13 +27,8 @@ public class IrcServer {
 	public String serverName;
 	@Value("${config.server.port}")
 	public int    serverPort;
-	public String globalServerInfo = "";
 	public final String VERSION = "0.02";
 	
-	@Autowired
-	private LoginBot loginBot;
-	private Map<String, IrcUser> userNicknameMap = new HashMap<String, IrcUser>();
-	private Map<String, Channel>       channelMap = new HashMap<String, Channel>();
 	
 	public ArrayList<String> MOTD = new ArrayList<String>(); 
 		
@@ -40,7 +37,7 @@ public class IrcServer {
 	@Autowired
 	AuthService authService;
 	@Autowired
-	PingService pingService;
+	ChannelService channels;
 	@Autowired
 	Environment env;
 
@@ -53,17 +50,13 @@ public class IrcServer {
 		serverSocket = new ServerSocket(serverPort);
 
 		// Init channel Config.WorldChannel
-		logger.info("Initializing {}",env.getProperty("config.server.WorldChannel"));
 		Channel worldChannel = new Channel( env.getProperty("config.server.WorldChannel"));
-		channelMap.put(worldChannel.name, worldChannel);
+		channels.add(worldChannel);
 		
         
        //TODO: No hard-coded admin accounts :P
   		authService.addAccount("admin", "password", Player.ACCESS_ADMIN);
-        
-		// Initializing IrcCommands
-		logger.debug("Initializing IrcCommands");
-		//IrcCommand.load(config.ircCommandsXmlFile);
+
 		
 		MOTD = new ArrayList<String>(Arrays.asList(new String(
 				  "Tissit on kivoja.\n"
@@ -121,80 +114,6 @@ public class IrcServer {
 				+ "....,...,...,,.,,......,...................,..........?  ...\n").split("\n")));
 	}
 	
-	public boolean trySetNickname(IrcUser user, String nick) {
-		nick = nick.toLowerCase();
-		synchronized (userNicknameMap) {
-			if (userNicknameMap.containsKey(nick)) return false;
-			userNicknameMap.put(nick, user);
-		}
-		return true;
-	}
-	
-	public boolean trySetNickname(IrcUser user, String newNick, String oldNick) {
-		newNick = newNick.toLowerCase();
-		oldNick = oldNick.toLowerCase();
-		synchronized (userNicknameMap) {
-			if (userNicknameMap.containsKey(newNick)) return false;
-			if (userNicknameMap.containsKey(oldNick)) {
-				userNicknameMap.remove(oldNick);
-			}
-			userNicknameMap.put(newNick, user);
-		}
-		return true;
-	}
-	
-	public Channel findChannel(String channelName) {
-		channelName = channelName.toLowerCase();
-		synchronized (channelMap) {
-			if (!channelMap.containsKey(channelName)) return null;
-			return channelMap.get(channelName);
-		}
-	}
-	public IrcUser findUserByNickname(String nickName) {
-		nickName = nickName.toLowerCase();
-		synchronized (userNicknameMap) {
-			if (!userNicknameMap.containsKey(nickName)) return null;
-			return userNicknameMap.get(nickName);
-		}
-	}
-	public void dropUser(String nickName) {
-		if (nickName == null) return;
-		logger.info("dropUser({})",nickName);
-		nickName = nickName.toLowerCase();
-		synchronized (userNicknameMap) {
-			if (!userNicknameMap.containsKey(nickName)) return;
-			IrcUser u = userNicknameMap.get(nickName);
-			userNicknameMap.remove(nickName);
-			
-			if (u instanceof Connection)
-				pingService.dropPartner((Connection)u);
-		}
-	}
-	public void dropConnection(Connection con) {
-		logger.info("dropConnection({})",con.getRepresentation());
-		String nickName = con.getNickname().toLowerCase();
-		synchronized (userNicknameMap) {
-			if (!userNicknameMap.containsKey(nickName)) return;
-
-			userNicknameMap.remove(nickName);
-			pingService.dropPartner(con);
-		}
-	}
-	
-	public void dropChannel(String channelName) {
-		logger.debug("dropChannel({})",channelName);
-		channelName = channelName.toLowerCase();
-		synchronized (channelMap) {
-			if (!channelMap.containsKey(channelName)) return;
-
-			channelMap.remove(channelName);
-		}
-	}
-	
-	public void addChannel(Channel  chan) {
-		logger.debug("addChannel({})",chan.getName());
-		channelMap.put(chan.getName().toLowerCase(), chan);
-	}
 	
 	public void run() {
 		logger.info("Starting server loop");

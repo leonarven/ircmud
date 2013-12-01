@@ -1,4 +1,4 @@
-package com.cb2.ircmud.services;
+package com.cb2.ircmud.domain.services;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

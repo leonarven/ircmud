@@ -1,10 +1,7 @@
 package com.cb2.ircmud;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.env.PropertySource;
 
 public class Main {
 	public static void main(String[] args) {

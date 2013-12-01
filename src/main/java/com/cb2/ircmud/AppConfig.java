@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+//load configuration
 @Configuration
 @PropertySource("file:src/main/resources/META-INF/spring/config.properties")
 public class AppConfig {

@@ -1,18 +1,27 @@
-package com.cb2.ircmud.ircserver;
+package com.cb2.ircmud.ircserver.bots;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import com.cb2.ircmud.domain.Player;
-import com.cb2.ircmud.services.PlayerService;
+import com.cb2.ircmud.domain.services.PlayerService;
+import com.cb2.ircmud.ircserver.IrcUser;
 
 @Component
 public class AdminBot extends IrcBotUser {
 	@Autowired
-	private PlayerService playerService;
+	PlayerService playerService;
+	@Autowired
+	Environment env;
+
+	public AdminBot() {
+		
+	}
 	
-	public AdminBot(){
-		super("Admin", "");
-    }
+	protected void init(){
+		nickname=env.getProperty("config.bots.admin.name");
+	}
 	
 	public enum Command {
 		GIVE("GIVE",   "ADMIN/GAMEMASTER <nickname or username(email)>"),
@@ -32,7 +41,6 @@ public class AdminBot extends IrcBotUser {
 	}
 	
 	public AdminBot(String nick, String realname) {
-		super(nick, realname);
 		parsePrivateMessages = true;
 	}
 	
