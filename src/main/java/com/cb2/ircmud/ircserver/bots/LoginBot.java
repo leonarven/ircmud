@@ -48,6 +48,9 @@ public class LoginBot extends IrcBotUser {
 
 	public void init() {
 		nickname=env.getProperty("config.bots.login.name");
+		username=env.getProperty("config.bots.login.username");
+		realname=env.getProperty("config.bots.login.realname");
+		hostname=env.getProperty("config.bots.login.hostname");
 		System.out.println(nickname);
 		
 		parsePrivateMessages = true;

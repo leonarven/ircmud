@@ -21,6 +21,9 @@ public class AdminBot extends IrcBotUser {
 	
 	protected void init(){
 		nickname=env.getProperty("config.bots.admin.name");
+		username=env.getProperty("config.bots.admin.username");
+		realname=env.getProperty("config.bots.admin.realname");
+		hostname=env.getProperty("config.bots.admin.hostname");
 	}
 	
 	public enum Command {
