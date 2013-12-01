@@ -77,17 +77,17 @@ public class KekkonenMotdService extends MotdService {
 
 		String serverName=env.getProperty("config.server.name");
 		String serverVersion=env.getProperty("config.server.version");
-		replies.add(new IrcReply(null, IrcReplyCode.RPL_WELCOME,  "Welcome to "+serverName+", "+user.getRepresentation()+"("+user.getRealname()+")", ""));
-		replies.add(new IrcReply(null, IrcReplyCode.RPL_YOURHOST, "Your host is "+serverName+", running version "+serverVersion, ""));
+		replies.add(IrcReply.serverReply(IrcReplyCode.RPL_WELCOME,  user.getNickname(), "Welcome to "+serverName+", "+user.getRepresentation()+"("+user.getRealname()+")", ""));
+		replies.add(IrcReply.serverReply(IrcReplyCode.RPL_YOURHOST, user.getNickname(), "Your host is "+serverName+", running version "+serverVersion, ""));
 
-		replies.add(new IrcReply(null, IrcReplyCode.RPL_BOUNCE, "RFC2812 PREFIX=(ov)@+ CHANTYPES=#&!+ MODES=3 CHANLIMIT=#&!+:21", "are supported by this server"));
-		replies.add(new IrcReply(null, IrcReplyCode.RPL_BOUNCE, "NICKLEN=15 TOPICLEN=255 KICKLEN=255 CHANNELLEN=50 IDCHAN=!:5", "are supported by this server"));
-		replies.add(new IrcReply(null, IrcReplyCode.RPL_BOUNCE, "PENALTY FNC EXCEPTS=e INVEX=I CASEMAPPING=ascii NETWORK=IrcMud", "are supported by this server"));
+		replies.add(IrcReply.serverReply(IrcReplyCode.RPL_BOUNCE, user.getNickname(), "RFC2812 PREFIX=(ov)@+ CHANTYPES=#&!+ MODES=3 CHANLIMIT=#&!+:21", "are supported by this server"));
+		replies.add(IrcReply.serverReply(IrcReplyCode.RPL_BOUNCE, user.getNickname(), "NICKLEN=15 TOPICLEN=255 KICKLEN=255 CHANNELLEN=50 IDCHAN=!:5", "are supported by this server"));
+		replies.add(IrcReply.serverReply(IrcReplyCode.RPL_BOUNCE, user.getNickname(), "PENALTY FNC EXCEPTS=e INVEX=I CASEMAPPING=ascii NETWORK=IrcMud", "are supported by this server"));
 
-		replies.add(new IrcReply(null, IrcReplyCode.RPL_MOTDSTART, serverName+" - Message Of The Day:", ""));
+		replies.add(IrcReply.serverReply(IrcReplyCode.RPL_MOTDSTART, user.getNickname(), serverName+" - Message Of The Day:", ""));
 		for(String str : MotdStr)
-			replies.add(new IrcReply(null, IrcReplyCode.RPL_MOTD, str, ""));
-		replies.add(new IrcReply(null, IrcReplyCode.RPL_ENDOFMOTD, "End of /MOTD command.", ""));
+			replies.add(IrcReply.serverReply(IrcReplyCode.RPL_MOTD, user.getNickname(), str));
+		replies.add(IrcReply.serverReply(IrcReplyCode.RPL_ENDOFMOTD, user.getNickname(), "End of /MOTD command.", ""));
 		
 		return replies;
 	}
