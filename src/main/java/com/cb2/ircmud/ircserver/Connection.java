@@ -38,6 +38,8 @@ public class Connection extends IrcUser implements Runnable {
 	@AutowiredLogger
 	Logger logger;
 	@Autowired
+	KekkonenMotdService motdService;
+	@Autowired
 	Environment env;
 	
 	
@@ -111,18 +113,8 @@ public class Connection extends IrcUser implements Runnable {
 	
 	public void acceptConnection() {
 		logger.debug("acceptConnection()");
-		sendServerCommand(IrcReplyCode.RPL_WELCOME, "Welcome to "+server.serverName+", "+getRepresentation()+"("+realname+")");
-		sendServerCommand(IrcReplyCode.RPL_YOURHOST, "Your host is "+server.serverName+", running version "+server.VERSION);
-
-		sendServerReply(IrcReplyCode.RPL_BOUNCE, "RFC2812 PREFIX=(ov)@+ CHANTYPES=#&!+ MODES=3 CHANLIMIT=#&!+:21 :are supported by this server");
-		sendServerReply(IrcReplyCode.RPL_BOUNCE, "NICKLEN=15 TOPICLEN=255 KICKLEN=255 CHANNELLEN=50 IDCHAN=!:5 :are supported by this server");
-		sendServerReply(IrcReplyCode.RPL_BOUNCE, "PENALTY FNC EXCEPTS=e INVEX=I CASEMAPPING=ascii NETWORK=IrcMud :are supported by this server");
-
-		sendServerCommand(IrcReplyCode.RPL_MOTDSTART, server.serverName+" - Message Of The Day:");
-	    Iterator<String> itr = server.MOTD.iterator();
-	    while (itr.hasNext())
-			sendServerCommand(IrcReplyCode.RPL_MOTD, itr.next());
-		sendServerCommand(IrcReplyCode.RPL_ENDOFMOTD, "End of /MOTD command.");
+		
+		motdService.sendMotd(this);
 
 		this.mode = "+i";
 
