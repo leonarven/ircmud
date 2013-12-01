@@ -3,8 +3,9 @@ package com.cb2.ircmud.ircserver;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 
-
+@Configurable
 public class Channel {
 
 	protected ArrayList<IrcUser> channelMembers = new ArrayList<IrcUser>();

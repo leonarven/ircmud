@@ -18,13 +18,17 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 
 
+
+
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 
 import com.cb2.ircmud.Config;
 import com.cb2.ircmud.ircserver.IrcCommand;
 import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
+@Configurable
 public class Connection extends IrcUser implements Runnable {
 	private InetSocketAddress address;
 	private Socket socket = null;
