@@ -17,10 +17,9 @@ public class KekkonenMotdService extends MotdService {
 	@Autowired
 	Environment env;
 
-	public ArrayList<IrcReply> getMotd(IrcUser user) {
-	
-		ArrayList<IrcReply> replies = new ArrayList<IrcReply>();
-		ArrayList<String> MotdStr = new ArrayList<String>(Arrays.asList(new String(
+	private ArrayList<String> motdStr;
+	public KekkonenMotdService() {
+		motdStr = new ArrayList<String>(Arrays.asList(new String(
 				  "Tissit on kivoja.\n"
 				+ "Niin on kuppikakutkin.\n\n"
 				+ "On mahdotonta olla masentunut, jos sinulla on ilmapallo. -Nalle Puh\n\n"
@@ -74,6 +73,11 @@ public class KekkonenMotdService extends MotdService {
 				+ ".......,...,..,...................~........,..........~7    \n"
 				+ "....,...,....,........................................+  77:\n"
 				+ "....,...,...,,.,,......,...................,..........?  ...\n").split("\n")));
+	}
+	
+	public ArrayList<IrcReply> getMotd(IrcUser user) {
+	
+		ArrayList<IrcReply> replies = new ArrayList<IrcReply>();
 
 		String serverName=env.getProperty("config.server.name");
 		String serverVersion=env.getProperty("config.server.version");
@@ -85,7 +89,7 @@ public class KekkonenMotdService extends MotdService {
 		replies.add(IrcReply.serverReply(IrcReplyCode.RPL_BOUNCE, user.getNickname(), "PENALTY FNC EXCEPTS=e INVEX=I CASEMAPPING=ascii NETWORK=IrcMud", "are supported by this server"));
 
 		replies.add(IrcReply.serverReply(IrcReplyCode.RPL_MOTDSTART, user.getNickname(), serverName+" - Message Of The Day:", ""));
-		for(String str : MotdStr)
+		for(String str : motdStr)
 			replies.add(IrcReply.serverReply(IrcReplyCode.RPL_MOTD, user.getNickname(), str));
 		replies.add(IrcReply.serverReply(IrcReplyCode.RPL_ENDOFMOTD, user.getNickname(), "End of /MOTD command.", ""));
 		
