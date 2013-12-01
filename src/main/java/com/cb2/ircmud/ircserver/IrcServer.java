@@ -27,7 +27,6 @@ public class IrcServer {
 	public String serverName;
 	@Value("${config.server.port}")
 	public int    serverPort;
-	public final String VERSION = "0.02";
 		
 	@AutowiredLogger
 	Logger logger;

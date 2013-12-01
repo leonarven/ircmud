@@ -1,9 +1,21 @@
-package com.cb2.ircmud.ircserver;
+package com.cb2.ircmud.ircserver.services;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Service;
+
+import com.cb2.ircmud.ircserver.IrcReply;
+import com.cb2.ircmud.ircserver.IrcReplyCode;
+import com.cb2.ircmud.ircserver.IrcUser;
+
+@Service
 public class KekkonenMotdService extends MotdService {
+	
+	@Autowired
+	Environment env;
 
 	public ArrayList<IrcReply> getMotd(IrcUser user) {
 	
@@ -63,15 +75,16 @@ public class KekkonenMotdService extends MotdService {
 				+ "....,...,....,........................................+  77:\n"
 				+ "....,...,...,,.,,......,...................,..........?  ...\n").split("\n")));
 
-		
-		replies.add(new IrcReply(null, IrcReplyCode.RPL_WELCOME,  "Welcome to "+server.serverName+", "+user.getRepresentation()+"("+user.getRealname()+")", ""));
-		replies.add(new IrcReply(null, IrcReplyCode.RPL_YOURHOST, "Your host is "+server.serverName+", running version "+server.VERSION, ""));
+		String serverName=env.getProperty("config.server.name");
+		String serverVersion=env.getProperty("config.server.version");
+		replies.add(new IrcReply(null, IrcReplyCode.RPL_WELCOME,  "Welcome to "+serverName+", "+user.getRepresentation()+"("+user.getRealname()+")", ""));
+		replies.add(new IrcReply(null, IrcReplyCode.RPL_YOURHOST, "Your host is "+serverName+", running version "+serverVersion, ""));
 
 		replies.add(new IrcReply(null, IrcReplyCode.RPL_BOUNCE, "RFC2812 PREFIX=(ov)@+ CHANTYPES=#&!+ MODES=3 CHANLIMIT=#&!+:21", "are supported by this server"));
 		replies.add(new IrcReply(null, IrcReplyCode.RPL_BOUNCE, "NICKLEN=15 TOPICLEN=255 KICKLEN=255 CHANNELLEN=50 IDCHAN=!:5", "are supported by this server"));
 		replies.add(new IrcReply(null, IrcReplyCode.RPL_BOUNCE, "PENALTY FNC EXCEPTS=e INVEX=I CASEMAPPING=ascii NETWORK=IrcMud", "are supported by this server"));
 
-		replies.add(new IrcReply(null, IrcReplyCode.RPL_MOTDSTART, server.serverName+" - Message Of The Day:", ""));
+		replies.add(new IrcReply(null, IrcReplyCode.RPL_MOTDSTART, serverName+" - Message Of The Day:", ""));
 		for(String str : MotdStr)
 			replies.add(new IrcReply(null, IrcReplyCode.RPL_MOTD, str, ""));
 		replies.add(new IrcReply(null, IrcReplyCode.RPL_ENDOFMOTD, "End of /MOTD command.", ""));

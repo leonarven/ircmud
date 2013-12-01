@@ -19,6 +19,7 @@ import org.springframework.core.env.Environment;
 
 import com.cb2.ircmud.ircserver.IrcCommand;
 import com.cb2.ircmud.ircserver.services.ChannelService;
+import com.cb2.ircmud.ircserver.services.MotdService;
 import com.cb2.ircmud.ircserver.services.UserService;
 import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
@@ -38,7 +39,7 @@ public class Connection extends IrcUser implements Runnable {
 	@AutowiredLogger
 	Logger logger;
 	@Autowired
-	KekkonenMotdService motdService;
+	MotdService motdService;
 	@Autowired
 	Environment env;
 	
