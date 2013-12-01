@@ -46,7 +46,7 @@ public class IrcReply {
 	
 	public String senderRepresentation() {
 		if (this.sender == null)
-			return server.globalServerName;
+			return server.serverName;
 		return this.sender.getRepresentation();
 	}
 	

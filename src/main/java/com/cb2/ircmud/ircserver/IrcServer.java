@@ -6,26 +6,30 @@ import java.util.*;
 import java.io.IOException;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
-import com.cb2.ircmud.Config;
 import com.cb2.ircmud.domain.Player;
 import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 @Component
-
 public class IrcServer {
-	
+
 	private ServerSocket serverSocket;
-	public String globalServerName;
-	public int    globalServerPort;
+	@Value("${config.server.name}")
+	public String serverName;
+	@Value("${config.server.port}")
+	public int    serverPort;
 	public String globalServerInfo = "";
 	public final String VERSION = "0.02";
 	
-	private LoginBot loginBot = new LoginBot("ACCOUNT", "Account bot");
+	@Autowired
+	private LoginBot loginBot;
 	private Map<String, IrcUser> userNicknameMap = new HashMap<String, IrcUser>();
 	private Map<String, Channel>       channelMap = new HashMap<String, Channel>();
 	
@@ -38,36 +42,28 @@ public class IrcServer {
 	@Autowired
 	PingService pingService;
 	@Autowired
-	Config config;
+	Environment env;
 
 	@PostConstruct
 	public void init() throws IOException {
 		
-		globalServerPort = config.ServerPort;
-		globalServerName = config.ServerName;
-		
-		logger.info("Initializing IrcServer({}: {})",globalServerName, globalServerPort);
+		logger.info("Initializing IrcServer({}: {})",serverName, serverPort);
 
 		logger.info("Initializing ServerSocket");
-		serverSocket = new ServerSocket(globalServerPort);
+		serverSocket = new ServerSocket(serverPort);
 
 		// Init channel Config.WorldChannel
-		logger.info("Initializing {}", config.WorldChannel);
-		Channel worldChannel = new Channel(config.WorldChannel);
+		logger.info("Initializing {}",env.getProperty("config.server.WorldChannel"));
+		Channel worldChannel = new Channel( env.getProperty("config.server.WorldChannel"));
 		channelMap.put(worldChannel.name, worldChannel);
 		
         
        //TODO: No hard-coded admin accounts :P
   		authService.addAccount("admin", "password", Player.ACCESS_ADMIN);
         
-		// Try to set Loginbot's nickname
-  		logger.info("Initializing LoginBot("+loginBot.getUsername()+")");
-		trySetNickname(loginBot, loginBot.getUsername());		
-		
 		// Initializing IrcCommands
 		logger.debug("Initializing IrcCommands");
-		IrcCommand.load(config.ircCommandsXmlFile);
-		
+		//IrcCommand.load(config.ircCommandsXmlFile);
 		
 		MOTD = new ArrayList<String>(Arrays.asList(new String(
 				  "Tissit on kivoja.\n"
@@ -220,5 +216,15 @@ public class IrcServer {
 		serverSocket.close();
 	
 		return false;
+	}
+	
+	@PreDestroy
+	protected void destroy(){
+		try {
+			close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

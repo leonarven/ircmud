@@ -19,3 +19,7 @@ target
 *.ear
 *.classpath
 /*.project
+
+#debug
+
+src/main/resources/log4j.properties

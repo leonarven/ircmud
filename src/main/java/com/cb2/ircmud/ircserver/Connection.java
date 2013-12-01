@@ -12,19 +12,11 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.LinkedBlockingQueue;
 
-
-
-
-
-
-
-
-
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.core.env.Environment;
 
-import com.cb2.ircmud.Config;
 import com.cb2.ircmud.ircserver.IrcCommand;
 import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
@@ -39,8 +31,8 @@ public class Connection extends IrcUser implements Runnable {
 	PingService pingService;
 	@AutowiredLogger
 	Logger logger;
-	@Autowired 
-	Config config;
+	@Autowired
+	Environment env;
 	
 	
 	public Connection(Socket socket){
@@ -83,11 +75,11 @@ public class Connection extends IrcUser implements Runnable {
 	}
 
 	public void sendServerCommand(Object command, String string) {
-		sendRawString(":" + server.globalServerName + " " + command.toString() + " " + nickname + " :" + string);
+		sendRawString(":" + server.serverName + " " + command.toString() + " " + nickname + " :" + string);
 	}
 
 	public void sendServerReply(Object command, String string) {
-		sendRawString(":" +server.globalServerName + " " + command.toString() + " " + nickname + " " + string);
+		sendRawString(":" +server.serverName + " " + command.toString() + " " + nickname + " " + string);
 	}
 
 	public void sendCommand(Object command, String string) {
@@ -113,14 +105,14 @@ public class Connection extends IrcUser implements Runnable {
 	
 	public void acceptConnection() {
 		logger.debug("acceptConnection()");
-		sendServerCommand(IrcReplyCode.RPL_WELCOME, "Welcome to "+server.globalServerName+", "+getRepresentation()+"("+realname+")");
-		sendServerCommand(IrcReplyCode.RPL_YOURHOST, "Your host is "+server.globalServerName+", running version "+server.VERSION);
+		sendServerCommand(IrcReplyCode.RPL_WELCOME, "Welcome to "+server.serverName+", "+getRepresentation()+"("+realname+")");
+		sendServerCommand(IrcReplyCode.RPL_YOURHOST, "Your host is "+server.serverName+", running version "+server.VERSION);
 
 		sendServerReply(IrcReplyCode.RPL_BOUNCE, "RFC2812 PREFIX=(ov)@+ CHANTYPES=#&!+ MODES=3 CHANLIMIT=#&!+:21 :are supported by this server");
 		sendServerReply(IrcReplyCode.RPL_BOUNCE, "NICKLEN=15 TOPICLEN=255 KICKLEN=255 CHANNELLEN=50 IDCHAN=!:5 :are supported by this server");
 		sendServerReply(IrcReplyCode.RPL_BOUNCE, "PENALTY FNC EXCEPTS=e INVEX=I CASEMAPPING=ascii NETWORK=IrcMud :are supported by this server");
 
-		sendServerCommand(IrcReplyCode.RPL_MOTDSTART, server.globalServerName+" - Message Of The Day:");
+		sendServerCommand(IrcReplyCode.RPL_MOTDSTART, server.serverName+" - Message Of The Day:");
 	    Iterator<String> itr = server.MOTD.iterator();
 	    while (itr.hasNext())
 			sendServerCommand(IrcReplyCode.RPL_MOTD, itr.next());
@@ -128,7 +120,7 @@ public class Connection extends IrcUser implements Runnable {
 
 		this.mode = "+i";
 
-		Channel worldChannel = server.findChannel(config.WorldChannel);
+		Channel worldChannel = server.findChannel(env.getProperty("config.server.WorldChannel"));
 		if (worldChannel == null) server.addChannel(worldChannel);
 		this.joinChannel(worldChannel);
 
@@ -223,7 +215,7 @@ public class Connection extends IrcUser implements Runnable {
 				case NICK:
 					String n = command.arguments[0];
 					if (!this.tryChangeNickname(n)) {
-						sendRawString(":" + server.globalServerName + " " + IrcReplyCode.ERR_NICKNAMEINUSE + " " + n + ":Nickname in use");
+						sendRawString(":" + server.serverName + " " + IrcReplyCode.ERR_NICKNAMEINUSE + " " + n + ":Nickname in use");
 					}
 					break;
 				case USER:
@@ -339,7 +331,7 @@ public class Connection extends IrcUser implements Runnable {
 					}
 					break;
 				case PING:
-					this.sendServerReply("PONG", server.globalServerName+" :"+server.globalServerName);
+					this.sendServerReply("PONG", server.serverName+" :"+server.serverName);
 					break;
 				case PONG:
 					pingService.pongFrom(this);

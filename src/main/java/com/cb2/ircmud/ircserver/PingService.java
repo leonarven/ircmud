@@ -9,17 +9,20 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import com.cb2.ircmud.Config;
 import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
 @Component
 public class PingService implements Runnable {
 
 	public final static String VERSION = "0.06";
+	@Value("${config.server.pingTimeout}")
 	private long pingTimeout  = 10000;
 	private int pingCheckTime = 1000;
+	@Value("${config.server.pingTimeout}")
 	private long newPingTime  = 10000;
 	private HashMap<Connection, Long> lastPongMap = new HashMap<Connection, Long>();
 	private HashMap<Connection, Long> lastPingMap = new HashMap<Connection, Long>();
@@ -29,8 +32,8 @@ public class PingService implements Runnable {
 	IrcServer server;
 	@AutowiredLogger
 	Logger logger;
-	@Autowired 
-	Config config;
+	@Autowired
+	Environment env;
 	
 
 	public void addPartner(Connection connection) {
@@ -65,9 +68,6 @@ public class PingService implements Runnable {
 	@PostConstruct
 	public void init() {
 		logger.info("Initializing PingService");
-		
-		pingCheckTime = config.connectionPingTime;
-		pingTimeout= config.connectionPingTimeout;
 		
 		Thread pingService = new Thread(new PingService());
 		
@@ -105,7 +105,7 @@ public class PingService implements Runnable {
 		        diff = currentTime - entry.getValue().longValue();
 	        	
 	        	if (diff > newPingTime) {
-	        		user.sendPing(server.globalServerName);
+	        		user.sendPing(server.serverName);
 	        		lastPingMap.put(user, new Date().getTime());
 	        	}
 	            pingit.remove();

@@ -16,8 +16,6 @@ public class Ircmud {
 	IrcServer server;
 	@AutowiredLogger
 	Logger logger;
-	@Autowired
-	Config config;
 	
 	@PostConstruct
 	public void init(){

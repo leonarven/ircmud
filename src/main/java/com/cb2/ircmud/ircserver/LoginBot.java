@@ -2,11 +2,17 @@ package com.cb2.ircmud.ircserver;
 
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import com.cb2.ircmud.domain.Player;
+import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
-
+@Component
 public class LoginBot extends IrcBotUser {
 	
 	private Pattern usernamePattern;
@@ -33,9 +39,17 @@ public class LoginBot extends IrcBotUser {
 	
 	@Autowired
 	AuthService authService;
+	@AutowiredLogger
+	Logger logger;
 	
-	public LoginBot(String nick, String realname) {
-		super(nick, realname);
+	@Value("${config.bots.login.name}")
+	protected String nickname;
+	@Value("${config.bots.login.realname}")
+	protected String realname;
+	
+	public LoginBot() {
+		super("", "");
+		
 		parsePrivateMessages = true;
 		
 		//Email pattern
@@ -43,6 +57,11 @@ public class LoginBot extends IrcBotUser {
 		
 		//TODO: a good password pattern
 		passwordPattern = Pattern.compile(".+", Pattern.CASE_INSENSITIVE);
+	}
+	
+	@PostConstruct
+	protected void init(){
+		logger.info("Initializing LoginBot({}: {})",nickname, realname);
 	}
 	
 	
