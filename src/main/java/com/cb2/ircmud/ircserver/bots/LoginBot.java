@@ -38,6 +38,9 @@ public class LoginBot extends IrcBotUser {
 		public String usage() {
 			return "Usage: "+command+" "+usage;
 		}
+		public String toString() {
+			return this.command;
+		}
 	}
 	
 	@Autowired
@@ -76,106 +79,103 @@ public class LoginBot extends IrcBotUser {
 			command = Command.valueOf(command_str.toUpperCase());
 		} catch(IllegalArgumentException e) {}
 		
-		if (command != null) {
-			switch(command) {
-				case LOGIN:
-					if (params != null && params.length == 2) {
-						String username = params[0];
-						String password = params[1];
-	
-						if (user.getPlayer() != null) {
-							user.sendMessage(this, "You have logged in already");
-						} else {
-							
-							Player acc = authService.login(username, password, user);
-		
-							if (acc != null) {
-								user.sendMessage(this, "You have successfully logged in");
-							} else {
-								user.sendMessage(this, "Invalid username or password");
-							}
-						}
-	
-					} else user.sendMessage(this, command.usage());
-					break;
-				case LOGOUT:
-					if (user.getPlayer() == null) {
-						user.sendMessage(this, "You haven't logged in");
+		if (command == null) command = Command.UNKNOWN;
+
+		switch(command) {
+			case LOGIN:
+				if (params != null && params.length == 2) {
+					String username = params[0];
+					String password = params[1];
+
+					if (user.getPlayer() != null) {
+						user.sendMessage(this, "You have logged in already");
 					} else {
-						authService.logout(user.getPlayer());
-						user.sendMessage(this, "You have logged out");
+						
+						Player acc = authService.login(username, password, user);
+	
+						if (acc != null) {
+							user.sendMessage(this, "You have successfully logged in");
+						} else {
+							user.sendMessage(this, "Invalid username or password");
+						}
 					}
-					break;
-				case CREATE:
-					if (params != null && params.length == 3) {
-						if (user.getPlayer() != null) {
-							user.sendMessage(this, "You have logged in");
-							break;
-						}
-						String username = params[0];
-						String password = params[1];
-						String password2 = params[2];
-						if (!password.equals(password2)) {
-							user.sendMessage(this, "Passwords don't match");
-							break;
-						}
-						//TODO: Enable username validation
-						/*if (!usernamePattern.matcher(username).matches()) {
-							user.sendMessage(this, "Invalid email address");
-							break;
-						}*/
-						//TODO: Enable password validation
-						/*if (!passwordPattern.matcher(password).matches()) {
-							user.sendMessage(this, "Invalid password address");
-							break;
-						}*/
-						
-						if (!authService.addAccount(username, password)) {
-							user.sendMessage(this, "Already created an account with the same email");
-							break;
-						}
-						
-						authService.login(username, password, user);
-						user.sendMessage(this, "You have successfully created an account. You are now logged in.");
-					} else user.sendMessage(this, command.usage());
-					break;
-				/*case NOTIFY:
-					if (params != null && params.length >= 1) {
-						String cantFindTheseUsers = "";
-						for (String notifyUser : params) {
-							IrcUser nuser = IrcServer.findUserByNickname(notifyUser);
-							if (nuser != null) {
-								nuser.sendReply(IrcReply.serverReply("NOTIFY", user.getNickname() + " wants to notify you"));
-							}
-							else {
-								cantFindTheseUsers += " " + notifyUser;
-							}
-						}
-						if (!cantFindTheseUsers.isEmpty()) {
-							user.sendMessage(this, "Can't find nicks:" + cantFindTheseUsers);
-						}
-					} else user.sendMessage(this, command.usage());
-					break;*/
-				case INFO:
-					if (!user.isLoggedIn()) {
-						user.sendMessage(this, "You must be logged in to use this command");
+
+				} else user.sendMessage(this, command.usage());
+				break;
+			case LOGOUT:
+				if (user.getPlayer() == null) {
+					user.sendMessage(this, "You haven't logged in");
+				} else {
+					authService.logout(user.getPlayer());
+					user.sendMessage(this, "You have logged out");
+				}
+				break;
+			case CREATE:
+				if (params != null && params.length == 3) {
+					if (user.getPlayer() != null) {
+						user.sendMessage(this, "You have logged in");
+						break;
+					}
+					String username = params[0];
+					String password = params[1];
+					String password2 = params[2];
+					if (!password.equals(password2)) {
+						user.sendMessage(this, "Passwords don't match");
+						break;
+					}
+					//TODO: Enable username validation
+					/*if (!usernamePattern.matcher(username).matches()) {
+						user.sendMessage(this, "Invalid email address");
+						break;
+					}*/
+					//TODO: Enable password validation
+					/*if (!passwordPattern.matcher(password).matches()) {
+						user.sendMessage(this, "Invalid password address");
+						break;
+					}*/
+					
+					if (!authService.addAccount(username, password)) {
+						user.sendMessage(this, "Already created an account with the same email");
 						break;
 					}
 					
-					user.sendMessage(this, "You are logged in as \"" + user.getPlayer().getUsername() + "\"");
-					
+					authService.login(username, password, user);
+					user.sendMessage(this, "You have successfully created an account. You are now logged in.");
+				} else user.sendMessage(this, command.usage());
+				break;
+			/*case NOTIFY:
+				if (params != null && params.length >= 1) {
+					String cantFindTheseUsers = "";
+					for (String notifyUser : params) {
+						IrcUser nuser = IrcServer.findUserByNickname(notifyUser);
+						if (nuser != null) {
+							nuser.sendReply(IrcReply.serverReply("NOTIFY", user.getNickname() + " wants to notify you"));
+						}
+						else {
+							cantFindTheseUsers += " " + notifyUser;
+						}
+					}
+					if (!cantFindTheseUsers.isEmpty()) {
+						user.sendMessage(this, "Can't find nicks:" + cantFindTheseUsers);
+					}
+				} else user.sendMessage(this, command.usage());
+				break;*/
+			case INFO:
+				if (!user.isLoggedIn()) {
+					user.sendMessage(this, "You must be logged in to use this command");
 					break;
-				case HELP:
-					Command[] commands = Command.values();
-					ArrayList<String> strcommands = new ArrayList<String>();
-					for(Command cmd : commands)
-						if (cmd.command.length() > 0) strcommands.add(cmd.command);
-					user.sendMessage(this, "Commands available: " + StringUtils.join(strcommands.toArray(), ", "));
-					break;
-				case UNKNOWN:
-				default:
-					user.sendMessage(this, "Unknown command \"" + command_str + "\". HELP for additional help");
-			}
-		} else user.sendMessage(this, "Unknown command \"" + command_str + "\". HELP for additional help");
+				}
+				
+				user.sendMessage(this, "You are logged in as \"" + user.getPlayer().getUsername() + "\"");
+				
+				break;
+			case HELP:
+				Command[] commands = Command.values();
+				user.sendMessage(this, "Commands available: " + StringUtils.join(commands, ", "));
+				break;
+			case UNKNOWN:
+			default:
+				user.sendMessage(this, "Unknown command \"" + command_str + "\". HELP for additional help");
+		}
 	}
 }
