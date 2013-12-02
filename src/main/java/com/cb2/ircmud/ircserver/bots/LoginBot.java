@@ -1,7 +1,8 @@
 package com.cb2.ircmud.ircserver.bots;
 
+import java.util.ArrayList;
 import java.util.regex.Pattern;
-
+import org.apache.commons.lang3.StringUtils;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ public class LoginBot extends IrcBotUser {
 		LOGOUT("LOGOUT", ""),
 		CREATE("CREATE", "<email> <password> <password>"),
 		INFO(  "INFO",   ""),
+		HELP(  "HELP",   ""),
 		UNKNOWN(  "",   "");
 		
 		public String command, usage;
@@ -163,10 +165,17 @@ public class LoginBot extends IrcBotUser {
 					user.sendMessage(this, "You are logged in as \"" + user.getPlayer().getUsername() + "\"");
 					
 					break;
+				case HELP:
+					Command[] commands = Command.values();
+					ArrayList<String> strcommands = new ArrayList<String>();
+					for(Command cmd : commands)
+						if (cmd.command.length() > 0) strcommands.add(cmd.command);
+					user.sendMessage(this, "Commands available: " + StringUtils.join(strcommands.toArray(), ", "));
+					break;
 				case UNKNOWN:
 				default:
-					user.sendMessage(this, "Unknown command \"" + command_str + "\"");
+					user.sendMessage(this, "Unknown command \"" + command_str + "\". HELP for additional help");
 			}
-		} else user.sendMessage(this, "Unknown command \"" + command_str + "\"");
+		} else user.sendMessage(this, "Unknown command \"" + command_str + "\". HELP for additional help");
 	}
 }
