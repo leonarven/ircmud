@@ -1,5 +1,6 @@
 package com.cb2.ircmud.ircserver.bots;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -73,67 +74,66 @@ public class AdminBot extends IrcBotUser {
 			command = Command.valueOf(command_str.toUpperCase());
 		} catch(IllegalArgumentException e) {}
 		
-		if (command != null) {
-			switch(command) {
-				case GIVE: {
-					if (params.length != 2) {
-						user.sendMessage(this, command.usage());
-						break;
-					}
-					
-					String paramsAccessStr = params[0];
-					int access = 0;
-					if (paramsAccessStr.equalsIgnoreCase("admin")) {
-						access = Player.ACCESS_ADMIN;
-					} else if (paramsAccessStr.equalsIgnoreCase("gamemaster")) {
-						access = Player.ACCESS_GAMEMASTER;
-					} else {
-						user.sendMessage(this, command.usage());
-						break;
-					}
-					String usernameOrNickname = params[1];
-					Player player = playerService.findPlayerByNicknameOrUsername(usernameOrNickname);
-					if (player == null) {
-						user.sendMessage(this, "Can't find player \"" + usernameOrNickname + "\"");
-						break;
-					}
-					
-					player.giveAccess(access);
-					
-					user.sendMessage(this,  "Success");
+		if (command == null) command = Command.UNKNOWN;
+		switch(command) {
+			case GIVE: {
+				if (params.length != 2) {
+					user.sendMessage(this, command.usage());
 					break;
 				}
-				case REMOVE: {
-					if (params.length != 2) {
-						user.sendMessage(this, command.usage());
-						break;
-					}
-					
-					String paramsAccessStr = params[0];
-					int access = 0;
-					if (paramsAccessStr.equalsIgnoreCase("admin")) {
-						access = Player.ACCESS_ADMIN_ONLY;
-					} else if (paramsAccessStr.equalsIgnoreCase("gamemaster")) {
-						access = Player.ACCESS_GAMEMASTER;
-					} else {
-						user.sendMessage(this, command.usage());
-						break;
-					}
-					String usernameOrNickname = params[1];
-					Player player = playerService.findPlayerByNicknameOrUsername(usernameOrNickname);
-					if (player == null) {
-						user.sendMessage(this, "Can't find player \"" + usernameOrNickname + "\"");
-						break;
-					}
-					
-					player.removeAccess(access);
-					
-					user.sendMessage(this,  "Success");
+				
+				String paramsAccessStr = params[0];
+				int access = 0;
+				if (paramsAccessStr.equalsIgnoreCase("admin")) {
+					access = Player.ACCESS_ADMIN;
+				} else if (paramsAccessStr.equalsIgnoreCase("gamemaster")) {
+					access = Player.ACCESS_GAMEMASTER;
+				} else {
+					user.sendMessage(this, command.usage());
+					break;
 				}
-				case UNKNOWN:
-				default:
-					user.sendMessage(this, "Unknown command \"" + command_str + "\"");
+				String usernameOrNickname = params[1];
+				Player player = playerService.findPlayerByNicknameOrUsername(usernameOrNickname);
+				if (player == null) {
+					user.sendMessage(this, "Can't find player \"" + usernameOrNickname + "\"");
+					break;
+				}
+				
+				player.giveAccess(access);
+				
+				user.sendMessage(this,  "Success");
+				break;
 			}
-		} else user.sendMessage(this, "Unknown command \"" + command_str + "\"");
+			case REMOVE: {
+				if (params.length != 2) {
+					user.sendMessage(this, command.usage());
+					break;
+				}
+				
+				String paramsAccessStr = params[0];
+				int access = 0;
+				if (paramsAccessStr.equalsIgnoreCase("admin")) {
+					access = Player.ACCESS_ADMIN_ONLY;
+				} else if (paramsAccessStr.equalsIgnoreCase("gamemaster")) {
+					access = Player.ACCESS_GAMEMASTER;
+				} else {
+					user.sendMessage(this, command.usage());
+					break;
+				}
+				String usernameOrNickname = params[1];
+				Player player = playerService.findPlayerByNicknameOrUsername(usernameOrNickname);
+				if (player == null) {
+					user.sendMessage(this, "Can't find player \"" + usernameOrNickname + "\"");
+					break;
+				}
+				
+				player.removeAccess(access);
+				
+				user.sendMessage(this,  "Success");
+			}
+			case UNKNOWN:
+			default:
+				user.sendMessage(this, "Unknown command \"" + command_str + "\"");
+		}
 	}
 }
