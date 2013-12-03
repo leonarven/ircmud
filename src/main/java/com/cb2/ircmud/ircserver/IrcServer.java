@@ -48,15 +48,14 @@ public class IrcServer {
 		// Init channel Config.WorldChannel
 		Channel worldChannel = new Channel( env.getProperty("config.server.WorldChannel"));
 		channels.add(worldChannel);
-		
-        
-       //TODO: No hard-coded admin accounts :P
-  		authService.addAccount("admin", "password", Player.ACCESS_ADMIN);
 	}
 	
 	
 	public void run() {
-		logger.info("Starting server loop");
+		//TODO: No hard-coded admin accounts :P
+  		authService.addAccount("admin", "password", Player.ACCESS_ADMIN);
+
+  		logger.info("Starting server loop");
 
 		while (true) {
 			try {
