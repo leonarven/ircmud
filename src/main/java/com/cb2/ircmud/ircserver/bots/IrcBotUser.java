@@ -4,7 +4,6 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 
 import com.cb2.ircmud.ircserver.Channel;
 import com.cb2.ircmud.ircserver.IrcReply;
@@ -12,7 +11,6 @@ import com.cb2.ircmud.ircserver.IrcUser;
 import com.cb2.ircmud.ircserver.services.UserService;
 import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
-@Configurable
 public abstract class IrcBotUser extends IrcUser {
 	protected boolean parsePrivateMessages = false;
 	protected boolean parseChannelMessages = false;
