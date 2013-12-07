@@ -6,17 +6,10 @@ public class SayEvent extends Event {
 	protected final String message;
 	
 	
-	public SayEvent(Item sender, String msg) {
-		super(Event.Type.Say, sender);
+	public SayEvent(Item sender, String msg, EventListener target) {
+		super(Event.Type.Say, sender, target);
 		this.message = msg;
 	}
 
 	String getMessage() { return message; }
-
-	@Override
-	public void trigger() {
-		// TODO Implement SayEvent.trigger
-	}
-	
-
 }

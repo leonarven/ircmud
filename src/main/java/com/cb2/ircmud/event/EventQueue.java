@@ -10,7 +10,7 @@ public class EventQueue implements Runnable {
 		try {
 			while(true) {
 				Event event = queue.take();
-				event.trigger();
+				event.getTarget().handleEvent(event);
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();

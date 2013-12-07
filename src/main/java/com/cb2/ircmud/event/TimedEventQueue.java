@@ -1,24 +1,31 @@
 package com.cb2.ircmud.event;
 
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.PriorityQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 public class TimedEventQueue implements Runnable {
-	private PriorityBlockingQueue<TimedEvent> queue;
+	private PriorityQueue<TimedEvent> queue = new PriorityQueue<TimedEvent>();
+	private Lock queueLock = new ReentrantLock();
 
 	@Override
 	public void run() {
 		try {
 			while(true) {
+				queueLock.lock();
 				if (!queue.isEmpty()) {
 					long waitTime = queue.peek().getTriggerTime().getTime() - System.currentTimeMillis();
 					if (waitTime <= 0) {
-						TimedEvent event = queue.take();
-						event.trigger();
+						TimedEvent event = queue.poll();
+						queueLock.unlock();
+						event.getTarget().handleEvent(event);
 					} else {
+						queueLock.unlock();
 						this.wait(waitTime);
 					}
 				} else {
+					queueLock.unlock();
 					this.wait();
 				}
 			}
@@ -28,7 +35,9 @@ public class TimedEventQueue implements Runnable {
 	}
 	
 	void addEvent(TimedEvent event) {
+		queueLock.lock();
 		queue.add(event);
+		queueLock.unlock();
 		this.notify();
 	}
 }

@@ -7,8 +7,8 @@ public abstract class TimedEvent extends Event implements Comparator<TimedEvent>
 
 	protected final Date triggerTime;
 	
-	public TimedEvent(Type type, Object sender, Date emitTime) {
-		super(type, sender);
+	public TimedEvent(Type type, Object sender, EventListener target, Date emitTime) {
+		super(type, sender, target);
 		this.triggerTime = emitTime;
 	}
 

@@ -7,22 +7,15 @@ import com.cb2.ircmud.ircserver.services.NotificationService;
 public class TimedServerNotificationEvent extends TimedEvent {
 
 	protected final String message;
-	protected final NotificationService notificationService;
 	
 	public TimedServerNotificationEvent(NotificationService notificationService, Date emitTime, String msg) {
 		this(notificationService, emitTime, msg, notificationService);
 	}
 	
 	public TimedServerNotificationEvent(Object sender, Date emitTime, String msg, NotificationService notificationService) {
-		super(Event.Type.ServerNotification, sender, emitTime);
+		super(Event.Type.ServerNotification, sender, notificationService, emitTime);
 		this.message = msg;
-		this.notificationService = notificationService;
 	}
 	
 	public String getMessage() { return message; }
-
-	@Override
-	public void trigger() {
-		notificationService.sendNoticeToAll(message);
-	}
 }

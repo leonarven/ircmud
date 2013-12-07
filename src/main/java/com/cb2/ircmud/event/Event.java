@@ -7,15 +7,16 @@ public abstract class Event {
 	}
 	
 	protected final Type type;
+	protected final EventListener target;
 	protected final Object sender;
 	
-	public Event(Type type, Object sender) {
+	public Event(Type type, Object sender, EventListener target) {
 		this.type = type;
 		this.sender = sender;
+		this.target = target;
 	}
 	
 	public Type getType() { return type; }
 	public Object getSender() { return sender; }
-	
-	abstract public void trigger();
+	public EventListener getTarget() { return target; }
 }
