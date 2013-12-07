@@ -9,6 +9,10 @@ public class TimedServerNotificationEvent extends TimedEvent {
 	protected final String message;
 	protected final NotificationService notificationService;
 	
+	public TimedServerNotificationEvent(NotificationService notificationService, Date emitTime, String msg) {
+		this(notificationService, emitTime, msg, notificationService);
+	}
+	
 	public TimedServerNotificationEvent(Object sender, Date emitTime, String msg, NotificationService notificationService) {
 		super(Event.Type.ServerNotification, sender, emitTime);
 		this.message = msg;
