@@ -1,5 +1,6 @@
 package com.cb2.ircmud.ircserver.services;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,5 +76,7 @@ public class UserService {
 			pingService.dropPartner(con);
 		}
 	}
+	
+	public Collection<IrcUser> getIrcUsers() { return userNicknameMap.values();}
 
 }
