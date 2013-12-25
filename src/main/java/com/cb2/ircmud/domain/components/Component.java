@@ -12,7 +12,7 @@ import com.cb2.ircmud.event.Event;
 @RooJavaBean
 @RooToString
 @RooJpaActiveRecord(inheritanceType = "TABLE_PER_CLASS")
-public abstract class Component {
+public class Component {
 
 	@ManyToOne
     private Item item;

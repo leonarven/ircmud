@@ -1,5 +1,6 @@
 package com.cb2.ircmud.domain.components;
 
+import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import com.cb2.ircmud.event.SayEvent;
 @RooJpaActiveRecord
 public class PlayerComponent extends Component {
 	
+	@ManyToOne
 	private Player player;
 	
 	@Transient
