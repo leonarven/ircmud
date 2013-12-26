@@ -22,8 +22,6 @@ import javax.annotation.PreDestroy;
 import com.cb2.ircmud.domain.Player;
 import com.cb2.ircmud.ircserver.services.AuthService;
 import com.cb2.ircmud.ircserver.services.ChannelService;
-import com.cb2.ircmud.ircserver.services.ConnectionReadService;
-import com.cb2.ircmud.ircserver.services.ConnectionWriteService;
 import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
 import org.slf4j.Logger;
@@ -54,10 +52,6 @@ public class IrcServer implements Runnable {
 	ChannelService channels;
 	@Autowired
 	Environment env;
-	@Autowired
-	ConnectionWriteService connectionWriteService;
-	@Autowired
-	ConnectionReadService connectionReadService;
 	
 	@PostConstruct
 	public void init() throws IOException {
@@ -116,7 +110,6 @@ public class IrcServer implements Runnable {
 		connectionList.add(con);
 		connectionListLock.writeLock().unlock();
 		
-		connectionReadService.addConnection(con);
 		con.initialize();
 	}
 	

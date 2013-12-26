@@ -54,6 +54,7 @@ public class Connection extends IrcUser {
 	public void sendRawString(String s) {
 		logger.debug("{} <<< {}", nickname, s);
 		outQueue.add(s);
+		asynchronousHandleOutQueue();
 	}
 	
 	public void sendPrivateMessage(String sender, String target, String msg) {
@@ -325,6 +326,7 @@ public class Connection extends IrcUser {
 	
 	public void initialize() {
 		try {
+			initAsynchronousRead();
 			this.address = (InetSocketAddress) socketChannel.getRemoteAddress();
 			this.hostname = address.getAddress().getHostAddress();
 			logger.info("Connection from host {}", hostname);
