@@ -17,7 +17,7 @@ public enum IrcCommand {
 
 	NICK(1, 1) {
 		@Override
-		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+		public void init(Connection con, String prefix, String[] arguments) {
 			this.arguments = arguments;
 
 			this.argumentMap.put("command",  "NICK");
@@ -26,7 +26,7 @@ public enum IrcCommand {
 	},
 	USER(1, 4) {
 		@Override
-		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+		public void init(Connection con, String prefix, String[] arguments) {
 			this.arguments  = arguments;
 
 			this.argumentMap.put("command",  "USER");
@@ -38,7 +38,7 @@ public enum IrcCommand {
 	},
 	QUIT(1, 1) {
 		@Override
-		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+		public void init(Connection con, String prefix, String[] arguments) {
 			this.arguments  = arguments;
 
 			this.argumentMap.put("command",  "QUIT");
@@ -47,7 +47,7 @@ public enum IrcCommand {
 	},
 	MODE(0, 2) { // TODO: If user queries channel mode no 2. parameter. Now causes java.lang.ArrayIndexOutOfBoundsException
 		@Override
-		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+		public void init(Connection con, String prefix, String[] arguments) {
 			this.arguments  = arguments;
 
 			this.argumentMap.put("command",  "MODE");
@@ -58,7 +58,7 @@ public enum IrcCommand {
 	},
 	JOIN(1, 2){
 		@Override
-		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+		public void init(Connection con, String prefix, String[] arguments) {
 			this.arguments  = arguments;
 
 			this.argumentMap.put("command",  "JOIN");
@@ -69,7 +69,7 @@ public enum IrcCommand {
 	},
 	PART(1, 2){
 		@Override
-		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+		public void init(Connection con, String prefix, String[] arguments) {
 			this.arguments  = arguments;
 
 			this.argumentMap.put("command",  "PART");
@@ -80,7 +80,7 @@ public enum IrcCommand {
 	},
 	PRIVMSG(2, 2) {
 		@Override
-		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+		public void init(Connection con, String prefix, String[] arguments) {
 			this.arguments = arguments;
 			
 			this.argumentMap.put("command", "PRIVMSG");
@@ -90,7 +90,7 @@ public enum IrcCommand {
 	},
 	WHO(1,2) {
 		@Override
-		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+		public void init(Connection con, String prefix, String[] arguments) {
 			this.arguments = arguments;
 			
 			this.argumentMap.put("command", "WHO");
@@ -101,7 +101,7 @@ public enum IrcCommand {
 	},
 	WHOIS(1,1) {
 		@Override
-		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+		public void init(Connection con, String prefix, String[] arguments) {
 			this.arguments = arguments;
 			
 			this.argumentMap.put("command", "WHOIS");
@@ -110,7 +110,7 @@ public enum IrcCommand {
 	},
 	PING(1,1) {
 		@Override
-		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+		public void init(Connection con, String prefix, String[] arguments) {
 			this.arguments = arguments;
 			
 			this.argumentMap.put("command", "PING");
@@ -119,7 +119,7 @@ public enum IrcCommand {
 	},
 	PONG(1,1) {
 		@Override
-		public void init(Connection con, String prefix, String[] arguments) throws Exception {
+		public void init(Connection con, String prefix, String[] arguments) {
 			this.arguments = arguments;
 			
 			this.argumentMap.put("command", "PONG");
@@ -172,7 +172,7 @@ public enum IrcCommand {
 	}
 	
 	
-	public abstract void init(Connection con, String prefix, String[] arguments) throws Exception;
+	public abstract void init(Connection con, String prefix, String[] arguments);
 	
 	//TODO: REMOVE THIS, seems out dated and unnecessary.
 	public static void load(String file) {

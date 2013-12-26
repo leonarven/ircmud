@@ -26,7 +26,7 @@ public class Ircmud {
 
 		try {
 			logger.info("Running Server");
-			server.run();	
+			server.run();
 		} finally {
 			try {
 				server.close();

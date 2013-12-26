@@ -1,15 +1,14 @@
 package com.cb2.ircmud.ircserver;
 
-import java.io.BufferedReader;
-import java.io.OutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.slf4j.Logger;
@@ -24,9 +23,11 @@ import com.cb2.ircmud.ircserver.services.UserService;
 import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
 @Configurable
-public class Connection extends IrcUser implements Runnable {
+public class Connection extends IrcUser {
 	private InetSocketAddress address;
-	private Socket socket = null;
+	private AsynchronousSocketChannel socketChannel = null;
+	private ByteBuffer readBuffer = ByteBuffer.allocate(512);
+	private volatile boolean writing = false;
 
 	@Autowired 
 	IrcServer server;
@@ -44,35 +45,11 @@ public class Connection extends IrcUser implements Runnable {
 	Environment env;
 	
 	
-	public Connection(Socket socket){
-		this.socket = socket;
+	public Connection(AsynchronousSocketChannel socketChannel){
+		this.socketChannel = socketChannel;
 	}
 
-	private LinkedBlockingQueue<String> outQueue = new LinkedBlockingQueue<String>(1000);
-	
-	private Thread outThread = new Thread() {
-		public void run() {
-			try {
-				OutputStream out = socket.getOutputStream();
-				while (keepRunning) {
-					String s = outQueue.take();
-					s = s.replace("\n", "").replace("\r", "");
-					s = s + "\r\n";
-					out.write(s.getBytes("UTF-8"));
-					out.flush();
-				}
-			} catch (Exception e) {
-				logger.error("outThread: Outqueue died");
-				outQueue.clear();
-				outQueue = null;
-			}
-			try {
-				closeConnection();
-			} catch (Exception e2) {
-				e2.printStackTrace();
-			}
-		}
-	};
+	private LinkedBlockingQueue<String> outQueue = new LinkedBlockingQueue<String>(100);
 
 	public void sendRawString(String s) {
 		logger.debug("{} <<< {}", nickname, s);
@@ -99,11 +76,17 @@ public class Connection extends IrcUser implements Runnable {
 		sendServerCommand("NOTICE", string);
 	}
 	
-	public void closeConnection() throws IOException {
+	public void closeConnection() {
 		//TODO: Cleaner closing
-		synchronized (socket) {
-			if (socket.isConnected())
-				socket.close();
+		synchronized (socketChannel) {
+			if (socketChannel.isOpen()) {
+				try {
+					socketChannel.close();
+				}
+				catch (IOException e) {
+					logger.error("{}: IOException while closing socket channel {}", getRepresentation(), e.getMessage());
+				}
+			}
 			users.dropUser(this.nickname);
 		}
 	}
@@ -126,7 +109,7 @@ public class Connection extends IrcUser implements Runnable {
 		pingService.addPartner(this);
 	}
 	
-	private void processLine(String line) throws Exception {
+	private void processLine(String line) {
 		
 		if (line == null) return;
 
@@ -158,13 +141,11 @@ public class Connection extends IrcUser implements Runnable {
 		IrcCommand commandObject = null;
 		try {
 			commandObject = IrcCommand.valueOf(command.toUpperCase());
-		} catch(IllegalArgumentException e) {}
-		if (commandObject == null) {
+		} catch(IllegalArgumentException e) {
 			sendServerReply(IrcReplyCode.ERR_UNKNOWNCOMMAND, command + " :Unknown command ");
 			return;
 		}
 		if (arguments.length < commandObject.getMin() || arguments.length > commandObject.getMax()) {
-			
 			//TODO: Use command
 			sendSelfNotice("Invalid number of arguments for this" + " command, expected not more than " + commandObject.getMax() + " and not less than " + commandObject.getMin() + " but got " + arguments.length + " arguments");
 			return;
@@ -174,7 +155,7 @@ public class Connection extends IrcUser implements Runnable {
 		act(commandObject);
 	}
 	
-	public void act(IrcCommand command) throws Exception {
+	public void act(IrcCommand command) {
 		String mask;
 		
 		if (this.nickname == null || this.username == null) {
@@ -269,7 +250,7 @@ public class Connection extends IrcUser implements Runnable {
 					break;
 				case QUIT:
 					quit(command.arguments[0]);
-					socket.close();
+					closeConnection();
 					break;
 				case PRIVMSG:
 					String target  = command.arguments[0];
@@ -342,38 +323,69 @@ public class Connection extends IrcUser implements Runnable {
 		}
 	}
 	
-	@Override
-	public void run() {
-		sendReply(IrcReply.serverReply("020", "Please wait while we process your connection"));
-
+	public void initialize() {
 		try {
-			
-			this.address = (InetSocketAddress) socket.getRemoteSocketAddress();
+			this.address = (InetSocketAddress) socketChannel.getRemoteAddress();
 			this.hostname = address.getAddress().getHostAddress();
 			logger.info("Connection from host {}", hostname);
-
-			outThread.start();
-
-			InputStream socketIn = socket.getInputStream();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(socketIn, "UTF-8"));
-			String line;
-			
-			while ((line = reader.readLine()) != null && this.keepRunning) {
-				try {
-					processLine(line);
-				} catch (Exception e) {
-					logger.error("ERROR: Exception in Connection.run: {} \n Stacktrace: ",e.getMessage());
-					e.printStackTrace();
-				}
-			}
 		} catch (IOException e) {
-			logger.error("IOException in run : ", e.getMessage());
-		} finally {
-			try {
-				closeConnection();
-			} catch (IOException e2) {
+			e.printStackTrace();
+		}
+		
+		send020Reply();
+	}
+	
+	public void send020Reply() {
+		sendReply(IrcReply.serverReply("020", "Please wait while we process your connection"));	
+	}
+	
+	public void initAsynchronousRead() {
+		socketChannel.read(readBuffer, null, new CompletionHandler<Integer, Object>() {
+
+			@Override
+			public void completed(Integer result, Object attachment) {
+				int readBytes = result.intValue();
+				readBuffer.flip();
+				String data = new String(readBuffer.array(), 0, readBytes, server.getCharset());
+				String[] lines = data.split("\r\n");
+				for (String line : lines) {
+					if (!line.isEmpty())
+						processLine(line);
+				}
+				readBuffer.clear();
+				
+				socketChannel.read(readBuffer, null, this);
 			}
-		}		
+
+			@Override
+			public void failed(Throwable exc, Object attachment) {
+				logger.error("{}: Socket channel read error {}", getNickname(), exc.getMessage());
+			}
+		});
+	}
+	
+	public void asynchronousHandleOutQueue() {
+		String data;
+		if (!writing && (data = outQueue.poll()) != null) {
+			writing = true;
+			socketChannel.write(ByteBuffer.wrap((data + "\r\n").getBytes(server.getCharset())), null, new CompletionHandler<Integer, Object>() {
+
+				@Override
+				public void completed(Integer result, Object attachment) {
+					String data;
+					if ((data = outQueue.poll()) != null) {
+						socketChannel.write(ByteBuffer.wrap((data + "\r\n").getBytes(server.getCharset())), null, this);
+					} else {
+						writing = false;
+					}
+				}
+
+				@Override
+				public void failed(Throwable exc, Object attachment) {
+					logger.error("{}: Socket channel write error {}", getNickname(), exc.getMessage());
+				}
+			});
+		}
 	}
 
 	@Override
