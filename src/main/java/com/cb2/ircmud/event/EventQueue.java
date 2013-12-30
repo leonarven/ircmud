@@ -1,9 +1,10 @@
 package com.cb2.ircmud.event;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class EventQueue implements Runnable {
-	private BlockingQueue<Event> queue;
+	private BlockingQueue<Event> queue = new LinkedBlockingQueue<Event>();
 
 	@Override
 	public void run() {

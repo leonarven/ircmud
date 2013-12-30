@@ -78,6 +78,14 @@ public abstract class IrcUser {
 		return true;
 	}
 	
+	public boolean hasJoinedToChannel(String channelName) {
+		return joinedChannels.containsKey(channelName);
+	}
+	
+	public Channel findJoinedChannel(String channelName) {
+		return joinedChannels.get(channelName);
+	}
+	
 	public String getRepresentation() {
 		return getIrcUserRepresentation(nickname, username, hostname);
 	}

@@ -2,13 +2,9 @@ package com.cb2.ircmud.ircserver;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.slf4j.Logger;
@@ -16,11 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.core.env.Environment;
 
-import com.cb2.ircmud.ircserver.IrcCommand;
-import com.cb2.ircmud.ircserver.services.ChannelService;
-import com.cb2.ircmud.ircserver.services.MotdService;
-import com.cb2.ircmud.ircserver.services.UserService;
+import com.cb2.ircmud.ircserver.services.IrcCommandService;
 import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
+
 
 @Configurable
 public class Connection extends IrcUser {
@@ -31,16 +25,10 @@ public class Connection extends IrcUser {
 
 	@Autowired 
 	IrcServer server;
-	@Autowired 
-	UserService users;
-	@Autowired 
-	PingService pingService;
-	@Autowired 
-	ChannelService channels;
 	@AutowiredLogger
 	Logger logger;
-	@Autowired
-	MotdService motdService;
+	@Autowired 
+	IrcCommandService ircCommandService;
 	@Autowired
 	Environment env;
 	
@@ -77,6 +65,10 @@ public class Connection extends IrcUser {
 		sendServerCommand("NOTICE", string);
 	}
 	
+	public boolean isConnected() {
+		return this.username != null && this.nickname != null;
+	}
+	
 	public void closeConnection() {
 		//TODO: Cleaner closing
 		synchronized (socketChannel) {
@@ -94,234 +86,6 @@ public class Connection extends IrcUser {
 	
 	public void sendPing(String ping) {
 		sendRawString("PING :"+ping);
-	}
-	
-	public void acceptConnection() {
-		logger.debug("acceptConnection()");
-		
-		motdService.sendMotd(this);
-
-		this.mode = "+i";
-
-		Channel worldChannel = channels.find(env.getProperty("config.server.WorldChannel"));
-		if (worldChannel == null) channels.add(worldChannel);
-		this.joinChannel(worldChannel);
-
-		pingService.addPartner(this);
-	}
-	
-	private void processLine(String line) {
-		
-		if (line == null) return;
-
-		logger.debug("{} >>> {}",nickname ,line);
-		String prefix = "";
-		if (line.startsWith(":")) {
-			String[] tokens = line.split(" ", 2);
-			prefix = tokens[0];
-			line = (tokens.length > 1 ? tokens[1] : "");
-		}
-		String[] tokens1 = line.split(" ", 2);
-		String command = tokens1[0];
-		line = tokens1.length > 1 ? tokens1[1] : "";
-		String[] tokens2 = line.split("(^| )\\:", 2);
-		String trailing = null;
-		line = tokens2[0];
-
-		if (tokens2.length > 1) trailing = tokens2[1];
-		ArrayList<String> argumentList = new ArrayList<String>();
-		
-		if (!line.equals("")) argumentList.addAll(Arrays.asList(line.split(" ")));
-		if (trailing != null) argumentList.add(trailing);
-
-		String[] arguments = argumentList.toArray(new String[0]);
-		
-
-		if (command.matches("[0-9][0-9][0-9]"))
-			command = "n" + command;
-		IrcCommand commandObject = null;
-		try {
-			commandObject = IrcCommand.valueOf(command.toUpperCase());
-		} catch(IllegalArgumentException e) {
-			sendServerReply(IrcReplyCode.ERR_UNKNOWNCOMMAND, command + " :Unknown command ");
-			return;
-		}
-		if (arguments.length < commandObject.getMin() || arguments.length > commandObject.getMax()) {
-			//TODO: Use command
-			sendSelfNotice("Invalid number of arguments for this" + " command, expected not more than " + commandObject.getMax() + " and not less than " + commandObject.getMin() + " but got " + arguments.length + " arguments");
-			return;
-		}
-		commandObject.init(this, prefix, arguments);
-
-		act(commandObject);
-	}
-	
-	public void act(IrcCommand command) {
-		String mask;
-		
-		if (this.nickname == null || this.username == null) {
-			switch(command) {
-				case NICK:
-					String n = command.arguments[0];
-					if (users.trySetNickname(this, n)) {
-						this.nickname = n;
-						sendSelfNotice("Nick changed to "+this.nickname);
-						if (this.username != null) {
-							acceptConnection();
-						}
-					} else {
-						sendServerCommand(IrcReplyCode.ERR_NICKNAMEINUSE,  n + " :Nickname in use");
-					}
-					break;
-				case USER:
-					if (this.username != null) {
-						sendSelfNotice("You cannot change userinfo");
-						break;
-					}
-						
-					this.username = command.arguments[0];
-					this.realname = command.arguments[3];
-	
-					if (this.nickname != null) {
-						acceptConnection();
-					}
-	
-					break;
-				default:
-					sendRawString("ERROR :Closing connection " + getRepresentation() + " (Invalid command)");
-			}
-		}
-		else { //Connection established
-			switch(command) {
-				case NICK:
-					String n = command.arguments[0];
-					if (!this.tryChangeNickname(n)) {
-						sendRawString(":" + server.serverName + " " + IrcReplyCode.ERR_NICKNAMEINUSE + " " + n + ":Nickname in use");
-					}
-					break;
-				case USER:
-					sendSelfNotice("You cannot change userinfo");
-					break;
-				case JOIN:
-					String[] chans = command.arguments[0].split(",");
-	                for (String channelName : chans) {
-	                	if (joinedChannels.containsKey(channelName)) {
-	                		//Already joined to channel
-	                		break;
-	                	}
-	                	Channel chan = channels.find(channelName);
-	                	if (chan == null) {
-							chan = new Channel(channelName);
-							channels.add(chan);
-	                	}
-	                	this.joinChannel(chan);
-	                }
-					break;
-				case MODE:
-					//TODO: Implement modes
-					if (command.arguments.length >= 2) {
-						if (command.arguments[1].equals("b") && Channel.isValidPrefix(command.arguments[0].charAt(0))) { //Ban list
-							IrcReply reply = IrcReply.serverReply(IrcReplyCode.RPL_ENDOFBANLIST, this.getNickname(), command.arguments[0], "End of channel ban list");
-							this.sendReply(reply);
-							break;
-						}
-						sendSelfNotice("This server does not allow to change usermode");
-					}
-					else {
-						if (Channel.isValidPrefix(command.arguments[0].charAt(0))) { //Channel
-							Channel channel = channels.find(command.arguments[0]);
-							if (channel != null) { 
-								IrcReply reply = IrcReply.serverReply(IrcReplyCode.RPL_CHANNELMODEIS,  this.nickname, command.arguments[0], channel.mode, "");
-								this.sendReply(reply);
-							} else {
-								this.sendCommand(IrcReplyCode.ERR_CANNOTSENDTOCHAN, "No such channel");
-							}
-						}
-						else if (command.arguments[0].equals(this.nickname)){
-							IrcReply reply = IrcReply.serverReply(IrcReplyCode.RPL_UMODEIS, this.nickname, this.mode, "");
-							this.sendReply(reply);
-						}
-					}
-					break;
-				case PART:
-					if (command.arguments.length == 2)
-						leaveChannel(command.arguments[0], command.arguments[1]);
-					else
-						leaveChannel(command.arguments[0], "");
-					break;
-				case QUIT:
-					quit(command.arguments[0]);
-					closeConnection();
-					break;
-				case PRIVMSG:
-					String target  = command.arguments[0];
-					if (Channel.isValidPrefix(target.charAt(0))) { //Channel
-						if (channels.find(target) != null) {
-							if (joinedChannels.containsKey(target)) {
-								joinedChannels.get(target).sendReplyToAllExceptSender(new IrcReply(this, "PRIVMSG", target, command.arguments[1]));
-							} else {
-								this.sendCommand(IrcReplyCode.ERR_CANNOTSENDTOCHAN, "Cannot send to channels you have not joined");
-							}
-						}
-						else {
-							this.sendCommand(IrcReplyCode.ERR_NOSUCHCHANNEL, "No such channel");
-						}
-					}
-					else {
-						IrcUser user = users.findUserByNickname(target);
-						if (user != null) {
-							user.sendMessage(this, command.arguments[1]);
-						}
-						else {
-							this.sendCommand(IrcReplyCode.ERR_NOSUCHNICK, "No such nick");
-						}
-					}
-					break;
-				case WHO:
-					mask = command.arguments[0];
-					String op;
-					if (command.arguments.length == 2)
-						op = command.arguments[1];
-					if (Channel.isValidPrefix(mask.charAt(0))) {
-						if (joinedChannels.containsKey(mask)) {
-							Channel channel = channels.find(mask);
-							if (channel != null) {
-								this.sendWhoReply(channel);
-							} else {
-								sendSelfNotice("Channel does not exits"); //ERR_NOSUCHCHANNEL = 403
-							}
-						} else {
-							sendSelfNotice("Server does not allow to asking about channels you are not in to");
-						}
-					} else {
-						// TODO
-						sendSelfNotice("Server does not allow to asking about users");
-					}
-					break;
-				case WHOIS:
-					mask = command.arguments[0];
-					
-					IrcUser con = users.findUserByNickname(mask);
-					if (con != null) {
-						
-						this.sendWhoIsReply(con);
-						
-					} else {
-						// TODO ERR_NOSUCHNICK = 401 
-						sendSelfNotice("No such nick");
-					}
-					break;
-				case PING:
-					this.sendServerReply("PONG", server.serverName+" :"+server.serverName);
-					break;
-				case PONG:
-					pingService.pongFrom(this);
-					break;
-				default:
-					logger.error("Unhandled IrcCommand");
-			}
-			
-		}
 	}
 	
 	public void initialize() {
@@ -352,7 +116,7 @@ public class Connection extends IrcUser {
 				String[] lines = data.split("\r\n");
 				for (String line : lines) {
 					if (!line.isEmpty())
-						processLine(line);
+						handleLine(line);
 				}
 				readBuffer.clear();
 				
@@ -364,6 +128,10 @@ public class Connection extends IrcUser {
 				logger.error("{}: Socket channel read error {}", getNickname(), exc.getMessage());
 			}
 		});
+	}
+	
+	private void handleLine(String line) {
+		ircCommandService.addMessage(this, line);
 	}
 	
 	public void asynchronousHandleOutQueue() {
@@ -388,6 +156,22 @@ public class Connection extends IrcUser {
 				}
 			});
 		}
+	}
+	
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
+	}
+	
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	
+	public void setRealname(String realName) {
+		this.realname = realName;
+	}
+	
+	public void setMode(String mode) {
+		this.mode = mode;
 	}
 
 	@Override
