@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.cb2.ircmud.domain.Item;
+import com.cb2.ircmud.domain.containers.Container;
 
 @Service
 public class SoundService {
@@ -14,7 +15,8 @@ public class SoundService {
 		Shout
 	}
 	public List<Item> listItemsWhichCanHear(Item source, SoundLevel level) {
-		
-		return null;
+		//TODO: Implement
+		Container container = source.getLocation();
+		return container.getItems();
 	}
 }

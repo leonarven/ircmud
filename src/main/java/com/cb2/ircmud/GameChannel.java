@@ -35,7 +35,7 @@ public class GameChannel extends Channel {
 	
 	
 	public void handlePrivateMessage(IrcReply privMsg) {
-		communication.handle(privMsg);
+		communication.handleChannelMessage(privMsg);
 	}
 	
 	public void sendWhoReply(IrcUser user) {
