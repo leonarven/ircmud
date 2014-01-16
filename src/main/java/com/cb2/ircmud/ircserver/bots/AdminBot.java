@@ -17,7 +17,7 @@ public class AdminBot extends IrcBotUser {
 	Environment env;
 
 	public AdminBot() {
-		
+		parsePrivateMessages = true;
 	}
 	
 	protected void init(){
@@ -30,7 +30,6 @@ public class AdminBot extends IrcBotUser {
 	public enum Command {
 		GIVE("GIVE",   "ADMIN/GAMEMASTER <nickname or username(email)>"),
 		REMOVE("REMOVE", "ADMIN/GAMEMASTER <nickname or username(email)>"),
-		INFO(  "INFO",   ""),
 		UNKNOWN(  "",   "");
 		
 		public String command, usage;
@@ -42,10 +41,6 @@ public class AdminBot extends IrcBotUser {
 		public String usage() {
 			return "Usage: "+command+" "+usage;
 		}
-	}
-	
-	public AdminBot(String nick, String realname) {
-		parsePrivateMessages = true;
 	}
 	
 	
@@ -132,7 +127,6 @@ public class AdminBot extends IrcBotUser {
 				user.sendMessage(this,  "Success");
 			}
 			case UNKNOWN:
-			default:
 				user.sendMessage(this, "Unknown command \"" + command_str + "\"");
 		}
 	}

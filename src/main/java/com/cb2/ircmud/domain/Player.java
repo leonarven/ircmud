@@ -82,7 +82,11 @@ public class Player {
     	return null;
     }
     
-    public boolean playing() {
+    public void addState(PlayerState state) {
+    	this.state.add(state);
+    }
+    
+    public boolean isPlaying() {
     	return getGameState() != null;
     }
     

@@ -10,6 +10,7 @@ import org.springframework.roo.addon.tostring.RooToString;
 
 import com.cb2.ircmud.communication.CommunicationService;
 import com.cb2.ircmud.domain.Player;
+import com.cb2.ircmud.domain.World;
 import com.cb2.ircmud.domain.services.PlayerService;
 import com.cb2.ircmud.event.Event;
 import com.cb2.ircmud.event.SayEvent;
@@ -29,6 +30,8 @@ public class PlayerComponent extends Component {
 	@Autowired
 	private PlayerService playerService;
 	
+	@ManyToOne
+	private World world;
 	
 	@Override
 	public void handleEvent(Event event) {

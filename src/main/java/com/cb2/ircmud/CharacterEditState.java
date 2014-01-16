@@ -1,12 +1,15 @@
 package com.cb2.ircmud;
 
+import com.cb2.ircmud.domain.Item;
 import com.cb2.ircmud.domain.Player;
 
 
-public class CharacterCreationState extends PlayerState {
-	public CharacterCreationState(Player player) {
+public class CharacterEditState extends PlayerState {
+	private Item character;
+	
+	public CharacterEditState(Player player, Item character) {
 		super(player);
-		// TODO Auto-generated constructor stub
+		this.character = character;
 	}
 
 	private static final String stateName = "CharacterCreationState";
@@ -14,6 +17,8 @@ public class CharacterCreationState extends PlayerState {
 	
 	@Override
 	public int getStateGroup() { return PlayerState.STATE_GROUP_PLAY_AND_CHARACTER_EDIT; }
+	public Item getCharacter() { return character; }
+	
 
 	@Override
 	public String getStateName() {

@@ -1,5 +1,8 @@
 package com.cb2.ircmud.ircserver.bots;
 
+import java.util.List;
+import java.util.Vector;
+
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
@@ -54,6 +57,45 @@ public abstract class IrcBotUser extends IrcUser {
 		else if (parsePrivateMessages) {
 			receivePrivateMessage(sender, reply.getPostfix());
 		}
+	}
+	
+	Vector<String> parseCommand(String commandString) {
+		Vector<String> ret = null;
+		
+		int spaceIndex = commandString.indexOf(' ');
+		if (spaceIndex == -1) {
+			ret = new Vector<String>();
+			ret.add(commandString);
+		}
+		else {
+			ret = parseParameterList(commandString.substring(spaceIndex + 1));
+			ret.add(0, commandString.substring(0, spaceIndex));
+		}
+		return ret;
+	}
+	
+	Vector<String> parseParameterList(String parameters) {
+		int index = 0;
+		Vector<String> ret = new Vector<String>();
+		while((index = parameters.indexOf('"')) != 0) {
+			String b = parameters.substring(0, index);
+			for (String p : b.split(" ")) {
+				ret.add(p);
+			}
+			parameters = parameters.substring(index + 1);
+			index = parameters.indexOf('"');
+			if (index == -1) {
+				ret.add(parameters);
+				return ret;
+			}
+			ret.add(parameters.substring(0, index));
+			parameters = parameters.substring(index + 1);
+		}
+		String b = parameters.substring(0, index);
+		for (String p : b.split(" ")) {
+			ret.add(p);
+		}
+		return ret;
 	}
 	
 	public void parseJoinMessage(IrcReply join) {

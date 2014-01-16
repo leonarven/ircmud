@@ -32,7 +32,7 @@ public class Item implements EventListener {
 
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy="item")
-    private Set<Component> components = new HashSet<Component>();
+    private Set<Component> components;
 
     @ManyToOne
     private Container location;
