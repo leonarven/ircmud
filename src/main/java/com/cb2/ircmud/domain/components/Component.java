@@ -13,7 +13,7 @@ import com.cb2.ircmud.event.EventListener;
 @RooJavaBean
 @RooToString
 @RooJpaActiveRecord(inheritanceType = "TABLE_PER_CLASS")
-public class Component implements EventListener {
+public abstract class Component implements EventListener {
 
 	@ManyToOne
     private Item item;

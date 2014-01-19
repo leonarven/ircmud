@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 @RooJavaBean
@@ -27,7 +28,9 @@ public class World {
 
     private String name;
 
-
+    @ManyToOne
+    private Room defaultRoom;
+    
     public Item findCharacterByName(String name) {
     	return characters.get(name.toLowerCase());
     }

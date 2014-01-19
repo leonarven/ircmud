@@ -31,4 +31,12 @@ public abstract class Container implements EventListener {
     	for (Item i : items) i.handleEvent(event);
     }
     
+    
+    public void addItem(Item item) {
+    	items.add(item);
+    }
+    public boolean removeItem(Item item) {
+    	return items.remove(item);
+    }
+    
 }

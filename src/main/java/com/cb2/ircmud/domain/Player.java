@@ -1,4 +1,5 @@
 package com.cb2.ircmud.domain;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -40,7 +41,7 @@ public class Player {
     
     
     @OneToMany
-    private Set<CharacterComponent> characters;
+    private Set<CharacterComponent> characters = new HashSet<CharacterComponent>();
 
     @Transient
     private IrcUser ircUser;
@@ -51,11 +52,15 @@ public class Player {
     public Item findCharacterByName(String name) {
     	for (CharacterComponent c : characters) {
 			Item item = c.getItem();
-    		if (item.getName().equals(name)) {
+    		if (item.getName().equalsIgnoreCase(name)) {
     			return item;
     		}
     	}
     	return null;
+    }
+    
+    public void removeState(PlayerState state) {
+    	this.state.remove(state);
     }
     
     public PlayerGameState getGameState() {

@@ -122,6 +122,12 @@ public abstract class IrcUser {
 		return true;
 	}
 	
+	public void sendMultiLineMessage(IrcUser sender, String msg) {
+		String[] parts = msg.split("\n");
+		for (String p : parts) {
+			sendReply(new IrcReply(sender, "PRIVMSG", this.nickname, p));
+		}
+	}
 	public void sendMessage(IrcUser sender, String msg) {
 		sendReply(new IrcReply(sender, "PRIVMSG", this.nickname, msg));
 	}

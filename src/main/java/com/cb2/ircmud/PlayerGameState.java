@@ -20,8 +20,9 @@ public class PlayerGameState extends PlayerState {
 	
 	private static final String stateName = "PlayerGameState";
 	
-	public PlayerGameState(Player player) {
+	public PlayerGameState(Player player, Item character) {
 		super(player);
+		this.character = character;
 	}
 	
 	@Override
@@ -38,9 +39,6 @@ public class PlayerGameState extends PlayerState {
 		return character;
 	}
 
-	public void setCharacter(Item character) {
-		this.character = character;
-	}
 
 	@Override
 	public void handlePlayerCommand(String commandString) {

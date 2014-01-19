@@ -1,5 +1,6 @@
 package com.cb2.ircmud.ircserver.bots;
 
+import java.util.Set;
 import java.util.Vector;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +13,14 @@ import com.cb2.ircmud.PlayerState;
 import com.cb2.ircmud.domain.Item;
 import com.cb2.ircmud.domain.Player;
 import com.cb2.ircmud.domain.World;
+import com.cb2.ircmud.domain.components.CharacterComponent;
 import com.cb2.ircmud.domain.services.CharacterService;
 import com.cb2.ircmud.domain.services.PlayerService;
 import com.cb2.ircmud.domain.services.WorldService;
 import com.cb2.ircmud.ircserver.IrcUser;
 
 @Component
-public class CharacterCreationBot extends IrcBotUser {
+public class CharacterEditBot extends IrcBotUser {
 	@Autowired
 	PlayerService playerService;
 	@Autowired
@@ -28,7 +30,7 @@ public class CharacterCreationBot extends IrcBotUser {
 	@Autowired
 	Environment env;
 
-	public CharacterCreationBot() {
+	public CharacterEditBot() {
 		parsePrivateMessages = true;
 	}
 	
@@ -42,8 +44,10 @@ public class CharacterCreationBot extends IrcBotUser {
 	
 	public enum Command {
 		CREATE("CREATE",   "CREATE <character name> <world name>  - Creates new character and enters to edit mode"),
+		PLAY("PLAY", "PLAY <character name>   - Starts or continues playing as the character"),
 		EDIT("EDIT", "EDIT <character name>      - Enters to the edit mode"),
 		NAME("NAME", "NAME [<character name>]      - Prints or sets the character name"),
+		LIST("LIST", "LIST   - Lists all created characters"),
 		DESCRIPTION("DESCRIPTION", "DESCRIPTION [<description>]     - Prints or sets the character description"),
 		SKILL("SKILL", "SKILL LIST|<skill name>"),
 		EXIT("EXIT", "EXIT  - leaves the edit mode"),
@@ -56,7 +60,7 @@ public class CharacterCreationBot extends IrcBotUser {
 			this.command = command;
 			this.usage = usage;
 		}
-		public String usage() {
+		public String getUsage() {
 			return "Usage: "+command+" "+usage;
 		}
 	}
@@ -102,10 +106,35 @@ public class CharacterCreationBot extends IrcBotUser {
 		if (command == null) command = Command.UNKNOWN;
 		switch(command) {
 			case CREATE: {
+				if (charCreationState != null) {
+					user.sendMessage(this, "Exit the character editing before trying to create a new character.");
+					break;
+				}
 				handleCreateCommand(player, command, params);
 				break;
 			}
+			case PLAY: {
+				if (charCreationState != null) {
+					user.sendMessage(this, "Please exit the character editing before starting the game.");
+					break;
+				}
+				handlePlayCommand(player, command, params);
+				break;
+			}
+			case LIST: {
+				String msg = " ";
+				Set<CharacterComponent> chars = player.getCharacters();
+				for (CharacterComponent cc : chars) {
+					msg = msg + "\"" + cc.getItem().getName() + "\"  ";
+				}
+				user.sendMessage(this, msg);
+				break;
+			}
 			case EDIT: {
+				if (charCreationState != null) {
+					user.sendMessage(this, "You are already editing a character.");
+					break;
+				}
 				handleEditCommand(player, command, params);
 				break;
 			}
@@ -121,16 +150,49 @@ public class CharacterCreationBot extends IrcBotUser {
 				
 			case UNKNOWN:
 				user.sendMessage(this, "Unknown command \"" + command_str + "\"");
+				break;
 		}
 	}
 	
-	public void handleCharacterEditModeCommand(Player player, CharacterEditState charCreationState, Command cmd, Vector<String> params) {
+	public void handleCharacterEditModeCommand(Player player, CharacterEditState charEditState, Command cmd, Vector<String> params) {
 		//TODO: implement this
+		switch (cmd) {
+			case EXIT:
+				charEditState.saveChanges();
+				player.removeState(charEditState);
+				player.getIrcUser().sendMessage(this, "Changes to the character \"" + charEditState.getCharacter().getName() + "\" saved and you have exited the edit mode");
+				return;
+			case DESCRIPTION:
+				break;
+			case NAME:
+				break;
+			case SKILL:
+				break;
+			default:
+				break;
+		}
+	}
+	
+	public void handlePlayCommand(Player player, Command command, Vector<String> params) {
+		if (params.size() != 1) {
+			player.getIrcUser().sendMessage(this, command.getUsage());
+			return;
+		}
+		
+		Item character = player.findCharacterByName(params.get(0));
+		if (character == null) {
+			player.getIrcUser().sendMessage(this, "Can't find a character \"" + params.get(0) + "\"");
+			return;
+		}
+		
+		PlayerGameState state = new PlayerGameState(player, character);
+		
+		player.addState(state);
 	}
 	
 	public void handleEditCommand(Player player, Command cmd, Vector<String> params) {
 		if (params.size() != 1) {
-			player.getIrcUser().sendMessage(this, cmd.usage());
+			player.getIrcUser().sendMessage(this, cmd.getUsage());
 			return;
 		}
 		Item character = player.findCharacterByName(params.firstElement().toLowerCase());
@@ -144,7 +206,7 @@ public class CharacterCreationBot extends IrcBotUser {
 	
 	public void handleCreateCommand(Player player, Command cmd, Vector<String> params) {
 		if (params.size() != 2) {
-			player.getIrcUser().sendMessage(this, cmd.usage());
+			player.getIrcUser().sendMessage(this, cmd.getUsage());
 			return;
 		}
 		

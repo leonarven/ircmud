@@ -28,13 +28,15 @@ public class CharacterEditState extends PlayerState {
 	@Override
 	public void handlePlayerCommand(String commandString) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void handlePlayerMessage(String message) {
 		// TODO Auto-generated method stub
-		
+	}
+	
+	public void saveChanges() {
+		character.persist();
 	}
 
 }
