@@ -1,7 +1,10 @@
 package com.cb2.ircmud.ircserver.bots;
 
 import java.util.List;
+import java.util.Scanner;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
@@ -60,40 +63,22 @@ public abstract class IrcBotUser extends IrcUser {
 	}
 	
 	Vector<String> parseCommand(String commandString) {
-		Vector<String> ret = null;
-		
-		int spaceIndex = commandString.indexOf(' ');
-		if (spaceIndex == -1) {
-			ret = new Vector<String>();
-			ret.add(commandString);
-		}
-		else {
-			ret = parseParameterList(commandString.substring(spaceIndex + 1));
-			ret.add(0, commandString.substring(0, spaceIndex));
-		}
-		return ret;
-	}
-	
-	Vector<String> parseParameterList(String parameters) {
-		int index = 0;
+		commandString = commandString.trim();
 		Vector<String> ret = new Vector<String>();
-		while((index = parameters.indexOf('"')) != 0) {
-			String b = parameters.substring(0, index);
-			for (String p : b.split(" ")) {
-				ret.add(p);
+
+		Pattern parameterPattern = Pattern.compile("(?:\"([^\"]*)(?:\"|$))|(\\S+)", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
+		Matcher matcher = parameterPattern.matcher(commandString);
+		while (matcher.find()) {
+			String paramWithSpaces = matcher.group(1);
+			String paramWithoutSpaces = matcher.group(2);
+			String param;
+			if (paramWithoutSpaces == null) {
+				param = paramWithSpaces;
 			}
-			parameters = parameters.substring(index + 1);
-			index = parameters.indexOf('"');
-			if (index == -1) {
-				ret.add(parameters);
-				return ret;
+			else {
+				param = paramWithoutSpaces;
 			}
-			ret.add(parameters.substring(0, index));
-			parameters = parameters.substring(index + 1);
-		}
-		String b = parameters.substring(0, index);
-		for (String p : b.split(" ")) {
-			ret.add(p);
+			ret.add(param);
 		}
 		return ret;
 	}
