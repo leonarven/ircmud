@@ -34,4 +34,8 @@ public class World {
     public Item findCharacterByName(String name) {
     	return characters.get(name.toLowerCase());
     }
+    
+    public void addRoom(Room room) {
+    	rooms.add(room);
+    }
 }

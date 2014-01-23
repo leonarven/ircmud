@@ -73,4 +73,16 @@ public class Item implements EventListener {
 		}
 		return result;
 	}
+	
+	public void setComponents(Set<Component> components) {
+		for (Component c : components) {
+			c.setItem(this);
+		}
+		this.components = components;
+	}
+	
+	public void addComponent(Component component) {
+		component.setItem(this);
+		this.components.add(component);
+	}
 }

@@ -33,11 +33,6 @@ public class DoorService {
 		door.persist();
 	}
 	
-	@Transactional
-	public void create(Room from, Room to, String name, String description, boolean isOpen){
-		//TODO
-		addToExistingItem(to,itemService.create(name,description,from),isOpen);
-	}
 	
 	
 	public List<Door> find(Room from){

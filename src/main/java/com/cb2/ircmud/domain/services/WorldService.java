@@ -31,4 +31,13 @@ public class WorldService {
 		}
 		roomService.moveCharacterToRoom(character, (Room)character.getLocation());
 	}
+	
+	public World createWorld(String name) {
+		if (findWorldByName(name) != null) return null;
+		
+		World world = new World();
+		world.setName(name);
+		world.persist();
+		return world;
+	}
 }
