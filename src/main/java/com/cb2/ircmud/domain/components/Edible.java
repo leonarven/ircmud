@@ -16,4 +16,10 @@ public class Edible extends Component {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public Component cloneComponent() {
+		Edible clone = new Edible();
+		return clone;
+	}
 }

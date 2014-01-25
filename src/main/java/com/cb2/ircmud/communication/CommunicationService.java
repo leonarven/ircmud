@@ -9,6 +9,7 @@ import com.cb2.ircmud.PlayerGameState;
 import com.cb2.ircmud.PlayerState;
 import com.cb2.ircmud.domain.Item;
 import com.cb2.ircmud.domain.Player;
+import com.cb2.ircmud.domain.World;
 import com.cb2.ircmud.domain.services.SoundService;
 import com.cb2.ircmud.event.Event;
 import com.cb2.ircmud.event.EventListener;

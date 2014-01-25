@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.cb2.ircmud.domain.Item;
 import com.cb2.ircmud.domain.World;
@@ -15,6 +16,8 @@ import com.cb2.ircmud.domain.containers.Room;
 public class WorldService {
 	@Autowired
 	RoomService roomService;
+	@Autowired
+	ItemService itemService;
 	
 	public World findWorldByName(String name) {
 		List<World> result = World.findWorldsByNameLike(name).getResultList();
@@ -23,7 +26,7 @@ public class WorldService {
 	}
 	
 	public void addCharacterToGame(Item character) {
-		PlayerComponent playerComponent = (PlayerComponent)character.findFirstComponentInstanceOf(PlayerComponent.class);
+		PlayerComponent playerComponent = (PlayerComponent)itemService.findFirstComponentInstanceOf(character, PlayerComponent.class);
 		World world = playerComponent.getWorld();
 		if (character.getLocation() == null) {
 			Room defaultRoom = world.getDefaultRoom();
@@ -40,4 +43,9 @@ public class WorldService {
 		world.persist();
 		return world;
 	}
+	
+	@Transactional(readOnly = true)
+	public Item findCharacterByName(World world, String name) {
+    	return world.getCharacters().get(name.toLowerCase());
+    }
 }

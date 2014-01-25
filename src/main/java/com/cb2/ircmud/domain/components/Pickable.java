@@ -16,4 +16,10 @@ public class Pickable extends Component {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public Component cloneComponent() {
+		Pickable clone = new Pickable();
+		return clone;
+	}
 }

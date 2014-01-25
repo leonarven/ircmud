@@ -11,8 +11,8 @@ import org.springframework.roo.addon.tostring.RooToString;
 
 @RooJavaBean
 @RooToString
-@RooJpaActiveRecord(finders = { "findDoorsByTargetRoom" })
-public class Door extends Component {
+@RooJpaActiveRecord(finders = { "findDoorComponentsByTargetRoom" })
+public class DoorComponent extends Component {
 
     @ManyToOne
     private Room targetRoom;
@@ -23,5 +23,13 @@ public class Door extends Component {
 	public void handleEvent(Event event) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public Component cloneComponent() {
+		DoorComponent door = new DoorComponent();
+		door.targetRoom = this.targetRoom;
+		door.isOpen = this.isOpen;
+		return door;
 	}
 }

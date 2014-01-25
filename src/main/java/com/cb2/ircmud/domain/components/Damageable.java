@@ -15,4 +15,10 @@ public class Damageable extends Component {
 	public void handleEvent(Event event) {
 		//TODO: Handle DamagedEvent
 	}
+
+	@Override
+	public Component cloneComponent() {
+		Damageable clone = new Damageable();
+		return clone;
+	}
 }

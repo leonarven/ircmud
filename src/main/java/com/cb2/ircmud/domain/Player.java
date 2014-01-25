@@ -5,12 +5,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.persistence.CascadeType;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
+import org.hibernate.Hibernate;
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.addon.tostring.RooToString;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.cb2.ircmud.PlayerGameState;
 import com.cb2.ircmud.PlayerState;
@@ -40,7 +44,7 @@ public class Player {
     private String passwordHash;
     
     
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<CharacterComponent> characters = new HashSet<CharacterComponent>();
 
     @Transient
@@ -63,37 +67,13 @@ public class Player {
     	this.state.remove(state);
     }
     
-    public PlayerGameState getGameState() {
-    	for (Iterator<PlayerState> i = state.iterator(); i.hasNext();) {
-    		PlayerState s = i.next();
-    		if (s instanceof PlayerGameState) {
-    			return (PlayerGameState)s;
-    		}
-    	}
-    	return null;
-    }
     
-    public boolean hasStateWithGroup(int group) {
-    	return getStateByGroup(group) != null;
-    }
-    
-    public PlayerState getStateByGroup(int group) {
-    	for (Iterator<PlayerState> i = state.iterator(); i.hasNext();) {
-    		PlayerState s = i.next();
-    		if (s.getStateGroup() == group) {
-    			return s;
-    		}
-    	}
-    	return null;
-    }
     
     public void addState(PlayerState state) {
     	this.state.add(state);
     }
     
-    public boolean isPlaying() {
-    	return getGameState() != null;
-    }
+    
     
     
     public boolean hasGamemasterAccess() {

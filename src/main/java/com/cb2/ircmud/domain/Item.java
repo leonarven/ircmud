@@ -32,7 +32,7 @@ public class Item implements EventListener {
 
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy="item")
-    private Set<Component> components;
+    private Set<Component> components = new HashSet<Component>();
 
     @ManyToOne
     private Container location;
@@ -46,33 +46,7 @@ public class Item implements EventListener {
 		}
 	}
 	
-	public boolean hasComponentInstanceOf(Class<?> cl) {
-		for (Component c : components) {
-			if (cl.isInstance(c)) {
-				return true;
-			}
-		}
-		return false;
-	}
 	
-	public Component findFirstComponentInstanceOf(Class<?> cl) {
-		for (Component c : components) {
-			if (cl.isInstance(c)) {
-				return c;
-			}
-		}
-		return null;
-	}
-	
-	public ArrayList<Component> findComponentsInstanceOf(Class<?> cl) {
-		ArrayList<Component> result = new ArrayList<Component>();
-		for (Component c : components) {
-			if (cl.isInstance(c)) {
-				result.add(c);
-			}
-		}
-		return result;
-	}
 	
 	public void setComponents(Set<Component> components) {
 		for (Component c : components) {

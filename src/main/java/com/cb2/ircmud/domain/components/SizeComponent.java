@@ -16,4 +16,11 @@ public class SizeComponent extends Component {
 	@Embedded
 	private Vec3 size;
 	private double weight;
+	@Override
+	public Component cloneComponent() {
+		SizeComponent clone = new SizeComponent();
+		clone.size = this.size;
+		clone.weight = this.weight;
+		return clone;
+	}
 }

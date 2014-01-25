@@ -8,7 +8,7 @@ import java.io.Serializable;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public final class Vec3 implements Serializable {
+public final class Vec3 implements Serializable, Cloneable {
 	private static final long serialVersionUID = 1L;
 	private double x;
 	private double y;
@@ -35,6 +35,22 @@ public final class Vec3 implements Serializable {
 		return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
 	}
 	
+	@Override
+	public Object clone() {
+		Vec3 c = new Vec3();
+		c.x = this.x;
+		c.y = this.y;
+		c.z = this.z;
+		return c;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if ( !(obj instanceof Vec3) ) return false;
+		Vec3 v = (Vec3)obj;
+		return (this.x == v.x) && (this.y == v.y) && (this.z == v.z);
+	}
 	
 	private void readObject( ObjectInputStream aInputStream) throws ClassNotFoundException, IOException {
 		 aInputStream.defaultReadObject();

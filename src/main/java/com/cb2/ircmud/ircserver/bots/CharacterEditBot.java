@@ -1,5 +1,6 @@
 package com.cb2.ircmud.ircserver.bots;
 
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -15,6 +16,7 @@ import com.cb2.ircmud.domain.Player;
 import com.cb2.ircmud.domain.World;
 import com.cb2.ircmud.domain.components.CharacterComponent;
 import com.cb2.ircmud.domain.services.CharacterService;
+import com.cb2.ircmud.domain.services.GameService;
 import com.cb2.ircmud.domain.services.PlayerService;
 import com.cb2.ircmud.domain.services.WorldService;
 import com.cb2.ircmud.ircserver.IrcUser;
@@ -27,6 +29,8 @@ public class CharacterEditBot extends IrcBotUser {
 	CharacterService characterService;
 	@Autowired
 	WorldService worldService;
+	@Autowired
+	GameService gameService;
 	@Autowired
 	Environment env;
 
@@ -88,12 +92,12 @@ public class CharacterEditBot extends IrcBotUser {
 		
 		Player player = user.getPlayer();
 		
-		if (player.isPlaying()) {
+		if (playerService.isPlayerInGame(player)) {
 			user.sendMessage(this, "You can't edit your characters while playing. Please leave the game world and try again.");
 			return;
 		}
 		
-		PlayerState state = player.getStateByGroup(PlayerGameState.STATE_GROUP_PLAY_AND_CHARACTER_EDIT);
+		PlayerState state = playerService.getPlayerStateByGroup(player, PlayerGameState.STATE_GROUP_PLAY_AND_CHARACTER_EDIT);
 		CharacterEditState charCreationState = null;
 		if (state instanceof CharacterEditState) charCreationState = (CharacterEditState)state;
 		
@@ -123,9 +127,9 @@ public class CharacterEditBot extends IrcBotUser {
 			}
 			case LIST: {
 				String msg = " ";
-				Set<CharacterComponent> chars = player.getCharacters();
-				for (CharacterComponent cc : chars) {
-					msg = msg + "\"" + cc.getItem().getName() + "\"  ";
+				List<String> charNames = playerService.getPlayerCharacterNames(player);
+				for (String cc : charNames) {
+					msg = msg + "\"" + cc + "\"  ";
 				}
 				user.sendMessage(this, msg);
 				break;
@@ -186,8 +190,8 @@ public class CharacterEditBot extends IrcBotUser {
 		}
 		
 		PlayerGameState state = new PlayerGameState(player, character);
-		
 		player.addState(state);
+		gameService.joinPlayerToGame(character);
 	}
 	
 	public void handleEditCommand(Player player, Command cmd, Vector<String> params) {
@@ -216,7 +220,7 @@ public class CharacterEditBot extends IrcBotUser {
 			return;
 		}
 		
-		Item character = world.findCharacterByName(params.get(0));
+		Item character = worldService.findCharacterByName(world, params.get(0));
 		if (character != null) {
 			player.getIrcUser().sendMessage(this, "Can't find character with name \"" + params.get(0) + "\"");
 			return;

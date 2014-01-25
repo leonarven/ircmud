@@ -19,7 +19,6 @@ import com.cb2.ircmud.CharacterAttribute;
 @RooJpaActiveRecord
 public class CharacterComponent extends Component {
     private int age;
-    private int height;
     
     @MapKeyEnumerated
     @ElementCollection
@@ -32,5 +31,16 @@ public class CharacterComponent extends Component {
 		// TODO Auto-generated method stub
 		
 	}
+
+
+
+	@Override
+	public Component cloneComponent() {
+		CharacterComponent clone = new CharacterComponent();
+		clone.age = this.age;
+		clone.attributes = new HashMap<CharacterAttribute.Type, Integer>(this.attributes);
+		return clone;
+	}
     
+	
 }

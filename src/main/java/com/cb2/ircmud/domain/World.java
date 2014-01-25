@@ -1,4 +1,5 @@
 package com.cb2.ircmud.domain;
+import org.hibernate.Hibernate;
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.addon.tostring.RooToString;
@@ -14,6 +15,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 @RooJavaBean
 @RooToString
@@ -31,9 +33,7 @@ public class World {
     @ManyToOne
     private Room defaultRoom;
     
-    public Item findCharacterByName(String name) {
-    	return characters.get(name.toLowerCase());
-    }
+    
     
     public void addRoom(Room room) {
     	rooms.add(room);

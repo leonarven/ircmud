@@ -1,10 +1,15 @@
 package com.cb2.ircmud.domain.services;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cb2.ircmud.domain.Item;
 import com.cb2.ircmud.domain.Vec3;
+import com.cb2.ircmud.domain.components.Component;
 import com.cb2.ircmud.domain.components.Pickable;
 import com.cb2.ircmud.domain.components.SizeComponent;
 import com.cb2.ircmud.domain.containers.Container;
@@ -13,11 +18,26 @@ import com.cb2.ircmud.domain.containers.Container;
 public class ItemService {
 	@Transactional
 	public void transfer(Item item, Container to) {
+		Container oldLocation = item.getLocation();
+		if (oldLocation != null) {
+			oldLocation.removeItem(item);
+		}
+		
 		item.setLocation(to);
+		to.addItem(item);
 	}
 	
-	public void clone(Item item, Container to) {
-		//TODO
+	public Item clone(Item item) {
+		Set<Component> components = item.getComponents();
+		
+		Item clonedItem = new Item();
+		clonedItem.setDescription(item.getDescription());
+		clonedItem.setName(item.getName());
+		clonedItem.setHiddenName(item.getHiddenName());
+		for (Component c : components) {
+			clonedItem.addComponent(c.cloneComponent());
+		}	
+		return clonedItem;
 	}
 
 	public Item createEmptyItem(String name, String description) {
@@ -26,6 +46,37 @@ public class ItemService {
 		item.setDescription(description);
 		item.persist();
 		return item;
+	}
+	
+	@Transactional(readOnly = true)
+	public boolean itemHasComponentInstanceOf(Item item, Class<?> cl) {
+		for (Component c : item.getComponents()) {
+			if (cl.isInstance(c)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@Transactional(readOnly = true)
+	public Component findFirstComponentInstanceOf(Item item, Class<?> cl) {
+		for (Component c : item.getComponents()) {
+			if (cl.isInstance(c)) {
+				return c;
+			}
+		}
+		return null;
+	}
+	
+	@Transactional(readOnly = true)
+	public ArrayList<Component> findComponentsInstanceOf(Item item, Class<?> cl) {
+		ArrayList<Component> result = new ArrayList<Component>();
+		for (Component c : item.getComponents()) {
+			if (cl.isInstance(c)) {
+				result.add(c);
+			}
+		}
+		return result;
 	}
 	
 	public Item createPickableItemWithSize(String name, String description, Vec3 size, double weight) {

@@ -111,15 +111,16 @@ public class Connection extends IrcUser {
 			@Override
 			public void completed(Integer result, Object attachment) {
 				int readBytes = result.intValue();
-				readBuffer.flip();
-				String data = new String(readBuffer.array(), 0, readBytes, server.getCharset());
-				String[] lines = data.split("\r\n");
-				for (String line : lines) {
-					if (!line.isEmpty())
-						handleLine(line);
+				if (readBytes > 0) {
+					readBuffer.flip();
+					String data = new String(readBuffer.array(), 0, readBytes, server.getCharset());
+					String[] lines = data.split("\r\n");
+					for (String line : lines) {
+						if (!line.isEmpty())
+							handleLine(line);
+					}
 				}
 				readBuffer.clear();
-				
 				socketChannel.read(readBuffer, null, this);
 			}
 

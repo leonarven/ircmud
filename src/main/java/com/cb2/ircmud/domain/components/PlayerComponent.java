@@ -45,7 +45,16 @@ public class PlayerComponent extends Component {
 	
 	
 	public void handleEvent(SayEvent event) {
-		//TODO: Send irc message
+		
+	}
+
+
+	@Override
+	public Component cloneComponent() {
+		PlayerComponent clone = new PlayerComponent();
+		clone.player = this.player;
+		clone.world = this.world;
+		return clone;
 	}
     
 }

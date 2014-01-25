@@ -22,4 +22,6 @@ public abstract class Component implements EventListener {
 	public void handleEvent(Event event) {
 	}
 	
+	public abstract Component cloneComponent();
+	
 }

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.cb2.ircmud.ircserver.IrcServer;
+import com.cb2.ircmud.tests.TestDataGenerationService;
 import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
 @Component
@@ -14,6 +15,8 @@ public class Ircmud {
 
 	@Autowired
 	IrcServer server;
+	@Autowired
+	TestDataGenerationService testDataGenerationService;
 	@AutowiredLogger
 	Logger logger;
 	
@@ -23,6 +26,9 @@ public class Ircmud {
 	
 	public void main(String[] args) {
         logger.debug("main()");
+        
+        logger.debug("Generating the test world");
+        testDataGenerationService.generateTestWorld();
 
 		try {
 			logger.info("Running Server");

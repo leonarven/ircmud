@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cb2.ircmud.domain.Item;
-import com.cb2.ircmud.domain.components.Door;
+import com.cb2.ircmud.domain.components.DoorComponent;
 import com.cb2.ircmud.domain.containers.Room;
 
 @Service
@@ -17,7 +17,7 @@ public class DoorService {
 	ItemService itemService;
 	
 	@Transactional
-	public void passThrough(Item item,Door door){
+	public void passThrough(Item item,DoorComponent door){
 		if(door.getIsOpen()){
 			itemService.transfer(item, door.getTargetRoom());
 		}
@@ -26,7 +26,7 @@ public class DoorService {
 	@Transactional
 	public void addToExistingItem(Room to, Item item, boolean isOpen){
 		//TODO
-		Door door = new Door();
+		DoorComponent door = new DoorComponent();
 		door.setItem(item);
 		door.setTargetRoom(to);
 		door.setIsOpen(isOpen);
@@ -35,11 +35,11 @@ public class DoorService {
 	
 	
 	
-	public List<Door> find(Room from){
-		return Door.findDoorsByTargetRoom(from).getResultList();
+	public List<DoorComponent> findDoors(Room from){
+		return DoorComponent.findDoorComponentsByTargetRoom(from).getResultList();
 	}
-	public List<Door> findbyName(Room from, String name){
+	public List<DoorComponent> findbyName(Room from, String name){
 		//TODO
-		return Door.findDoorsByTargetRoom(from).getResultList();
+		return DoorComponent.findDoorComponentsByTargetRoom(from).getResultList();
 	}
 }
