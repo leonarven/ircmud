@@ -1,7 +1,9 @@
 package com.cb2.ircmud.domain;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -31,7 +33,13 @@ public class Player {
 	public final static int ACCESS_ADMIN_ONLY = 2;  //10
 	public final static int ACCESS_ADMIN = 3;		//11
 	
+	private class TransientData {
+		List<PlayerState> state = new Vector<PlayerState>();;
+		IrcUser ircUser = null;
+	}
 	
+	@Transient
+	private static Map<Long, TransientData> transientData = new HashMap<Long, TransientData>();
 	
 	private int access;
 	
@@ -44,14 +52,8 @@ public class Player {
     private String passwordHash;
     
     
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<CharacterComponent> characters = new HashSet<CharacterComponent>();
-
-    @Transient
-    private IrcUser ircUser;
-    
-    @Transient
-    private List<PlayerState> state = new Vector<PlayerState>();
     
     public Item findCharacterByName(String name) {
     	for (CharacterComponent c : characters) {
@@ -63,17 +65,52 @@ public class Player {
     	return null;
     }
     
+    @Transient
     public void removeState(PlayerState state) {
-    	this.state.remove(state);
+		getTransientData().state.remove(state);
     }
     
+    @Transient
+    private TransientData getTransientData() {
+    	Long id = Long.valueOf(getId());
+    	TransientData data = transientData.get(id);
+    	if (data != null) {
+    		return data;
+    	}
+    	else {
+    		data = new TransientData();
+    		transientData.put(id, data);
+    		return data;
+    	}
+    }
     
-    
+    @Transient
     public void addState(PlayerState state) {
-    	this.state.add(state);
+    	getTransientData().state.add(state);
     }
     
+    @Transient
+    public List<PlayerState> getState() {
+    	return getTransientData().state;
+    }
     
+    public void addCharacter(CharacterComponent characterComponent) {
+    	characters.add(characterComponent);
+    }
+    
+    public void setIrcUser(IrcUser ircUser) {
+    	getTransientData().ircUser = ircUser;
+    }
+    
+    @Transient
+    public IrcUser getIrcUser() {
+    	return getTransientData().ircUser;
+    }
+    
+    @Transient
+    public static void removePlayerTransientData(long playerId) {
+    	transientData.remove(playerId);
+    }
     
     
     public boolean hasGamemasterAccess() {

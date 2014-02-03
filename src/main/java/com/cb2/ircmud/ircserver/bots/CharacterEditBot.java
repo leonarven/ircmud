@@ -4,9 +4,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.persistence.Transient;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.cb2.ircmud.CharacterEditState;
 import com.cb2.ircmud.PlayerGameState;
@@ -84,13 +87,14 @@ public class CharacterEditBot extends IrcBotUser {
 		handleCommand(user, commandName, command);
 	}
 	
+	@Transactional
 	public void handleCommand(IrcUser user, String command_str, Vector<String> params) {
 		if (!user.isLoggedIn()) {
 			user.sendMessage(this, "You have to be logged in to use this bot");
 			return;
 		}
 		
-		Player player = user.getPlayer();
+		Player player = Player.findPlayer(user.getPlayerId());
 		
 		if (playerService.isPlayerInGame(player)) {
 			user.sendMessage(this, "You can't edit your characters while playing. Please leave the game world and try again.");
@@ -169,6 +173,12 @@ public class CharacterEditBot extends IrcBotUser {
 			case DESCRIPTION:
 				break;
 			case NAME:
+				if (params.size() == 0) {
+					player.getIrcUser().sendMessage(this,  charEditState.getCharacter().getName());
+				}
+				else if (params.size() == 1) {
+					
+				}
 				break;
 			case SKILL:
 				break;
@@ -177,6 +187,7 @@ public class CharacterEditBot extends IrcBotUser {
 		}
 	}
 	
+	@Transactional
 	public void handlePlayCommand(Player player, Command command, Vector<String> params) {
 		if (params.size() != 1) {
 			player.getIrcUser().sendMessage(this, command.getUsage());
@@ -208,6 +219,7 @@ public class CharacterEditBot extends IrcBotUser {
 		startEditing(player, character);
 	}
 	
+	@Transactional
 	public void handleCreateCommand(Player player, Command cmd, Vector<String> params) {
 		if (params.size() != 2) {
 			player.getIrcUser().sendMessage(this, cmd.getUsage());
@@ -219,14 +231,16 @@ public class CharacterEditBot extends IrcBotUser {
 			player.getIrcUser().sendMessage(this, "Can't find world with name \"" + params.get(1) + "\"");
 			return;
 		}
-		
-		Item character = worldService.findCharacterByName(world, params.get(0));
+		String characterName = params.get(0);
+		Item character = worldService.findCharacterByName(world, characterName);
 		if (character != null) {
-			player.getIrcUser().sendMessage(this, "Can't find character with name \"" + params.get(0) + "\"");
+			player.getIrcUser().sendMessage(this, "There is already character named \"" + characterName + "\"");
 			return;
 		}
 		
-		
+		character = characterService.createPlayerCharacter(player, world);
+		character.setName(characterName);
+		player.addCharacter(character.findFirstComponentInstanceOf(CharacterComponent.class));
 		
 		startEditing(player, character);
 	}

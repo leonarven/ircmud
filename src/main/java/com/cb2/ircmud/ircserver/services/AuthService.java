@@ -69,15 +69,15 @@ public class AuthService {
 			return null;
 		}
 		if (player.getIrcUser() != null) { //Someone has already logged in with the same account
-			logout(player);
+			logout(player.getIrcUser());
 		}
 		player.setIrcUser(user);
 		user.setPlayer(player);
 		return player;
 	}
 	
-	public void logout(Player player) {
-		player.getIrcUser().setPlayer(null);
-		player.setIrcUser(null);
+	public void logout(IrcUser ircUser) {
+		Player.removePlayerTransientData(ircUser.getPlayerId());
+		ircUser.setPlayerId(0);
 	}
 }

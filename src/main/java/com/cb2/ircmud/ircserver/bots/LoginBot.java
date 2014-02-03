@@ -87,7 +87,7 @@ public class LoginBot extends IrcBotUser {
 					String username = params[0];
 					String password = params[1];
 
-					if (user.getPlayer() != null) {
+					if (user.isLoggedIn()) {
 						user.sendMessage(this, "You have logged in already");
 					} else {
 						
@@ -103,16 +103,16 @@ public class LoginBot extends IrcBotUser {
 				} else user.sendMessage(this, command.usage());
 				break;
 			case LOGOUT:
-				if (user.getPlayer() == null) {
+				if (!user.isLoggedIn()) {
 					user.sendMessage(this, "You haven't logged in");
 				} else {
-					authService.logout(user.getPlayer());
+					authService.logout(user);
 					user.sendMessage(this, "You have logged out");
 				}
 				break;
 			case CREATE:
 				if (params != null && params.length == 3) {
-					if (user.getPlayer() != null) {
+					if (user.isLoggedIn()) {
 						user.sendMessage(this, "You have logged in");
 						break;
 					}
@@ -166,7 +166,7 @@ public class LoginBot extends IrcBotUser {
 					break;
 				}
 				
-				user.sendMessage(this, "You are logged in as \"" + user.getPlayer().getUsername() + "\"");
+				user.sendMessage(this, "You are logged in as \"" + Player.findPlayer(user.getPlayerId()).getUsername() + "\"");
 				
 				break;
 			case HELP:

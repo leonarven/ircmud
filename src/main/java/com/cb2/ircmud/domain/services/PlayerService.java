@@ -24,6 +24,7 @@ public class PlayerService {
 	@Autowired 
 	UserService users;
 	
+	@Transactional
 	public Player findPlayerByUsername(String username) {
 		List<Player> playerList = Player.findPlayersByUsernameEquals(username.toLowerCase()).getResultList();
 		if (playerList.size() == 0) return null;
@@ -31,10 +32,11 @@ public class PlayerService {
 		return playerList.get(0);
 	}
 	
+	@Transactional
 	public Player findPlayerByNickname(String nick) {
 		IrcUser ircUser = users.findUserByNickname(nick);
 		if (ircUser != null) {
-			return ircUser.getPlayer();
+			return Player.findPlayer(ircUser.getPlayerId());
 		}
 		return null;
 		

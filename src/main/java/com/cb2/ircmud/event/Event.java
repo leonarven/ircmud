@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public abstract class Event {
 	public enum Type {
 		Say,
+		Command,
 		ServerNotification,
 		Look,
 		Vision

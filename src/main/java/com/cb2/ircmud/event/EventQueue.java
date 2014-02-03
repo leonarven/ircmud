@@ -19,7 +19,6 @@ public class EventQueue implements Runnable {
 	}
 	
 	void addEvent(Event event) {
-		queue.add(event);
-		this.notify();
+		queue.add(event); 
 	}
 }

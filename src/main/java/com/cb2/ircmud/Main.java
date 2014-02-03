@@ -12,6 +12,7 @@ public class Main {
         //ctx.refresh();
         //Do what @Autowired would do, because we are not in the context yet
         Ircmud ircmud = ctx.getBean(Ircmud.class);
+        
         ircmud.main(args);
     }
 }

@@ -26,7 +26,9 @@ public class TimedEventQueue implements Runnable {
 					}
 				} else {
 					queueLock.unlock();
-					this.wait();
+					synchronized(this) {
+						this.wait();
+					}
 				}
 			}
 		} catch (InterruptedException e) {
@@ -38,6 +40,8 @@ public class TimedEventQueue implements Runnable {
 		queueLock.lock();
 		queue.add(event);
 		queueLock.unlock();
-		this.notify();
+		synchronized(this) {
+			this.notify();
+		}
 	}
 }

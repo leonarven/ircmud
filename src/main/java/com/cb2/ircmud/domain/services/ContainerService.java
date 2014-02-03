@@ -19,5 +19,6 @@ public class ContainerService {
 	void moveItemToContainer(Item item, Container container) {
 		removeItemFromContainer(item);
 		container.addItem(item);
+		item.setLocation(container);
 	}
 }

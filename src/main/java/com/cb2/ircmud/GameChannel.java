@@ -54,6 +54,7 @@ public class GameChannel extends Channel {
 		synchronized (channelMembers) {
 			IrcReply joinReply = new IrcReply(user, "JOIN", this.name, "");
 			user.sendReply(joinReply);
+			sendReplyToAll(joinReply);
 			
 			if (this.topic != null) {
 				IrcReply topicReply = IrcReply.serverReply(IrcReplyCode.RPL_TOPIC, user.getNickname(), this.name, this.topic);
@@ -63,9 +64,15 @@ public class GameChannel extends Channel {
 				user.sendReply(topicDateReply);
 			} else {
 				IrcReply topicReply = IrcReply.serverReply(IrcReplyCode.RPL_NOTOPIC, user.getNickname(), this.name, "No topic is set");
+
 				user.sendReply(topicReply);
 			}
+
+			String userlist = user.getNickname() + " Story";
+			IrcReply namesReply = IrcReply.serverReply(IrcReplyCode.RPL_NAMREPLY, user.getNickname(), "@", this.name, userlist.trim());
 			IrcReply namesEndReply = IrcReply.serverReply("366", user.getNickname(), this.name , "End of /NAMES list.");
+
+			user.sendReply(namesReply);
 			user.sendReply(namesEndReply);
 			
 			channelMembers.add(user);

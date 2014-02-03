@@ -36,7 +36,8 @@ public class CharacterEditState extends PlayerState {
 	}
 	
 	public void saveChanges() {
-		character.persist();
+		
+		character.flush();
 	}
 
 }

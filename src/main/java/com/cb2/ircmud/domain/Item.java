@@ -20,6 +20,7 @@ import javax.persistence.OneToMany;
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.addon.tostring.RooToString;
+import org.springframework.transaction.annotation.Transactional;
 
 @RooJavaBean
 @RooToString
@@ -46,7 +47,36 @@ public class Item implements EventListener {
 		}
 	}
 	
+	@Transactional(readOnly = true)
+	public boolean itemHasComponentInstanceOf(Class<?> cl) {
+		for (Component c : this.getComponents()) {
+			if (cl.isInstance(c)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
+	@Transactional(readOnly = true)
+	public <T extends Component>T findFirstComponentInstanceOf(Class<T> cl) {
+		for (Component c : this.getComponents()) {
+			if (cl.isInstance(c)) {
+				return cl.cast(c);
+			}
+		}
+		return null;
+	}
+	
+	@Transactional(readOnly = true)
+	public <T extends Component>ArrayList<T> findComponentsInstanceOf(Class<T> cl) {
+		ArrayList<T> result = new ArrayList<T>();
+		for (Component c : this.getComponents()) {
+			if (cl.isInstance(c)) {
+				result.add(cl.cast(c));
+			}
+		}
+		return result;
+	}
 	
 	public void setComponents(Set<Component> components) {
 		for (Component c : components) {

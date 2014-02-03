@@ -11,5 +11,5 @@ public class SayEvent extends Event {
 		this.message = msg;
 	}
 
-	String getMessage() { return message; }
+	public String getMessage() { return message; }
 }

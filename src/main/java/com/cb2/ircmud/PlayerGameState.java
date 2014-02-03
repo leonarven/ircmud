@@ -3,9 +3,11 @@ package com.cb2.ircmud;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
+import com.cb2.ircmud.communication.CommandService;
 import com.cb2.ircmud.communication.CommunicationService;
 import com.cb2.ircmud.domain.Item;
 import com.cb2.ircmud.domain.Player;
+import com.cb2.ircmud.event.CommandEvent;
 import com.cb2.ircmud.event.EventService;
 import com.cb2.ircmud.event.SayEvent;
 
@@ -13,6 +15,8 @@ import com.cb2.ircmud.event.SayEvent;
 public class PlayerGameState extends PlayerState {
 	@Autowired
 	CommunicationService communicationService;
+	@Autowired
+	CommandService commandService;
 	@Autowired
 	EventService eventService;
 	
@@ -42,7 +46,7 @@ public class PlayerGameState extends PlayerState {
 
 	@Override
 	public void handlePlayerCommand(String commandString) {
-		//TODO: implement command handling (CommandService?)
+		eventService.addEvent(new CommandEvent(character, commandString, commandService));
 	}
 
 	@Override

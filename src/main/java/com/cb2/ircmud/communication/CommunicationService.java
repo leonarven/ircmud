@@ -2,6 +2,7 @@ package com.cb2.ircmud.communication;
 
 import java.util.List;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import com.cb2.ircmud.event.EventService;
 import com.cb2.ircmud.event.SayEvent;
 import com.cb2.ircmud.ircserver.Channel;
 import com.cb2.ircmud.ircserver.IrcReply;
+import com.github.rlespinasse.slf4j.spring.AutowiredLogger;
 
 @Service
 public class CommunicationService implements EventListener {
@@ -24,12 +26,14 @@ public class CommunicationService implements EventListener {
 	private SoundService soundService;
 	@Autowired
 	private EventService eventService;
+	@AutowiredLogger
+	Logger logger;
 	
 	public void handleChannelMessage(IrcReply reply) {
 		String msg = reply.getPostfix();
-		Player player = reply.getSender().getPlayer();
+		Player player = Player.findPlayer(reply.getSender().getPlayerId());
 		if (msg.startsWith("!")) {
-			handlePlayerCommand(msg, player);
+			handlePlayerCommand(msg.substring(1), player);
 		}
 		else {
 			handlePlayerMessage(msg, player);
@@ -52,7 +56,7 @@ public class CommunicationService implements EventListener {
 	public void handleEvent(Event event) {
 		switch (event.getType()) {
 		case Say: {
-			handleEvent((SayEvent)event);			
+			handleEvent((SayEvent)event);
 			break;
 		}
 		default:
@@ -62,6 +66,7 @@ public class CommunicationService implements EventListener {
 	
 	public void handleEvent(SayEvent event) {
 		Item sender = (Item)event.getSender();
+		logger.debug("Say event! sender: " + sender.getName()  + "  message: " + event.getMessage());
 		List<Item> items = soundService.listItemsWhichCanHear(sender, SoundService.SoundLevel.Normal);
 		for (Item listener : items) {
 			listener.handleEvent(event);

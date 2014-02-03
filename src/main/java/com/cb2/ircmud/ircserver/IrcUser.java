@@ -21,7 +21,7 @@ public abstract class IrcUser {
 	protected String hostname;
 	protected boolean keepRunning = true;
 	protected Map<String, Channel> joinedChannels = new HashMap<String, Channel>();
-	protected Player player = null;
+	protected long playerId = 0;
 	
 	@Autowired 
 	Environment env;
@@ -48,16 +48,20 @@ public abstract class IrcUser {
 	public String getHostname() { return hostname; }
 	public String getUsername() { return username; }
 	public String getMode() { return mode; }
-	public Player getPlayer() { return player; }
-	public boolean isLoggedIn() { return player != null; }
+	public long getPlayerId() { return playerId; }
+	public boolean isLoggedIn() { return playerId != 0; }
 	
 	/**
 	 * Only for AuthService
 	 * @param player
 	 */
 	public void setPlayer(Player player) {
-		this.player = player;
+		this.playerId = player.getId();
 		//TODO: Kick IrcUser (player == null) if doesn't have access to the channel anymore
+	}
+	
+	public void setPlayerId(long playerId) {
+		this.playerId = playerId;
 	}
 	
 	public boolean tryChangeNickname(String newNick) {
