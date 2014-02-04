@@ -10,7 +10,7 @@ public class IrcReply {
 
 	private ArrayList<String> arguments = new ArrayList<String>();
 	private String postfix = null;
-	private IrcUser sender = null;
+	private Object sender = null;
 	private String command = null;
 	
 	@Autowired 
@@ -27,9 +27,20 @@ public class IrcReply {
 
 		for( String argv: args ) if (!argv.isEmpty()) this.arguments.add(argv);
 	}
+	
+	public IrcReply(String sender, Object command, String... args) {
+		this.sender = sender;
+		this.command = command.toString();
+		if (args.length > 0) {
+			this.postfix = args[args.length-1];
+			args[args.length-1] = "";
+		}
+
+		for( String argv: args ) if (!argv.isEmpty()) this.arguments.add(argv);
+	}
 
 	public static IrcReply serverReply(Object command, String... args) {
-		return new IrcReply(null, command, args);
+		return new IrcReply((IrcUser)null, command, args);
 	}
 	
 	public String argument( int n ) {
@@ -47,10 +58,17 @@ public class IrcReply {
 	public String senderRepresentation() {
 		if (this.sender == null)
 			return server.serverName;
-		return this.sender.getRepresentation();
+		if (this.sender instanceof String) {
+			return (String)this.sender;
+		}
+		return getIrcUserSender().getRepresentation();
 	}
 	
-	public IrcUser getSender() {
+	public IrcUser getIrcUserSender() {
+		return (IrcUser)this.sender;
+	}
+	
+	public Object getSender() {
 		return this.sender;
 	}
 	

@@ -15,6 +15,7 @@ import com.cb2.ircmud.CharacterEditState;
 import com.cb2.ircmud.PlayerGameState;
 import com.cb2.ircmud.PlayerState;
 import com.cb2.ircmud.domain.Item;
+import com.cb2.ircmud.domain.Name;
 import com.cb2.ircmud.domain.Player;
 import com.cb2.ircmud.domain.World;
 import com.cb2.ircmud.domain.components.CharacterComponent;
@@ -50,14 +51,14 @@ public class CharacterEditBot extends IrcBotUser {
 	}
 	
 	public enum Command {
-		CREATE("CREATE",   "CREATE <character name> <world name>  - Creates new character and enters to edit mode"),
-		PLAY("PLAY", "PLAY <character name>   - Starts or continues playing as the character"),
-		EDIT("EDIT", "EDIT <character name>      - Enters to the edit mode"),
-		NAME("NAME", "NAME [<character name>]      - Prints or sets the character name"),
-		LIST("LIST", "LIST   - Lists all created characters"),
-		DESCRIPTION("DESCRIPTION", "DESCRIPTION [<description>]     - Prints or sets the character description"),
-		SKILL("SKILL", "SKILL LIST|<skill name>"),
-		EXIT("EXIT", "EXIT  - leaves the edit mode"),
+		CREATE("CREATE",   "<character name> <world name>  - Creates new character and enters to edit mode"),
+		PLAY("PLAY", "<character name>   - Starts or continues playing as the character"),
+		EDIT("EDIT", "<character name>      - Enters to the edit mode"),
+		NAME("NAME", "[<character name>]      - Prints or sets the character name"),
+		LIST("LIST", "    - Lists all created characters"),
+		DESCRIPTION("DESCRIPTION", "[<description>]     - Prints or sets the character description"),
+		SKILL("SKILL", "LIST|<skill name>"),
+		EXIT("EXIT", "     - leaves the edit mode"),
 		HELP(  "HELP",   "<command name>"),
 		UNKNOWN(  "",   "");
 		
@@ -174,7 +175,7 @@ public class CharacterEditBot extends IrcBotUser {
 				break;
 			case NAME:
 				if (params.size() == 0) {
-					player.getIrcUser().sendMessage(this,  charEditState.getCharacter().getName());
+					player.getIrcUser().sendMessage(this,  charEditState.getCharacter().getName().getName());
 				}
 				else if (params.size() == 1) {
 					
@@ -238,8 +239,7 @@ public class CharacterEditBot extends IrcBotUser {
 			return;
 		}
 		
-		character = characterService.createPlayerCharacter(player, world);
-		character.setName(characterName);
+		character = characterService.createPlayerCharacter(player, characterName, world);
 		player.addCharacter(character.findFirstComponentInstanceOf(CharacterComponent.class));
 		
 		startEditing(player, character);
@@ -248,6 +248,6 @@ public class CharacterEditBot extends IrcBotUser {
 	public void startEditing(Player player, Item character) {
 		CharacterEditState state = new CharacterEditState(player, character);
 		player.addState(state);
-		player.getIrcUser().sendMessage(this, "Started editing character \"" + character.getName() + "\"");
+		player.getIrcUser().sendMessage(this, "Started editing character \"" + character.getName().getName() + "\"");
 	}
 }

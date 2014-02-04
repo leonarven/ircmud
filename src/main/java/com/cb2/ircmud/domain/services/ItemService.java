@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cb2.ircmud.domain.Item;
+import com.cb2.ircmud.domain.Name;
 import com.cb2.ircmud.domain.Vec3;
 import com.cb2.ircmud.domain.components.Component;
 import com.cb2.ircmud.domain.components.Pickable;
@@ -40,7 +41,7 @@ public class ItemService {
 		return clonedItem;
 	}
 
-	public Item createEmptyItem(String name, String description) {
+	public Item createEmptyItem(Name name, String description) {
 		Item item = new Item();
 		item.setName(name);
 		item.setDescription(description);
@@ -79,7 +80,7 @@ public class ItemService {
 		return result;
 	}
 	
-	public Item createPickableItemWithSize(String name, String description, Vec3 size, double weight) {
+	public Item createPickableItemWithSize(Name name, String description, Vec3 size, double weight) {
 		Item item = new Item();
 		item.setName(name);
 		item.setDescription(description);

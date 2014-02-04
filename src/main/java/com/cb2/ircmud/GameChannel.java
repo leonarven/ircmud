@@ -23,21 +23,13 @@ public class GameChannel extends Channel {
 	}
 	
 	@Override
-	public void sendReplyToAll(IrcReply reply) {
-		
+	public void messageToChannelReceived(IrcUser sender, String message) {
+		communication.handleChannelMessage(sender, message);
 	}
+	
+	
+	
 	@Override
-	public void sendReplyToAllExceptSender(IrcReply reply) {
-		if (reply.getCommandName().equals("PRIVMSG")) {
-			handlePrivateMessage(reply);
-		}
-	}
-	
-	
-	public void handlePrivateMessage(IrcReply privMsg) {
-		communication.handleChannelMessage(privMsg);
-	}
-	
 	public void sendWhoReply(IrcUser user) {
 		// RPL_WHOREPLY 352
 			for(IrcUser _user : channelMembers) {
@@ -50,6 +42,7 @@ public class GameChannel extends Channel {
 			user.sendReply(whoEndReply);
 	}
 	
+	@Override
 	public void addMember(IrcUser user) {
 		synchronized (channelMembers) {
 			IrcReply joinReply = new IrcReply(user, "JOIN", this.name, "");
@@ -79,17 +72,20 @@ public class GameChannel extends Channel {
 		}
 	}
 
-	
+	@Override
 	public void memberLeave(IrcUser user, String msg) {
 		synchronized (channelMembers) {
 			channelMembers.remove(user);
 		}
+		user.sendReply(new IrcReply(user, "PART", this.getName(), msg));
 	}
 	
+	@Override
 	public void memberQuit(IrcUser user, String msg) {
 		synchronized (channelMembers) {
 			channelMembers.remove(user);
 		}
+		user.sendReply(new IrcReply(user, "QUIT", this.getName(), msg));
 	}
 	
 	

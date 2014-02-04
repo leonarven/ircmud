@@ -9,6 +9,7 @@ import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.addon.tostring.RooToString;
 
 import com.cb2.ircmud.communication.CommunicationService;
+import com.cb2.ircmud.domain.Item;
 import com.cb2.ircmud.domain.Player;
 import com.cb2.ircmud.domain.World;
 import com.cb2.ircmud.domain.services.PlayerService;
@@ -45,7 +46,7 @@ public class PlayerComponent extends Component {
 	
 	
 	public void handleEvent(SayEvent event) {
-		
+		communicationService.sayToCharacter((Item)event.getSender(), this.item, event.getMessage());
 	}
 
 

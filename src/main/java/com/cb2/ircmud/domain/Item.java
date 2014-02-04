@@ -14,6 +14,7 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -26,11 +27,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RooToString
 @RooJpaActiveRecord
 public class Item implements EventListener {
-
-    private String name;
+	@Embedded
+    private Name name;
 
     private String description;
 
+    public boolean isSessionOpen() {
+    	return entityManager.contains(this);
+    }
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy="item")
     private Set<Component> components = new HashSet<Component>();
@@ -41,10 +45,12 @@ public class Item implements EventListener {
     private String hiddenName;
 
 	@Override
+	@Transactional
 	public void handleEvent(Event event) {
 		for (Component c : components) {
 			c.handleEvent(event);
 		}
+		
 	}
 	
 	@Transactional(readOnly = true)

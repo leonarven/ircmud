@@ -49,10 +49,18 @@ public  class Channel {
 		}
 	}
 	
+	public void messageToChannelReceived(IrcUser sender, String message) {
+		sendReplyToAllExceptSender(new IrcReply(sender, "PRIVMSG", this.getName(), message));
+	}
+	
 	public void sendReplyToAllExceptSender(IrcReply reply) {
+		sendReplyToAllExcept(reply, reply.getIrcUserSender());
+	}
+	
+	public void sendReplyToAllExcept(IrcReply reply, IrcUser except) {
 		synchronized (channelMembers) {
 			for (IrcUser user : channelMembers) {
-				if (user != reply.getSender()) user.sendReply(reply);
+				if (user != except) user.sendReply(reply);
 			}
 		}
 	}

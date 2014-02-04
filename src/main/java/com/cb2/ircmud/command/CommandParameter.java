@@ -7,7 +7,8 @@ public abstract class CommandParameter {
 		Integer,
 		String,
 		Location,
-		Item
+		Item,
+		None
 	}
 	
 	public abstract Type type();

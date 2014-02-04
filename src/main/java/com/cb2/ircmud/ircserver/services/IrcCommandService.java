@@ -223,7 +223,7 @@ public class IrcCommandService implements Runnable {
 		if (Channel.isValidPrefix(target.charAt(0))) { //Channel
 			if (channels.find(target) != null) {
 				if (sender.hasJoinedToChannel(target)) {
-					sender.findJoinedChannel(target).sendReplyToAllExceptSender(new IrcReply(sender, "PRIVMSG", target, command.arguments[1]));
+					sender.findJoinedChannel(target).messageToChannelReceived(sender, command.arguments[1]);
 				} else {
 					sender.sendCommand(IrcReplyCode.ERR_CANNOTSENDTOCHAN, "Cannot send to channels you have not joined");
 				}

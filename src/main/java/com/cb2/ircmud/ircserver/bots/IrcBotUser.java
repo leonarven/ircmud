@@ -51,7 +51,7 @@ public abstract class IrcBotUser extends IrcUser {
 	}
 	
 	public void parsePrivateMessage(IrcReply reply) {
-		IrcUser sender = reply.getSender();
+		IrcUser sender = reply.getIrcUserSender();
 		if (Channel.isValidPrefix(reply.argument(0).charAt(0))) { //Channel msg
 			if (parseChannelMessages) {
 				receiveChannelMessage(sender, reply.argument(0), reply.getPostfix());
@@ -84,7 +84,7 @@ public abstract class IrcBotUser extends IrcUser {
 	}
 	
 	public void parseJoinMessage(IrcReply join) {
-		IrcUser joinedUser = join.getSender();
+		IrcUser joinedUser = join.getIrcUserSender();
 		String channel = join.argument(0);
 		receiveJoinMessage(joinedUser, channel);
 	}

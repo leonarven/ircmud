@@ -58,7 +58,7 @@ public class Player {
     public Item findCharacterByName(String name) {
     	for (CharacterComponent c : characters) {
 			Item item = c.getItem();
-    		if (item.getName().equalsIgnoreCase(name)) {
+    		if (item.getName().getName().equalsIgnoreCase(name)) {
     			return item;
     		}
     	}

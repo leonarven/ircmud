@@ -79,7 +79,7 @@ public class PlayerService {
     public List<String> getPlayerCharacterNames(Player player) {
     	Vector<String> names = new Vector<String>();
     	for (CharacterComponent c : player.getCharacters()) {
-    		names.add(c.getItem().getName());
+    		names.add(c.getItem().getName().getName());
     	}
     	return names;
     }

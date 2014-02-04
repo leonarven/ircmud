@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cb2.ircmud.domain.Item;
+import com.cb2.ircmud.domain.Name;
 import com.cb2.ircmud.domain.Player;
 import com.cb2.ircmud.domain.Vec3;
 import com.cb2.ircmud.domain.World;
@@ -16,8 +17,8 @@ import com.cb2.ircmud.domain.components.*;
 public class CharacterService {
 	
 	@Transactional
-	public Item createPlayerCharacter(Player player, World world) {
-		Item character = createCharacter();
+	public Item createPlayerCharacter(Player player, String charName, World world) {
+		Item character = createCharacter(charName);
 		PlayerComponent playerComponent = new PlayerComponent();
 		playerComponent.setWorld(world);
 		playerComponent.setPlayer(player);
@@ -27,10 +28,11 @@ public class CharacterService {
 	}
 	
 	@Transactional
-	public Item createCharacter() {
+	public Item createCharacter(String name) {
 		Item character = new Item();
 		Set<Component> components = createCharacterComponents();
 		for (Component c : components) c.persist();
+		character.setName(Name.createCharacterName(name));
 		character.setComponents(components);
 		character.persist();
 		return character;

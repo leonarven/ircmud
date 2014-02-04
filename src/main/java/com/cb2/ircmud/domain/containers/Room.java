@@ -9,6 +9,4 @@ import org.springframework.roo.addon.tostring.RooToString;
 @RooJpaActiveRecord
 public class Room extends Container {
     private String name;
-    private String description;
-
 }

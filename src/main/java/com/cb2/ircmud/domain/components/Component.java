@@ -16,7 +16,7 @@ import com.cb2.ircmud.event.EventListener;
 public abstract class Component implements EventListener {
 
 	@ManyToOne
-    private Item item;
+    protected Item item;
 
 	@Override
 	public void handleEvent(Event event) {
