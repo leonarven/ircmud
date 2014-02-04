@@ -47,7 +47,7 @@ public class GameChannel extends Channel {
 		synchronized (channelMembers) {
 			IrcReply joinReply = new IrcReply(user, "JOIN", this.name, "");
 			user.sendReply(joinReply);
-			sendReplyToAll(joinReply);
+			//sendReplyToAll(joinReply);
 			
 			if (this.topic != null) {
 				IrcReply topicReply = IrcReply.serverReply(IrcReplyCode.RPL_TOPIC, user.getNickname(), this.name, this.topic);
