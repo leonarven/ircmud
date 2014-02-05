@@ -32,10 +32,6 @@ public class Item implements EventListener {
 
     private String description;
 
-    public boolean isSessionOpen() {
-    	return entityManager.contains(this);
-    }
-
     @OneToMany(cascade = CascadeType.ALL, mappedBy="item")
     private Set<Component> components = new HashSet<Component>();
 
@@ -44,6 +40,16 @@ public class Item implements EventListener {
 
     private String hiddenName;
 
+    public boolean isSessionOpen() {
+    	return entityManager.contains(this);
+    }
+    
+    @Transactional
+    static Item refleshSession(Item item) {
+    	if (item.isSessionOpen()) return item;
+    	return Item.findItem(item.getId());
+    }
+    
 	@Override
 	@Transactional
 	public void handleEvent(Event event) {

@@ -134,7 +134,7 @@ public class LoginBot extends IrcBotUser {
 						break;
 					}*/
 					
-					if (!authService.addAccount(username, password)) {
+					if (authService.addAccount(username, password) == null) {
 						user.sendMessage(this, "Already created an account with the same email");
 						break;
 					}

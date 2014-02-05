@@ -23,6 +23,7 @@ public class CharacterService {
 		playerComponent.setWorld(world);
 		playerComponent.setPlayer(player);
 		playerComponent.persist();
+		player.addCharacter(character);
 		character.addComponent(playerComponent);
 		return character;
 	}

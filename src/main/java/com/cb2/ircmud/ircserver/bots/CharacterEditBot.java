@@ -240,7 +240,6 @@ public class CharacterEditBot extends IrcBotUser {
 		}
 		
 		character = characterService.createPlayerCharacter(player, characterName, world);
-		player.addCharacter(character.findFirstComponentInstanceOf(CharacterComponent.class));
 		
 		startEditing(player, character);
 	}

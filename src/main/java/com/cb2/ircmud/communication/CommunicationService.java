@@ -99,8 +99,10 @@ public class CommunicationService implements EventListener {
 		logger.debug("Say event! sender: " + sender.getName()  + "  message: " + event.getMessage());
 		List<Item> items = soundService.listItemsWhichCanHear(sender, SoundService.SoundLevel.Normal);
 		for (Item listener : items) {
-			if (!listener.isSessionOpen()) listener = Item.findItem(listener.getId());
-			listener.handleEvent(event);
+			if (sender.getId() != listener.getId()) {
+				if (!listener.isSessionOpen()) listener = Item.findItem(listener.getId());
+				listener.handleEvent(event);
+			}
 		}
 	}
 	
@@ -109,7 +111,7 @@ public class CommunicationService implements EventListener {
 	}
 	
 	@Transactional
-	public void sayToCharacter(Item speaker, Item character! String message) {
+	public void sayToCharacter(Item speaker, Item character, String message) {
 		PlayerComponent playerComponent = character.findFirstComponentInstanceOf(PlayerComponent.class);
 		if (playerComponent == null) return;
 		Player player = playerComponent.getPlayer();

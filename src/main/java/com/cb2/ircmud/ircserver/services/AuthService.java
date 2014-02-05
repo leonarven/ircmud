@@ -37,15 +37,15 @@ public class AuthService {
 		}
 	}
 	
-	public boolean addAccount(String username, String password) {
+	public Player addAccount(String username, String password) {
 		return addAccount(username, password, Player.ACCESS_NORMAL);
 	}
 	
-	public boolean addAccount(String username, String password, int access) {
+	public Player addAccount(String username, String password, int access) {
 		username = username.toLowerCase();
 		List<Player> playerList = Player.findPlayersByUsernameEquals(username).getResultList();
 		if (!playerList.isEmpty()) { //Already created an account with the same user name
-			return false;
+			return null;
 		}
 		String passwordHash = new String(digestInstance.digest(password.getBytes()));
 		Player player = new Player();
@@ -53,7 +53,7 @@ public class AuthService {
 		player.setPasswordHash(passwordHash);
 		player.setAccess(access);
 		player.persist();
-		return true;
+		return player;
 	}
 
 	public Player login(String username, String password, IrcUser user) {

@@ -53,13 +53,12 @@ public class Player {
     
     
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<CharacterComponent> characters = new HashSet<CharacterComponent>();
+    private Set<Item> characters = new HashSet<Item>();
     
     public Item findCharacterByName(String name) {
-    	for (CharacterComponent c : characters) {
-			Item item = c.getItem();
-    		if (item.getName().getName().equalsIgnoreCase(name)) {
-    			return item;
+    	for (Item i : characters) {
+    		if (i.getName().getName().equalsIgnoreCase(name)) {
+    			return i;
     		}
     	}
     	return null;
@@ -94,8 +93,8 @@ public class Player {
     	return getTransientData().state;
     }
     
-    public void addCharacter(CharacterComponent characterComponent) {
-    	characters.add(characterComponent);
+    public void addCharacter(Item character) {
+    	characters.add(character);
     }
     
     public void setIrcUser(IrcUser ircUser) {
