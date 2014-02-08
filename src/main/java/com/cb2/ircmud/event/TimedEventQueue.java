@@ -4,11 +4,19 @@ import java.util.PriorityQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 
+
+@Configurable
 public class TimedEventQueue implements Runnable {
 	private PriorityQueue<TimedEvent> queue = new PriorityQueue<TimedEvent>();
 	private Lock queueLock = new ReentrantLock();
 
+	
+	@Autowired
+	private EventService eventService;
+	
 	@Override
 	public void run() {
 		try {
@@ -19,7 +27,7 @@ public class TimedEventQueue implements Runnable {
 					if (waitTime <= 0) {
 						TimedEvent event = queue.poll();
 						queueLock.unlock();
-						event.getTarget().handleEvent(event);
+						eventService.addEvent(event);
 					} else {
 						queueLock.unlock();
 						this.wait(waitTime);
