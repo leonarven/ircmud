@@ -27,7 +27,7 @@ public class CommandParser {
 	public CommandParser() {
 		defaultEndPattern = Pattern.compile("^(\\s|\\.|!)*", Pattern.UNICODE_CHARACTER_CLASS);
 		integerPattern = Pattern.compile("^-?[1-9][0-9]*", Pattern.UNICODE_CHARACTER_CLASS);
-		stringPattern = Pattern.compile("^\"([^\"]*)\"", Pattern.UNICODE_CHARACTER_CLASS);
+		stringPattern = Pattern.compile("^''([^'']*)''", Pattern.UNICODE_CHARACTER_CLASS);
 		locationPattern = Pattern.compile("^(the\\s+)?([a-zA-Z]+)");
 		itemPattern = Pattern.compile("^((an?|the|all|every|my|[0-9]+)\\s+)?([a-z]+(\\s+[a-z]+)*)+", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
 		itemSeparatorPattern = Pattern.compile("((\\s+and)|(\\s*,))\\s+", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
@@ -48,11 +48,12 @@ public class CommandParser {
 			if (matcher.lookingAt()) {
 				cmdLine = cmdLine.substring(matcher.end());
 				cmdDef = def;
+				break;
 			}
 		}
 		
 		if (cmdDef == null) {
-			throw new CommandException(MessageFormat.format("Can't find command \"{0}\"", cmdLine));
+			throw new CommandException(MessageFormat.format("Can''t find command ''{0}''", cmdLine));
 		}
 		
 		Command cmd = new Command(cmdDef);
@@ -64,7 +65,7 @@ public class CommandParser {
 			Pattern endPattern = cmdDef.getEndPattern();
 			if (endPattern == null) endPattern = defaultEndPattern;
 			if (!endPattern.matcher(cmdLine).matches()) {
-				throw new CommandException(MessageFormat.format("The command end pattern \"{0}\" didn't match \"{1}\" ", endPattern.toString(), cmdLine));
+				throw new CommandException(MessageFormat.format("The command end pattern ''{0}'' didn''t match ''1}''", endPattern.toString(), cmdLine));
 			}
 		}
 		return cmd;
@@ -100,12 +101,12 @@ public class CommandParser {
 				cmd.addParameter(new IntegerParameter(val));
 				return cmdLine;
 			} catch (NumberFormatException e) {
-				throw new CommandException(MessageFormat.format("Integer parsing failed \"{0}\"", intString));
+				throw new CommandException(MessageFormat.format("Integer parsing failed ''{0}''", intString));
 			}
 			
 			
 		} else {
-			throw new CommandException(MessageFormat.format("Expecting integer... \"{0}\"", cmdLine));
+			throw new CommandException(MessageFormat.format("Expecting integer... ''{0}''", cmdLine));
 		}
 	}
 	
@@ -117,7 +118,7 @@ public class CommandParser {
 			cmd.addParameter(new StringParameter(stringVal));
 			
 		} else {
-			throw new CommandException(MessageFormat.format("Expecting string... \"{0}\"", cmdLine));
+			throw new CommandException(MessageFormat.format("Expecting string... ''{0}''", cmdLine));
 		}
 		return null;
 	}
@@ -130,7 +131,7 @@ public class CommandParser {
 			cmd.addParameter(new LocationParameter(locationString));
 			
 		} else {
-			throw new CommandException(MessageFormat.format("Expecting location... \"{0}\"", cmdLine));
+			throw new CommandException(MessageFormat.format("Expecting location... ''{0}''", cmdLine));
 		}
 		return null;
 	}
@@ -162,7 +163,7 @@ public class CommandParser {
 						int val = Integer.parseInt(preString);
 						param = new ItemParameter(val, itemName);
 					} catch (NumberFormatException e) {
-						throw new CommandException(MessageFormat.format("Integer parsing failed \"{0}\"", preString));
+						throw new CommandException(MessageFormat.format("Integer parsing failed ''{0}''", preString));
 					}
 				} else {
 					throw new CommandException("WTF error");
@@ -172,11 +173,11 @@ public class CommandParser {
 					return itemString;
 				} else {
 					if (itemString != null && !itemString.isEmpty()) {
-						throw new CommandException(MessageFormat.format("Unexpected \"{0}\", while parsing the item name", itemString));
+						throw new CommandException(MessageFormat.format("Unexpected ''{0}'', while parsing the item name", itemString));
 					}
 				}
 			} else {
-				throw new CommandException(MessageFormat.format("Expecting item... \"{0}\"", itemString));
+				throw new CommandException(MessageFormat.format("Expecting item... ''{0}''", itemString));
 			}
 			index++;
 		}
