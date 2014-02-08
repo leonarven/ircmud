@@ -31,6 +31,11 @@ public abstract class Container implements EventListener {
     
     private String description;
     
+    public abstract boolean isSessionOpen();
+    
+    
+    public abstract Container refleshSession();
+    
     @Transactional
     public void handleEvent(Event event) {
     	switch (event.getType()) {

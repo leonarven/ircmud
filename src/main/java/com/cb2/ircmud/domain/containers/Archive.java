@@ -7,5 +7,15 @@ import org.springframework.roo.addon.tostring.RooToString;
 @RooJavaBean
 @RooToString
 @RooJpaActiveRecord
-public class Archive {
+public class Archive extends Container {
+	@Override
+	public boolean isSessionOpen() {
+		return this.entityManager.contains(this);
+	}
+
+	@Override
+	public Container refleshSession() {
+		if (isSessionOpen()) return this;
+		return Archive.findArchive(this.getId());
+	}
 }

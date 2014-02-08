@@ -1,5 +1,6 @@
 package com.cb2.ircmud.domain.services;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -31,6 +32,19 @@ public class VisionService {
 		for (Event ce : e.getChildEvents()) {
 			VisionEvent ve = (VisionEvent)ce;
 			itemsInVision.add(ve.getItemInVision());
+		}
+		return itemsInVision;
+	}
+	
+	public List<Item> findItemsInVisionByName(Item eye, String name) {
+		Container container = eye.getLocation();
+		List<Item> itemsInVision = itemsInVision(new LookEvent(eye, container));
+		Iterator<Item> i = itemsInVision.iterator();
+		while (i.hasNext()) {
+			Item item = i.next();
+			if (!item.getName().equalsLike(name)) {
+				i.remove();
+			}
 		}
 		return itemsInVision;
 	}

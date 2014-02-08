@@ -48,5 +48,6 @@ public class LookAroundCommand extends CommandDefinition {
 		}
 		
 		communicationService.sendStoryMessageToCharacter(sender, message);
+		communicationService.sendPlayerActionStoryMessageToOthers(sender, "{name} is looking around");
 	}
 }

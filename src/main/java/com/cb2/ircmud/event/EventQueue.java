@@ -8,14 +8,17 @@ public class EventQueue implements Runnable {
 
 	@Override
 	public void run() {
-		try {
 			while(true) {
-				Event event = queue.take();
-				event.getTarget().handleEvent(event);
+				try {
+					Event event = queue.take();
+					event.getTarget().handleEvent(event);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					break;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	void addEvent(Event event) {

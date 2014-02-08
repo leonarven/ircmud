@@ -145,7 +145,13 @@ public class CommunicationService implements EventListener {
 		IrcUser ircUser = player.getIrcUser();
 		IrcReply reply = new IrcReply("Story", "PRIVMSG", gameService.getGameChannel().getName(), message);
 		ircUser.sendReply(reply);
-		
+	}
+	
+	@Transactional
+	public void sendPlayerActionStoryMessageToOthers(Item playerCharacter, String message) {
+		Room room = (Room)playerCharacter.getLocation();
+		message = message.replaceAll("\\{name\\}", playerCharacter.getName().getItemName(1, true));
+		sendStoryMessageToAllPlayersInRoomExcept(room, message, playerCharacter);
 	}
 	
 	@Transactional

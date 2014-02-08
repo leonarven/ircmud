@@ -35,6 +35,28 @@ public class ItemParameter extends CommandParameter {
 	public Type type() {
 		return Type.Item;
 	}
+	
+	public String getItemNameWithArticle() {
+		String prefix = null;
+		 switch (quantityType) {
+		 case All:
+			 prefix = "all ";
+			 break;
+			 
+		 case Number:
+			 if (quantity == 1) {
+				 prefix = "a ";
+			 }
+			 else {
+				 prefix = String.valueOf(quantity) + " ";
+			 }
+			 break;
+		 case Specific:
+			 prefix = "the ";
+			 break;
+		 }
+		 return prefix + itemName;
+	}
 
 	public String getItemName() { return itemName; }
 	public QuantityType getQuantityType() { return quantityType; }

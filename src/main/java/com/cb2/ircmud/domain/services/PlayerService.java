@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cb2.ircmud.PlayerGameState;
 import com.cb2.ircmud.PlayerState;
+import com.cb2.ircmud.domain.Item;
 import com.cb2.ircmud.domain.Player;
 import com.cb2.ircmud.domain.components.CharacterComponent;
 import com.cb2.ircmud.ircserver.IrcServer;
@@ -78,8 +79,8 @@ public class PlayerService {
     @Transactional
     public List<String> getPlayerCharacterNames(Player player) {
     	Vector<String> names = new Vector<String>();
-    	for (CharacterComponent c : player.getCharacters()) {
-    		names.add(c.getItem().getName().getName());
+    	for (Item c : player.getCharacters()) {
+    		names.add(c.getName().getName());
     	}
     	return names;
     }

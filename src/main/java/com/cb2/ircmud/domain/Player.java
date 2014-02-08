@@ -51,9 +51,18 @@ public class Player {
      */
     private String passwordHash;
     
-    
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Item> characters = new HashSet<Item>();
+    
+    public boolean isSessionOpen() {
+    	return this.entityManager.contains(this);
+    }
+    
+    @Transactional
+    public Player refleshSession() {
+    	if (this.isSessionOpen()) return this;
+    	return Player.findPlayer(this.getId());
+    }
     
     public Item findCharacterByName(String name) {
     	for (Item i : characters) {

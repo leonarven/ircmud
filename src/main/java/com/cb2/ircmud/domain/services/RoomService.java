@@ -31,6 +31,7 @@ public class RoomService {
 		List<Item> r = new Vector<Item>();
 		List<Item> items = room.getItems();
 		for (Item i : items) {
+			i = i.refleshSession();
 			if (i.findFirstComponentInstanceOf(PlayerComponent.class) != null) {
 				r.add(i);
 			}

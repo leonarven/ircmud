@@ -63,6 +63,10 @@ public final class Name implements Cloneable, Serializable {
 		return "a";
 	}
 	
+	public boolean equalsLike(String name) {
+		return this.name.equalsIgnoreCase(name) || getPluralForm().equalsIgnoreCase(name);
+	}
+	
 	public String definiteArticle() { return "the"; }
 	
 	public String getItemName(int itemQuantity, boolean definite) {

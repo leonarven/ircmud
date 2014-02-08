@@ -11,6 +11,7 @@ import com.cb2.ircmud.command.CommandParameter;
 import com.cb2.ircmud.command.CommandParser;
 import com.cb2.ircmud.command.CommandException;
 import com.cb2.ircmud.command.LookAroundCommand;
+import com.cb2.ircmud.command.LookAtCommand;
 import com.cb2.ircmud.domain.Item;
 import com.cb2.ircmud.domain.services.SoundService;
 import com.cb2.ircmud.event.CommandEvent;
@@ -35,6 +36,7 @@ public class CommandService implements EventListener {
 	@PostConstruct
 	void initialize() {
 		commandParser.addCommandDefinition(new LookAroundCommand());
+		commandParser.addCommandDefinition(new LookAtCommand());
 	}
 	
 	@Override

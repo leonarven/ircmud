@@ -8,4 +8,14 @@ import org.springframework.roo.addon.tostring.RooToString;
 @RooToString
 @RooJpaActiveRecord
 public class Inventory extends Container {
+	@Override
+	public boolean isSessionOpen() {
+		return this.entityManager.contains(this);
+	}
+
+	@Override
+	public Container refleshSession() {
+		if (isSessionOpen()) return this;
+		return Inventory.findInventory(this.getId());
+	}
 }

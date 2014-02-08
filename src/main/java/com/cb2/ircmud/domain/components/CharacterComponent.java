@@ -5,12 +5,14 @@ import java.util.Map;
 import javax.persistence.ElementCollection;
 import javax.persistence.MapKeyEnumerated;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 import org.hibernate.type.IntegerType;
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.addon.tostring.RooToString;
 
+import com.cb2.ircmud.domain.containers.Inventory;
 import com.cb2.ircmud.event.Event;
 import com.cb2.ircmud.CharacterAttribute;
 
@@ -24,6 +26,8 @@ public class CharacterComponent extends Component {
     @ElementCollection
     private Map<CharacterAttribute.Type, Integer> attributes = new HashMap<CharacterAttribute.Type, Integer>();
     
+    @OneToOne
+    private Inventory inventory;
     
     
 	@Override

@@ -45,9 +45,9 @@ public class Item implements EventListener {
     }
     
     @Transactional
-    static Item refleshSession(Item item) {
-    	if (item.isSessionOpen()) return item;
-    	return Item.findItem(item.getId());
+    public Item refleshSession() {
+    	if (this.isSessionOpen()) return this;
+    	return Item.findItem(this.getId());
     }
     
 	@Override
