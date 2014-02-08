@@ -85,7 +85,7 @@ public class GameChannel extends Channel {
 		synchronized (channelMembers) {
 			channelMembers.remove(user);
 		}
-		user.sendReply(new IrcReply(user, "QUIT", this.getName(), msg));
+		user.sendReply(new IrcReply(user, "QUIT", msg));
 	}
 	
 	

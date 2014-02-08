@@ -183,24 +183,4 @@ public class CommandParser {
 		}
 		return null;
 	}
-	
-	/*static public void main(String[] args) {
-		CommandParser parser = new CommandParser();
-		CommandDefinition runDefinition = new CommandDefinition("run", "runs?\\s+(to\\s+)");
-		runDefinition.setParameterType(CommandParameter.Type.Location);
-		parser.addCommandDefinition(runDefinition);
-		
-		CommandDefinition eatDefinition = new CommandDefinition("eat", "eats?\\s+");
-		eatDefinition.setParameterType(CommandParameter.Type.Item);
-		parser.addCommandDefinition(eatDefinition);
-		
-		try {
-			Command cmd = parser.parse("eat 23 apples , a sword, the dead king and the banana");
-			System.out.print(cmd.toString());
-		} catch (CommandException ex) {
-			System.err.print(ex);
-		}
-		
-	}*/
-	
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
@@ -39,6 +40,7 @@ public class IrcCommandService implements Runnable {
 	MotdService motdService;
 	@Autowired
 	Environment env;
+	Pattern validNicknamePattern = Pattern.compile("[\\p{L}_\\-\\[\\]\\\\^{}|`][\\p{L}0-9_\\-\\[\\]\\\\^{}|`]{1,15}", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
 	
 	private Thread thread;
 	private BlockingQueue<IrcCommand> workQueue = new LinkedBlockingQueue<IrcCommand>();
@@ -305,6 +307,10 @@ public class IrcCommandService implements Runnable {
 
 	private void handleNickCommand(IrcCommand command, Connection sender) {
 		String n = command.arguments[0];
+		if (!validNicknamePattern.matcher(n).matches()) {
+			sender.sendRawString(":" + server.serverName + " " + IrcReplyCode.ERR_ERRONEUSNICKNAME + " " + n + " :Erroneous nickname");
+			return;
+		}
 		if (!sender.tryChangeNickname(n)) {
 			sender.sendRawString(":" + server.serverName + " " + IrcReplyCode.ERR_NICKNAMEINUSE + " " + n + ":Nickname in use");
 		}
@@ -325,16 +331,20 @@ public class IrcCommandService implements Runnable {
 		}
 	}
 
-	private void handleNotConnectedNickCommand(IrcCommand command,
-			Connection sender) {
+	private void handleNotConnectedNickCommand(IrcCommand command, Connection sender) {
 		String n = command.arguments[0];
+		if (!validNicknamePattern.matcher(n).matches()) {
+			sender.sendRawString(":" + server.serverName + " " + IrcReplyCode.ERR_ERRONEUSNICKNAME + " " + n + " :Erroneous nickname");
+			return;
+		}
+		
 		if (users.trySetNickname(sender, n)) {
 			sender.setNickname(n);
 			if (sender.getUsername() != null) {
 				acceptConnection(sender);
 			}
 		} else {
-			sender.sendServerCommand(IrcReplyCode.ERR_NICKNAMEINUSE,  n + " :Nickname in use");
+			sender.sendRawString(":" + server.serverName + " " + IrcReplyCode.ERR_NICKNAMEINUSE + " " + n + ":Nickname in use");
 		}
 	}
 	
