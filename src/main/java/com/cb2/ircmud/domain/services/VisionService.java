@@ -54,4 +54,16 @@ public class VisionService {
 		item.handleEvent(e);
 		return e;
 	}
+	
+	public List<Item> findLocations(Item eye, String locationName) {
+		List<Item> items = lookAround(eye);
+		List<Item> possibilities = new Vector<Item>();
+		for (Item i : items) {
+			if (i.getName().equalsLike(locationName)) {
+				possibilities.add(i);
+			}
+		}
+		
+		return possibilities;
+	}
 }

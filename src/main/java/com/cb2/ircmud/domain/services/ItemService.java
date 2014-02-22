@@ -13,6 +13,7 @@ import com.cb2.ircmud.domain.Vec3;
 import com.cb2.ircmud.domain.components.Component;
 import com.cb2.ircmud.domain.components.Pickable;
 import com.cb2.ircmud.domain.components.SizeComponent;
+import com.cb2.ircmud.domain.components.VisionComponent;
 import com.cb2.ircmud.domain.containers.Container;
 
 @Service
@@ -80,16 +81,26 @@ public class ItemService {
 		return result;
 	}
 	
+	@Transactional
 	public Item createPickableItemWithSize(Name name, String description, Vec3 size, double weight) {
 		Item item = new Item();
 		item.setName(name);
 		item.setDescription(description);
 		
+		VisionComponent visionComp = new VisionComponent();
+		visionComp.setDescription(description);
+		visionComp.setVisibilityValue(100);
+		visionComp.persist();
+		item.addComponent(visionComp);
+		
 		SizeComponent sizeComp = new SizeComponent();
 		sizeComp.setSize(size);
 		sizeComp.setWeight(weight);
+		sizeComp.persist();
 		item.addComponent(sizeComp);
+		
 		Pickable pickable = new Pickable();
+		pickable.persist();
 		item.addComponent(pickable);
 		
 		item.persist();

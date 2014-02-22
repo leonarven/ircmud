@@ -11,6 +11,7 @@ import org.springframework.roo.addon.tostring.RooToString;
 @RooToString
 @RooJpaActiveRecord
 public class Damageable extends Component {
+	int health;
 	@Override
 	public void handleEvent(Event event) {
 		//TODO: Handle DamagedEvent

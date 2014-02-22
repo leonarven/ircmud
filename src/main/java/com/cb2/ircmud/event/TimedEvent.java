@@ -3,24 +3,26 @@ package com.cb2.ircmud.event;
 import java.util.Comparator;
 import java.util.Date;
 
-public abstract class TimedEvent extends Event implements Comparator<TimedEvent>, Comparable<TimedEvent> {
+public class TimedEvent implements Comparator<TimedEvent>, Comparable<TimedEvent> {
 
-	protected final Date triggerTime;
+	private final Date emitTime;
+	private final Event containedEvent;
 	
-	public TimedEvent(Type type, Object sender, EventListener target, Date emitTime) {
-		super(type, sender, target);
-		this.triggerTime = emitTime;
+	public TimedEvent(Date emitTime, Event containedEvent) {
+		this.emitTime = emitTime;
+		this.containedEvent = containedEvent;
 	}
 
-	Date getTriggerTime() { return triggerTime; }
+	public Date getEmitTime() { return emitTime; }
+	public Event getContainedEvent() { return containedEvent; } 
 	
 	@Override
 	public int compareTo(TimedEvent o) {
-		return this.triggerTime.compareTo(o.triggerTime);
+		return this.emitTime.compareTo(o.emitTime);
 	}
 
 	@Override
 	public int compare(TimedEvent o1, TimedEvent o2) {
-		return o1.triggerTime.compareTo(o2.triggerTime);
+		return o1.emitTime.compareTo(o2.emitTime);
 	}
 }

@@ -37,6 +37,8 @@ public class Item implements EventListener {
 
     @ManyToOne
     private Container location;
+    @Embedded
+    private LocationSpecifier locationSpecifier;
 
     private String hiddenName;
 

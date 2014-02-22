@@ -8,7 +8,10 @@ public abstract class Event {
 		Command,
 		ServerNotification,
 		Look,
-		Vision
+		Vision,
+		MovementStart,
+		MovementCancel,
+		MovementEnd
 	}
 	
 	protected final Type type;

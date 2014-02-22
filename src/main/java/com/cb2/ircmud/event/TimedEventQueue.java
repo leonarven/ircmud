@@ -1,5 +1,6 @@
 package com.cb2.ircmud.event;
 
+import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -23,14 +24,16 @@ public class TimedEventQueue implements Runnable {
 			while(true) {
 				queueLock.lock();
 				if (!queue.isEmpty()) {
-					long waitTime = queue.peek().getTriggerTime().getTime() - System.currentTimeMillis();
+					long waitTime = queue.peek().getEmitTime().getTime() - System.currentTimeMillis();
 					if (waitTime <= 0) {
 						TimedEvent event = queue.poll();
 						queueLock.unlock();
-						eventService.addEvent(event);
+						eventService.addEvent(event.getContainedEvent());
 					} else {
 						queueLock.unlock();
-						this.wait(waitTime);
+						synchronized(this) {
+							this.wait(waitTime);
+						}
 					}
 				} else {
 					queueLock.unlock();
@@ -52,4 +55,16 @@ public class TimedEventQueue implements Runnable {
 			this.notify();
 		}
 	}
+	public void removeEventsByFilter(EventFilter filter) {
+		queueLock.lock();
+		Iterator<TimedEvent> i = queue.iterator();
+		while (i.hasNext()) {
+			TimedEvent e = i.next();
+			if (filter.accept(e.getContainedEvent())) {
+				i.remove();
+			}
+		}
+		queueLock.unlock();
+	}
+	
 }

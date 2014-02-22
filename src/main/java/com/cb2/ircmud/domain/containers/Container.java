@@ -37,20 +37,7 @@ public abstract class Container implements EventListener {
     public abstract Container refleshSession();
     
     @Transactional
-    public void handleEvent(Event event) {
-    	switch (event.getType()) {
-		case Look:
-			for (Item i : items) {
-				//Can't see itself
-				if (i.getId() != ((Item)event.getSender()).getId()) {
-					event.addChildEvent(new VisionEvent(i));
-				}
-			}
-			
-			break;
-		default:
-    	}
-    	
+    public void handleEvent(Event event) {    	
     	for (Item i : items) {
 			if (!i.isSessionOpen()) {
 				i = Item.findItem(i.getId());
